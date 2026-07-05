@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #11141B; color: #ECEAE3; }
 
@@ -336,6 +337,7 @@ body { background: #11141B; color: #ECEAE3; }
 .logout-btn{background:none;border:1px solid var(--line2,#3A4357);color:var(--faint,#5C6472);border-radius:7px;padding:5px 10px;font-size:11.5px;cursor:pointer;font-family:'IBM Plex Mono',monospace;}
 .logout-btn:hover{color:var(--loss,#E2917E);border-color:var(--loss,#E2917E);}
 
+  
   </style>
 </head>
 <body>
@@ -1621,18 +1623,7 @@ function PortfolioDashboard() {
     minute: "2-digit"
   }) : "Nog niet bijgewerkt", apiKey && holdings.some(h => h.live) && /*#__PURE__*/React.createElement("span", {
     className: "live-dot"
-  }, "● realtime (US)")), /*#__PURE__*/React.createElement(ImportPanel, {
-    onImport: handleImport
-  }), /*#__PURE__*/React.createElement(ExportButton, {
-    portfolios: portfolios,
-    loan: loan,
-    portRate: portRate,
-    budget: budget,
-    transactions: transactions,
-    apiKey: apiKey,
-    auto: auto,
-    intervalMin: intervalMin
-  }), /*#__PURE__*/React.createElement("button", {
+  }, "● realtime (US)")), /*#__PURE__*/React.createElement("button", {
     className: "btn" + (activeTab === "account" ? " primary" : ""),
     style: {
       fontSize: 12,
@@ -1646,33 +1637,13 @@ function PortfolioDashboard() {
     className: "tabs"
   }, /*#__PURE__*/React.createElement("div", {
     className: "tabs-list"
-  }, portfolios.map(p => renaming && p.id === activeId && activeTab === "portfolio" ? /*#__PURE__*/React.createElement("input", {
-    key: p.id,
-    className: "tab-rename",
-    autoFocus: true,
-    value: renameVal,
-    onChange: e => setRenameVal(e.target.value),
-    onBlur: commitRename,
-    onKeyDown: e => {
-      if (e.key === "Enter") commitRename();
-      if (e.key === "Escape") setRenaming(false);
-    }
-  }) : /*#__PURE__*/React.createElement("button", {
-    key: p.id,
-    className: "tab" + (p.id === activeId && activeTab === "portfolio" ? " on" : ""),
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "tab calc-tab" + (activeTab === "portfolio" ? " on" : ""),
     onClick: () => {
       setActiveTab("portfolio");
-      switchPortfolio(p.id);
+      resetTransient();
     }
-  }, p.name, /*#__PURE__*/React.createElement("span", {
-    className: "tab-n"
-  }, p.holdings.length))), /*#__PURE__*/React.createElement("button", {
-    className: "tab add",
-    onClick: newPortfolio,
-    title: "Nieuwe portefeuille"
-  }, "+ nieuw"), /*#__PURE__*/React.createElement("span", {
-    className: "tab-sep"
-  }), /*#__PURE__*/React.createElement("button", {
+  }, "📈 Aandelenportefeuille"), /*#__PURE__*/React.createElement("button", {
     className: "tab calc-tab" + (activeTab === "calc" ? " on" : ""),
     onClick: () => {
       setActiveTab("calc");
@@ -1690,9 +1661,51 @@ function PortfolioDashboard() {
       setActiveTab("trans");
       resetTransient();
     }
-  }, "📋 Uitgaven")), /*#__PURE__*/React.createElement("div", {
+  }, "📋 Uitgaven"))), activeTab === "calc" && /*#__PURE__*/React.createElement(CalcTab, {
+    loan: loan,
+    setLoan: setLoan,
+    loanCalc: loanCalc,
+    portfolioValue: t.mvTotal,
+    portRate: portRate,
+    setPortRate: setPortRate
+  }), activeTab === "budget" && /*#__PURE__*/React.createElement(BudgetTab, {
+    budget: budget,
+    setBudget: setBudget
+  }), activeTab === "trans" && /*#__PURE__*/React.createElement(TransactionsTab, {
+    transactions: transactions,
+    setTransactions: setTransactions,
+    budget: budget
+  }), activeTab === "account" && /*#__PURE__*/React.createElement(AccountTab, null), activeTab === "portfolio" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "tabs",
+    style: {
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tabs-list"
+  }, portfolios.map(p => renaming && p.id === activeId ? /*#__PURE__*/React.createElement("input", {
+    key: p.id,
+    className: "tab-rename",
+    autoFocus: true,
+    value: renameVal,
+    onChange: e => setRenameVal(e.target.value),
+    onBlur: commitRename,
+    onKeyDown: e => {
+      if (e.key === "Enter") commitRename();
+      if (e.key === "Escape") setRenaming(false);
+    }
+  }) : /*#__PURE__*/React.createElement("button", {
+    key: p.id,
+    className: "tab" + (p.id === activeId ? " on" : ""),
+    onClick: () => switchPortfolio(p.id)
+  }, p.name, /*#__PURE__*/React.createElement("span", {
+    className: "tab-n"
+  }, p.holdings.length))), /*#__PURE__*/React.createElement("button", {
+    className: "tab add",
+    onClick: newPortfolio,
+    title: "Nieuwe portefeuille"
+  }, "+ nieuw")), /*#__PURE__*/React.createElement("div", {
     className: "tabs-tools"
-  }, activeTab === "portfolio" && activePortfolio && !renaming && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+  }, activePortfolio && !renaming && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
     className: "ttool",
     onClick: startRename,
     title: "Hernoemen"
@@ -1708,21 +1721,18 @@ function PortfolioDashboard() {
     className: "ttool del",
     onClick: () => setConfirmDel(true),
     title: "Verwijderen"
-  }, "verwijder"))))), activeTab === "calc" && /*#__PURE__*/React.createElement(CalcTab, {
+  }, "verwijder"))), /*#__PURE__*/React.createElement(ImportPanel, {
+    onImport: handleImport
+  }), /*#__PURE__*/React.createElement(ExportButton, {
+    portfolios: portfolios,
     loan: loan,
-    setLoan: setLoan,
-    loanCalc: loanCalc,
-    portfolioValue: t.mvTotal,
     portRate: portRate,
-    setPortRate: setPortRate
-  }), activeTab === "budget" && /*#__PURE__*/React.createElement(BudgetTab, {
     budget: budget,
-    setBudget: setBudget
-  }), activeTab === "trans" && /*#__PURE__*/React.createElement(TransactionsTab, {
     transactions: transactions,
-    setTransactions: setTransactions,
-    budget: budget
-  }), activeTab === "account" && /*#__PURE__*/React.createElement(AccountTab, null), activeTab === "portfolio" && /*#__PURE__*/React.createElement(React.Fragment, null, holdings.some(h => h.priceNative != null) && /*#__PURE__*/React.createElement("div", {
+    apiKey: apiKey,
+    auto: auto,
+    intervalMin: intervalMin
+  }))), holdings.some(h => h.priceNative != null) && /*#__PURE__*/React.createElement("div", {
     className: "tape"
   }, /*#__PURE__*/React.createElement("div", {
     className: "tape-track"
@@ -2732,169 +2742,199 @@ function BudgetTab({
   budget,
   setBudget
 }) {
-  const n = v => parseFloat(String(v || "").replace(",", ".")) || 0;
-  const budUid = () => Math.random().toString(36).slice(2, 9);
+  const uid = () => Math.random().toString(36).slice(2, 9);
+  const n = v => parseFloat(String(v || '').replace(',', '.')) || 0;
   const today = new Date().toISOString().slice(0, 7);
-  const activeMonth = budget.activeMonth || today;
-  const monthData = budget.months && budget.months[activeMonth] || {
-    ...DEFAULT_MONTH_BUDGET
+
+  // Veilige state — nooit undefined
+  const months = budget && budget.months || {};
+  const activeMonth = budget && budget.activeMonth || today;
+  const monthData = months[activeMonth] || {
+    salaryGross: '',
+    savingsTarget: '',
+    categories: [{
+      id: 'c1',
+      label: 'Huur / hypotheek',
+      amount: '',
+      fixed: true
+    }, {
+      id: 'c2',
+      label: 'Boodschappen',
+      amount: '',
+      fixed: false
+    }, {
+      id: 'c3',
+      label: 'Verzekeringen',
+      amount: '',
+      fixed: true
+    }, {
+      id: 'c4',
+      label: 'Abonnementen',
+      amount: '',
+      fixed: true
+    }, {
+      id: 'c5',
+      label: 'Transport',
+      amount: '',
+      fixed: false
+    }, {
+      id: 'c6',
+      label: 'Uit eten / vrije tijd',
+      amount: '',
+      fixed: false
+    }]
   };
+  const [confirmDel, setConfirmDel] = useState(false);
 
-  /* helpers to update the active month */
-  const setField = (k, v) => setBudget(b => ({
+  // Zet huidige maand als er niets is
+  useEffect(() => {
+    if (!budget || !budget.months || Object.keys(budget.months).length === 0) {
+      setBudget({
+        months: {
+          [today]: monthData
+        },
+        activeMonth: today
+      });
+    }
+  }, []); // eslint-disable-line
+
+  const upd = patch => setBudget(b => ({
     ...b,
     months: {
-      ...b.months,
+      ...(b.months || {}),
       [activeMonth]: {
-        ...(b.months[activeMonth] || DEFAULT_MONTH_BUDGET),
-        [k]: v
+        ...monthData,
+        ...patch
       }
     }
   }));
-  const setCat = (id, k, v) => setBudget(b => ({
-    ...b,
-    months: {
-      ...b.months,
-      [activeMonth]: {
-        ...(b.months[activeMonth] || DEFAULT_MONTH_BUDGET),
-        categories: (b.months[activeMonth]?.categories || DEFAULT_MONTH_BUDGET.categories).map(c => c.id === id ? {
-          ...c,
-          [k]: v
-        } : c)
-      }
-    }
-  }));
-  const addCat = () => setBudget(b => {
-    const cur = b.months[activeMonth] || DEFAULT_MONTH_BUDGET;
-    return {
-      ...b,
-      months: {
-        ...b.months,
-        [activeMonth]: {
-          ...cur,
-          categories: [...(cur.categories || []), {
-            id: budUid(),
-            label: "",
-            amount: "",
-            fixed: false
-          }]
-        }
-      }
-    };
+  const setField = (k, v) => upd({
+    [k]: v
   });
-  const delCat = id => setBudget(b => {
-    const cur = b.months[activeMonth] || DEFAULT_MONTH_BUDGET;
-    return {
-      ...b,
-      months: {
-        ...b.months,
-        [activeMonth]: {
-          ...cur,
-          categories: (cur.categories || []).filter(c => c.id !== id)
-        }
-      }
-    };
+  const setCat = (id, k, v) => upd({
+    categories: monthData.categories.map(c => c.id === id ? {
+      ...c,
+      [k]: v
+    } : c)
+  });
+  const addCat = () => upd({
+    categories: [...monthData.categories, {
+      id: uid(),
+      label: '',
+      amount: '',
+      fixed: false
+    }]
+  });
+  const delCat = id => upd({
+    categories: monthData.categories.filter(c => c.id !== id)
   });
 
-  /* add/copy month helpers */
-  function addMonth(ym, copyFrom) {
-    setBudget(b => {
-      const source = copyFrom && b.months[copyFrom] ? b.months[copyFrom] : DEFAULT_MONTH_BUDGET;
-      const newMonthData = copyFrom ? {
-        ...source,
-        categories: source.categories.map(c => ({
-          ...c,
-          id: budUid()
-        }))
-      } : {
-        ...DEFAULT_MONTH_BUDGET
-      };
-      return {
+  // Maand navigatie
+  const monthNames = Object.keys(months).sort().reverse();
+  if (!monthNames.includes(activeMonth)) monthNames.unshift(activeMonth);
+  function fmtMonth(ym) {
+    try {
+      const [y, m] = ym.split('-');
+      return new Date(+y, +m - 1).toLocaleDateString('nl-NL', {
+        month: 'long',
+        year: 'numeric'
+      });
+    } catch (e) {
+      return ym;
+    }
+  }
+  function goMonth(ym) {
+    if (!months[ym]) {
+      // Nieuwe lege maand
+      setBudget(b => ({
         ...b,
         activeMonth: ym,
         months: {
-          ...b.months,
-          [ym]: newMonthData
+          ...(b.months || {}),
+          [ym]: {
+            salaryGross: '',
+            savingsTarget: '',
+            categories: monthData.categories.map(c => ({
+              ...c,
+              id: uid()
+            }))
+          }
         }
-      };
-    });
-  }
-  function deleteMonth(ym) {
-    setBudget(b => {
-      const newMonths = {
-        ...b.months
-      };
-      delete newMonths[ym];
-      const keys = Object.keys(newMonths).sort();
-      return {
+      }));
+    } else {
+      setBudget(b => ({
         ...b,
-        months: newMonths,
-        activeMonth: keys[keys.length - 1] || today
-      };
-    });
+        activeMonth: ym
+      }));
+    }
   }
-
-  /* month selector options */
-  const existingMonths = Object.keys(budget.months || {}).sort().reverse();
-  if (!existingMonths.includes(activeMonth)) existingMonths.unshift(activeMonth);
-
-  /* generate next/prev month strings */
-  function offsetMonth(ym, delta) {
-    const [y, m] = ym.split("-").map(Number);
-    const d = new Date(y, m - 1 + delta, 1);
+  function prevMonth() {
+    const [y, m] = activeMonth.split('-').map(Number);
+    const d = new Date(y, m - 2, 1);
     return d.toISOString().slice(0, 7);
   }
-  const prevMonth = offsetMonth(activeMonth, -1);
-  const nextMonth = offsetMonth(activeMonth, 1);
-  const monthLabel = ym => {
-    const [y, m] = ym.split("-");
-    return new Date(Number(y), Number(m) - 1).toLocaleDateString("nl-NL", {
-      month: "long",
-      year: "numeric"
+  function nextMonth() {
+    const [y, m] = activeMonth.split('-').map(Number);
+    const d = new Date(y, m, 1);
+    return d.toISOString().slice(0, 7);
+  }
+  function delMonth() {
+    const newMonths = {
+      ...months
+    };
+    delete newMonths[activeMonth];
+    const remaining = Object.keys(newMonths).sort();
+    const newActive = remaining[remaining.length - 1] || today;
+    setBudget({
+      months: newMonths,
+      activeMonth: newActive
     });
-  };
+    setConfirmDel(false);
+  }
+
+  // Berekeningen
   const gross = n(monthData.salaryGross);
-  const nlTax = calcNLTax(gross);
-  const netMth = nlTax.net / 12;
-  const cats = monthData.categories || [];
+  const tax = calcNLTax(gross);
+  const netMth = tax.net / 12;
+  const cats = Array.isArray(monthData.categories) ? monthData.categories : [];
   const totalCosts = cats.reduce((s, c) => s + n(c.amount), 0);
   const fixedCosts = cats.filter(c => c.fixed).reduce((s, c) => s + n(c.amount), 0);
   const varCosts = totalCosts - fixedCosts;
   const savingsTarget = n(monthData.savingsTarget);
   const leftover = netMth - totalCosts;
   const surplus = leftover - savingsTarget;
-  const catColors = ["#6EA8D8", "#C98AC0", "#E2917E", "#9AA0AE", "#B5915A", "#7FB8A0", "#CBA135", "#79C7A0", "#6EA8D8", "#C98AC0"];
+  const catColors = ['#6EA8D8', '#C98AC0', '#E2917E', '#9AA0AE', '#B5915A', '#7FB8A0', '#CBA135', '#79C7A0'];
   const donutData = [...cats.filter(c => n(c.amount) > 0).map((c, i) => ({
     id: c.id,
-    label: c.label || "—",
+    label: c.label || '—',
     value: n(c.amount),
     color: catColors[i % catColors.length]
   })), ...(savingsTarget > 0 ? [{
-    id: "sav",
-    label: "Spaardoel",
+    id: 'sav',
+    label: 'Spaardoel',
     value: savingsTarget,
-    color: "#79C7A0"
+    color: '#79C7A0'
   }] : []), ...(surplus > 0 ? [{
-    id: "sur",
-    label: "Vrij besteedbaar",
+    id: 'sur',
+    label: 'Vrij besteedbaar',
     value: surplus,
-    color: "#CBA135"
+    color: '#CBA135'
   }] : [])];
   const donutTotal = donutData.reduce((s, d) => s + d.value, 0) || 1;
-  const brackets2025 = [{
-    label: "Schijf 1 (t/m €38.441)",
-    rate: "35,82%",
-    rateN: 0.3582,
+  const brackets = [{
+    label: 'Schijf 1 (t/m €38.441)',
+    rate: '35,82%',
+    rN: 0.3582,
     max: 38441
   }, {
-    label: "Schijf 2 (€38.441–€76.817)",
-    rate: "37,48%",
-    rateN: 0.3748,
+    label: 'Schijf 2 (€38.441–€76.817)',
+    rate: '37,48%',
+    rN: 0.3748,
     max: 76817
   }, {
-    label: "Schijf 3 (>€76.817)",
-    rate: "49,5%",
-    rateN: 0.495,
+    label: 'Schijf 3 (>€76.817)',
+    rate: '49,5%',
+    rN: 0.495,
     max: Infinity
   }];
   return /*#__PURE__*/React.createElement("div", {
@@ -2904,73 +2944,79 @@ function BudgetTab({
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn",
     style: {
-      padding: "7px 11px"
+      padding: '7px 11px'
     },
-    onClick: () => {
-      if (!(budget.months || {})[prevMonth]) addMonth(prevMonth, null);else setBudget(b => ({
-        ...b,
-        activeMonth: prevMonth
-      }));
-    }
+    onClick: () => goMonth(prevMonth())
   }, "‹"), /*#__PURE__*/React.createElement("select", {
     className: "auto-int budget-month-sel",
     value: activeMonth,
     onChange: e => {
       const v = e.target.value;
-      if (v === "__new__") {
-        addMonth(nextMonth, null);
-      } else if (v === "__copy__") {
-        addMonth(nextMonth, activeMonth);
-      } else setBudget(b => ({
-        ...b,
-        activeMonth: v
-      }));
+      if (v === '__new__') goMonth(nextMonth());else if (v === '__copy__') {
+        const nm = nextMonth();
+        setBudget(b => ({
+          ...b,
+          activeMonth: nm,
+          months: {
+            ...(b.months || {}),
+            [nm]: {
+              ...monthData,
+              categories: monthData.categories.map(c => ({
+                ...c,
+                id: uid()
+              }))
+            }
+          }
+        }));
+      } else goMonth(v);
     }
-  }, existingMonths.map(m => /*#__PURE__*/React.createElement("option", {
+  }, monthNames.map(m => /*#__PURE__*/React.createElement("option", {
     key: m,
     value: m
-  }, monthLabel(m))), /*#__PURE__*/React.createElement("option", {
+  }, fmtMonth(m))), /*#__PURE__*/React.createElement("option", {
     disabled: true
   }, "──────────"), /*#__PURE__*/React.createElement("option", {
     value: "__new__"
-  }, "+ Nieuwe maand toevoegen"), /*#__PURE__*/React.createElement("option", {
+  }, "+ Nieuwe maand"), /*#__PURE__*/React.createElement("option", {
     value: "__copy__"
   }, "+ Kopieer huidige maand")), /*#__PURE__*/React.createElement("button", {
     className: "btn",
     style: {
-      padding: "7px 11px"
+      padding: '7px 11px'
     },
-    onClick: () => {
-      if (!(budget.months || {})[nextMonth]) addMonth(nextMonth, null);else setBudget(b => ({
-        ...b,
-        activeMonth: nextMonth
-      }));
-    }
-  }, "›"), Object.keys(budget.months || {}).length > 1 && /*#__PURE__*/React.createElement("button", {
+    onClick: () => goMonth(nextMonth())
+  }, "›"), Object.keys(months).length > 1 && (confirmDel ? /*#__PURE__*/React.createElement("span", {
+    className: "del-confirm"
+  }, "Verwijderen?", /*#__PURE__*/React.createElement("button", {
+    className: "ttool danger",
+    onClick: delMonth
+  }, "ja"), /*#__PURE__*/React.createElement("button", {
+    className: "ttool",
+    onClick: () => setConfirmDel(false)
+  }, "nee")) : /*#__PURE__*/React.createElement("button", {
     className: "btn",
     style: {
-      padding: "7px 11px",
-      color: "var(--loss)",
-      fontSize: 12
+      fontSize: 12,
+      padding: '6px 11px',
+      color: 'var(--loss)',
+      borderColor: 'var(--loss)'
     },
-    onClick: () => {
-      if (window.confirm(`Maand ${monthLabel(activeMonth)} verwijderen?`)) deleteMonth(activeMonth);
-    }
-  }, "verwijder")), /*#__PURE__*/React.createElement("div", {
+    onClick: () => setConfirmDel(true)
+  }, "verwijder maand"))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("div", {
     className: "calc-title"
-  }, "Budget — ", monthLabel(activeMonth)), /*#__PURE__*/React.createElement("div", {
+  }, "Budget — ", fmtMonth(activeMonth)), /*#__PURE__*/React.createElement("div", {
     className: "calc-desc"
   }, "Vul je bruto jaarsalaris in. De Nederlandse belastingschijven 2025 worden automatisch toegepast."), /*#__PURE__*/React.createElement("div", {
     className: "budget-income"
   }, /*#__PURE__*/React.createElement("div", {
     className: "fld"
   }, /*#__PURE__*/React.createElement("label", null, "Bruto jaarsalaris (€)"), /*#__PURE__*/React.createElement("input", {
-    value: monthData.salaryGross || "",
+    value: monthData.salaryGross || '',
     placeholder: "bv. 45000",
     inputMode: "decimal",
-    onChange: e => setField("salaryGross", e.target.value)
+    onChange: e => setField('salaryGross', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "budget-net-box"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2982,14 +3028,14 @@ function BudgetTab({
     style: {
       marginTop: 4
     }
-  }, "Effectief tarief ", nlTax.effectiveRate.toFixed(1), "%"))), gross > 0 && /*#__PURE__*/React.createElement("div", {
+  }, "Effectief tarief ", tax.effectiveRate.toFixed(1), "%"))), gross > 0 && /*#__PURE__*/React.createElement("div", {
     className: "tax-breakdown"
   }, /*#__PURE__*/React.createElement("div", {
     className: "tax-title"
   }, "Belastingopbouw 2025"), /*#__PURE__*/React.createElement("div", {
     className: "tax-rows"
-  }, brackets2025.map((b, i) => {
-    const prev = i === 0 ? 0 : brackets2025[i - 1].max;
+  }, brackets.map((b, i) => {
+    const prev = i === 0 ? 0 : brackets[i - 1].max;
     const slice = Math.max(0, Math.min(gross, b.max) - prev);
     if (slice <= 0) return null;
     return /*#__PURE__*/React.createElement("div", {
@@ -3001,7 +3047,7 @@ function BudgetTab({
       className: "tax-base"
     }, eur(slice), " × ", b.rate), /*#__PURE__*/React.createElement("span", {
       className: "tax-amt loss"
-    }, "−", eur(slice * b.rateN)));
+    }, "−", eur(slice * b.rN)));
   }), /*#__PURE__*/React.createElement("div", {
     className: "tax-row korting"
   }, /*#__PURE__*/React.createElement("span", {
@@ -3010,7 +3056,7 @@ function BudgetTab({
     className: "tax-base"
   }, "korting"), /*#__PURE__*/React.createElement("span", {
     className: "tax-amt gain"
-  }, "+", eur(nlTax.ahk))), /*#__PURE__*/React.createElement("div", {
+  }, "+", eur(tax.ahk))), /*#__PURE__*/React.createElement("div", {
     className: "tax-row korting"
   }, /*#__PURE__*/React.createElement("span", {
     className: "tax-label"
@@ -3018,7 +3064,7 @@ function BudgetTab({
     className: "tax-base"
   }, "korting"), /*#__PURE__*/React.createElement("span", {
     className: "tax-amt gain"
-  }, "+", eur(nlTax.ak))), /*#__PURE__*/React.createElement("div", {
+  }, "+", eur(tax.ak))), /*#__PURE__*/React.createElement("div", {
     className: "tax-row total"
   }, /*#__PURE__*/React.createElement("span", {
     className: "tax-label"
@@ -3026,7 +3072,7 @@ function BudgetTab({
     className: "tax-base"
   }), /*#__PURE__*/React.createElement("span", {
     className: "tax-amt loss"
-  }, "−", eur(nlTax.netTax))), /*#__PURE__*/React.createElement("div", {
+  }, "−", eur(tax.netTax))), /*#__PURE__*/React.createElement("div", {
     className: "tax-row total"
   }, /*#__PURE__*/React.createElement("span", {
     className: "tax-label"
@@ -3034,7 +3080,7 @@ function BudgetTab({
     className: "tax-base"
   }), /*#__PURE__*/React.createElement("span", {
     className: "tax-amt"
-  }, eur(nlTax.net)))))), /*#__PURE__*/React.createElement("div", {
+  }, eur(tax.net)))))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("h3", null, "Maandelijkse kosten"), /*#__PURE__*/React.createElement("div", {
     className: "budget-cats"
@@ -3042,7 +3088,7 @@ function BudgetTab({
     className: "budget-cat-h"
   }, /*#__PURE__*/React.createElement("span", null, "Omschrijving"), /*#__PURE__*/React.createElement("span", null, "Bedrag / mnd"), /*#__PURE__*/React.createElement("span", {
     style: {
-      textAlign: "center"
+      textAlign: 'center'
     }
   }, "Vast"), /*#__PURE__*/React.createElement("span", null)), cats.map(c => /*#__PURE__*/React.createElement("div", {
     className: "budget-cat-r",
@@ -3050,62 +3096,62 @@ function BudgetTab({
   }, /*#__PURE__*/React.createElement("input", {
     value: c.label,
     placeholder: "bv. Huur",
-    onChange: e => setCat(c.id, "label", e.target.value),
+    onChange: e => setCat(c.id, 'label', e.target.value),
     style: {
-      background: "var(--bg2)",
-      border: "1px solid var(--line2)",
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
       borderRadius: 7,
-      color: "var(--ink)",
-      padding: "8px 11px",
-      fontFamily: "Inter,sans-serif",
+      color: 'var(--ink)',
+      padding: '8px 11px',
+      fontFamily: 'Inter,sans-serif',
       fontSize: 13,
-      outline: "none",
-      width: "100%"
+      outline: 'none',
+      width: '100%'
     }
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      alignItems: "center",
+      display: 'flex',
+      alignItems: 'center',
       gap: 6
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      color: "var(--faint)",
+      color: 'var(--faint)',
       fontSize: 13
     }
   }, "€"), /*#__PURE__*/React.createElement("input", {
     value: c.amount,
     placeholder: "0",
     inputMode: "decimal",
-    onChange: e => setCat(c.id, "amount", e.target.value),
+    onChange: e => setCat(c.id, 'amount', e.target.value),
     style: {
-      background: "var(--bg2)",
-      border: "1px solid var(--line2)",
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
       borderRadius: 7,
-      color: "var(--ink)",
-      padding: "8px 11px",
+      color: 'var(--ink)',
+      padding: '8px 11px',
       fontFamily: "'IBM Plex Mono',monospace",
       fontSize: 13,
-      outline: "none",
-      width: "100%",
-      textAlign: "right"
+      outline: 'none',
+      width: '100%',
+      textAlign: 'right'
     }
   })), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      justifyContent: "center"
+      display: 'flex',
+      justifyContent: 'center'
     }
   }, /*#__PURE__*/React.createElement("button", {
-    className: "fixed-btn" + (c.fixed ? " on" : ""),
-    onClick: () => setCat(c.id, "fixed", !c.fixed)
-  }, c.fixed ? "vast" : "var")), /*#__PURE__*/React.createElement("button", {
+    className: 'fixed-btn' + (c.fixed ? ' on' : ''),
+    onClick: () => setCat(c.id, 'fixed', !c.fixed)
+  }, c.fixed ? 'vast' : 'var')), /*#__PURE__*/React.createElement("button", {
     className: "xbtn",
     onClick: () => delCat(c.id)
   }, "×"))), /*#__PURE__*/React.createElement("button", {
     className: "btn",
     style: {
       marginTop: 10,
-      alignSelf: "flex-start"
+      alignSelf: 'flex-start'
     },
     onClick: addCat
   }, "+ Kostenpost toevoegen"))), netMth > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
@@ -3129,22 +3175,22 @@ function BudgetTab({
   }, "Variabele kosten"), /*#__PURE__*/React.createElement("div", {
     className: "loan-big",
     style: {
-      color: "var(--loss)"
+      color: 'var(--loss)'
     }
   }, eur(varCosts))), /*#__PURE__*/React.createElement("div", {
     className: "loan-pill"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
   }, "Ruimte na kosten"), /*#__PURE__*/React.createElement("div", {
-    className: "loan-big " + (leftover >= 0 ? "gain" : "loss")
+    className: 'loan-big ' + (leftover >= 0 ? 'gain' : 'loss')
   }, eur(leftover)))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("h3", null, "Spaardoel"), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
+      display: 'flex',
       gap: 16,
-      alignItems: "center",
-      flexWrap: "wrap",
+      alignItems: 'center',
+      flexWrap: 'wrap',
       marginBottom: 16
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -3153,20 +3199,20 @@ function BudgetTab({
       maxWidth: 200
     }
   }, /*#__PURE__*/React.createElement("label", null, "Maandelijks spaardoel (€)"), /*#__PURE__*/React.createElement("input", {
-    value: monthData.savingsTarget || "",
+    value: monthData.savingsTarget || '',
     placeholder: "bv. 500",
     inputMode: "decimal",
-    onChange: e => setField("savingsTarget", e.target.value)
+    onChange: e => setField('savingsTarget', e.target.value)
   })), savingsTarget > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: "'IBM Plex Mono',monospace",
       fontSize: 13,
-      color: surplus >= 0 ? "var(--gain)" : "var(--loss)"
+      color: surplus >= 0 ? 'var(--gain)' : 'var(--loss)'
     }
   }, surplus >= 0 ? `✓ +${eur(surplus)} vrij besteedbaar` : `✗ ${eur(Math.abs(surplus))} tekort`)), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      alignItems: "center",
+      display: 'flex',
+      alignItems: 'center',
       gap: 24
     }
   }, /*#__PURE__*/React.createElement(BudgetDonut, {
@@ -3175,8 +3221,8 @@ function BudgetTab({
     center: eur(netMth)
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      flexDirection: "column",
+      display: 'flex',
+      flexDirection: 'column',
       gap: 8,
       flex: 1,
       minWidth: 0
@@ -3184,8 +3230,8 @@ function BudgetTab({
   }, donutData.map(d => /*#__PURE__*/React.createElement("div", {
     key: d.id,
     style: {
-      display: "flex",
-      alignItems: "center",
+      display: 'flex',
+      alignItems: 'center',
       gap: 9,
       fontSize: 12.5
     }
@@ -3199,26 +3245,84 @@ function BudgetTab({
     }
   }), /*#__PURE__*/React.createElement("span", {
     style: {
-      color: "var(--ink)",
+      color: 'var(--ink)',
       flex: 1,
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap"
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
     }
   }, d.label), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: "'IBM Plex Mono',monospace",
-      color: "var(--muted)",
+      color: 'var(--muted)',
       flexShrink: 0
     }
   }, eur(d.value)), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: "'IBM Plex Mono',monospace",
-      color: "var(--faint)",
+      color: 'var(--faint)',
       fontSize: 11,
       flexShrink: 0
     }
   }, Math.round(d.value / donutTotal * 100), "%"))))))));
+}
+function BudgetDonut({
+  data,
+  total,
+  center
+}) {
+  const r = 52,
+    sw = 18,
+    circ = 2 * Math.PI * r;
+  let acc = 0;
+  return /*#__PURE__*/React.createElement("svg", {
+    width: "140",
+    height: "140",
+    viewBox: "0 0 140 140",
+    style: {
+      flex: 'none'
+    }
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "70",
+    cy: "70",
+    r: r,
+    fill: "none",
+    stroke: "var(--line)",
+    strokeWidth: sw
+  }), data.map(d => {
+    const len = d.value / total * circ;
+    const seg = /*#__PURE__*/React.createElement("circle", {
+      key: d.id,
+      cx: "70",
+      cy: "70",
+      r: r,
+      fill: "none",
+      stroke: d.color,
+      strokeWidth: sw,
+      strokeDasharray: `${len} ${circ - len}`,
+      strokeDashoffset: -acc,
+      transform: "rotate(-90 70 70)"
+    });
+    acc += len;
+    return seg;
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "70",
+    y: "66",
+    textAnchor: "middle",
+    fill: "var(--ink)",
+    style: {
+      font: "600 11px 'IBM Plex Mono',monospace"
+    }
+  }, center), /*#__PURE__*/React.createElement("text", {
+    x: "70",
+    y: "81",
+    textAnchor: "middle",
+    fill: "var(--faint)",
+    style: {
+      font: '10px Inter,sans-serif',
+      letterSpacing: '.06em'
+    }
+  }, "PER MAAND"));
 }
 
 /* ---- uitgaven tracker ---- */
@@ -3243,10 +3347,166 @@ function TransactionsTab({
   const [editId, setEditId] = React.useState(null);
   const [sortField, setSortField] = React.useState("date");
   const [sortDir, setSortDir] = React.useState("desc");
+  const [showIngImport, setShowIngImport] = React.useState(false);
+  const [ingMsg, setIngMsg] = React.useState("");
+  const [ingLoading, setIngLoading] = React.useState(false);
   const activeMon = budget.activeMonth || new Date().toISOString().slice(0, 7);
   const activeBudget = budget.months && budget.months[activeMon] || DEFAULT_MONTH_BUDGET;
   const budgetCats = activeBudget.categories.map(c => c.label).filter(Boolean);
   const allCats = [...new Set([...budgetCats, ...transactions.map(t => t.category).filter(Boolean)])].sort();
+
+  /* ── ING CSV-categorisatie ── */
+  const ING_CATS = {
+    "albert heijn": "Boodschappen",
+    "jumbo": "Boodschappen",
+    "lidl": "Boodschappen",
+    "aldi": "Boodschappen",
+    "plus": "Boodschappen",
+    "dirk": "Boodschappen",
+    "ns ": "Transport",
+    "ov-chipkaart": "Transport",
+    "connexxion": "Transport",
+    "arriva": "Transport",
+    "ret ": "Transport",
+    "gvb": "Transport",
+    "shell": "Transport",
+    "bp ": "Transport",
+    "tinq": "Transport",
+    "esso": "Transport",
+    "neom": "Transport",
+    "tango": "Transport",
+    "spotify": "Abonnementen",
+    "netflix": "Abonnementen",
+    "youtube": "Abonnementen",
+    "disney": "Abonnementen",
+    "amazon": "Abonnementen",
+    "apple.com/bill": "Abonnementen",
+    "ziggo": "Abonnementen",
+    "kpn": "Abonnementen",
+    "vodafone": "Abonnementen",
+    "t-mobile": "Abonnementen",
+    "tele2": "Abonnementen",
+    "huur": "Huur / hypotheek",
+    "hypotheek": "Huur / hypotheek",
+    "zorgverzekering": "Verzekeringen",
+    "centraal beheer": "Verzekeringen",
+    "nationale nederlanden": "Verzekeringen",
+    "aegon": "Verzekeringen",
+    "restaurant": "Uit eten / vrije tijd",
+    "cafe ": "Uit eten / vrije tijd",
+    "mcdonalds": "Uit eten / vrije tijd",
+    "burger king": "Uit eten / vrije tijd",
+    "thuisbezorgd": "Uit eten / vrije tijd",
+    "uber eats": "Uit eten / vrije tijd",
+    "salaris": "Inkomsten",
+    "loon": "Inkomsten",
+    "uitkering": "Inkomsten"
+  };
+  function guessCat(omschrijving, tegenrekening) {
+    const haystack = (omschrijving + " " + tegenrekening).toLowerCase();
+    // Eerst budgetcategorieën proberen
+    for (const cat of budgetCats) {
+      if (haystack.includes(cat.toLowerCase())) return cat;
+    }
+    // Dan vaste mapping
+    for (const [key, cat] of Object.entries(ING_CATS)) {
+      if (haystack.includes(key)) return cat;
+    }
+    return "";
+  }
+  function parseINGcsv(text) {
+    const lines = text.split('\n').filter(l => l.trim());
+    if (lines.length < 2) return {
+      entries: [],
+      errors: ['Bestand lijkt leeg of ongeldig.']
+    };
+
+    // ING formaat: "Datum";"Naam / Omschrijving";"Rekening";"Tegenrekening";"Code";"Af Bij";"Bedrag (EUR)";"Mutatiesoort";"Mededelingen"
+    const header = lines[0].replace(/"/g, '').split(';').map(h => h.trim().toLowerCase());
+    const datumIdx = header.findIndex(h => h === 'datum');
+    const naamIdx = header.findIndex(h => h.includes('naam') || h.includes('omschrijving'));
+    const tegenIdx = header.findIndex(h => h.includes('tegenrekening'));
+    const afbijIdx = header.findIndex(h => h === 'af bij');
+    const bedragIdx = header.findIndex(h => h.includes('bedrag'));
+    const mededIdx = header.findIndex(h => h.includes('mededeling'));
+    if (datumIdx === -1 || bedragIdx === -1) {
+      return {
+        entries: [],
+        errors: ['Dit lijkt geen ING-exportbestand. Controleer of je het juiste bestand hebt gekozen.']
+      };
+    }
+    const entries = [];
+    const existingKeys = new Set(transactions.map(t => `${t.date}_${t.amount}_${t.note?.slice(0, 20)}`));
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(';').map(c => c.replace(/^"|"$/g, '').trim());
+      if (cols.length < 4) continue;
+
+      // Datum: YYYYMMDD → YYYY-MM-DD
+      const rawDate = cols[datumIdx] || '';
+      const date = rawDate.length === 8 ? `${rawDate.slice(0, 4)}-${rawDate.slice(4, 6)}-${rawDate.slice(6, 8)}` : rawDate;
+      const naam = cols[naamIdx] || '';
+      const tegen = cols[tegenIdx] || '';
+      const afbij = (cols[afbijIdx] || '').toLowerCase();
+      const bedragRaw = (cols[bedragIdx] || '').replace('.', '').replace(',', '.');
+      const bedrag = Math.abs(parseFloat(bedragRaw) || 0);
+      const meded = cols[mededIdx] || '';
+      if (!date || bedrag === 0) continue;
+      const type = afbij === 'bij' ? 'inkomst' : 'uitgave';
+      const note = naam || meded.slice(0, 60);
+      const category = guessCat(naam + ' ' + meded, tegen);
+
+      // Duplicaat check
+      const key = `${date}_${bedrag}_${note.slice(0, 20)}`;
+      if (existingKeys.has(key)) continue;
+      existingKeys.add(key);
+      entries.push({
+        id: tuid(),
+        date,
+        amount: bedrag,
+        type,
+        note,
+        category
+      });
+    }
+    return {
+      entries,
+      errors: []
+    };
+  }
+  function handleIngFile(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setIngLoading(true);
+    setIngMsg('');
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result || '');
+      const {
+        entries,
+        errors
+      } = parseINGcsv(text);
+      if (errors.length) {
+        setIngMsg('⚠ ' + errors[0]);
+        setIngLoading(false);
+        return;
+      }
+      if (entries.length === 0) {
+        setIngMsg('Geen nieuwe transacties gevonden — mogelijk al geïmporteerd.');
+        setIngLoading(false);
+        return;
+      }
+      setTransactions(prev => [...entries, ...prev]);
+      setIngMsg(`✓ ${entries.length} transacties geïmporteerd!`);
+      setShowIngImport(false);
+      setIngLoading(false);
+    };
+    reader.onerror = () => {
+      setIngMsg('Bestand kon niet worden gelezen.');
+      setIngLoading(false);
+    };
+    reader.readAsText(file, 'UTF-8');
+    e.target.value = '';
+  }
   function saveForm() {
     const amt = parseFloat(String(form.amount).replace(",", "."));
     if (isNaN(amt) || amt <= 0) return;
@@ -3350,7 +3610,18 @@ function TransactionsTab({
   }, "Alle categorieën"), allCats.map(c => /*#__PURE__*/React.createElement("option", {
     key: c,
     value: c
-  }, c)))), /*#__PURE__*/React.createElement("button", {
+  }, c)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => {
+      setShowIngImport(s => !s);
+      setIngMsg('');
+    }
+  }, showIngImport ? "Annuleren" : "⬆ ING importeren"), /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
     onClick: () => {
       setEditId(null);
@@ -3363,7 +3634,35 @@ function TransactionsTab({
       });
       setShowForm(s => !s);
     }
-  }, showForm && !editId ? "Annuleren" : "+ Transactie")), showForm && /*#__PURE__*/React.createElement("div", {
+  }, showForm && !editId ? "Annuleren" : "+ Transactie"))), showIngImport && /*#__PURE__*/React.createElement("div", {
+    className: "import",
+    style: {
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("h4", null, "Importeer ING bankafschrift (CSV)"), /*#__PURE__*/React.createElement("ol", null, /*#__PURE__*/React.createElement("li", null, "Log in op ", /*#__PURE__*/React.createElement("b", null, "mijn.ing.nl"), " → Betaalrekening → ", /*#__PURE__*/React.createElement("b", null, "Exporteren")), /*#__PURE__*/React.createElement("li", null, "Kies periode, formaat ", /*#__PURE__*/React.createElement("b", null, "CSV"), " en download het bestand"), /*#__PURE__*/React.createElement("li", null, "Kies het bestand hieronder — transacties worden automatisch gecategoriseerd")), /*#__PURE__*/React.createElement("div", {
+    className: "rt-note"
+  }, "Duplicaten worden automatisch overgeslagen. Categorieën worden geraden op basis van de omschrijving en je bestaande budgetcategorieën."), /*#__PURE__*/React.createElement("div", {
+    className: "import-row",
+    style: {
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "btn primary file-btn"
+  }, ingLoading ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+    className: "spin"
+  }), "Importeren...") : "📂 Kies ING CSV-bestand", /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: ".csv",
+    onChange: handleIngFile,
+    disabled: ingLoading
+  }))), ingMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 12.5,
+      color: ingMsg.startsWith('✓') ? "var(--gain)" : "var(--loss)"
+    }
+  }, ingMsg)), showForm && /*#__PURE__*/React.createElement("div", {
     className: "form",
     style: {
       marginTop: 12
@@ -3833,6 +4132,14 @@ function AccountTab() {
   });
   const [apiMsg, setApiMsg] = useState('');
   const [resetSent, setResetSent] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(() => {
+    try {
+      return localStorage.getItem('fb:avatar') || '';
+    } catch (e) {
+      return '';
+    }
+  });
+  const [avatarUploading, setAvatarUploading] = useState(false);
   useEffect(() => {
     if (!sb) return;
     sb.auth.getSession().then(async ({
@@ -3938,14 +4245,48 @@ function AccountTab() {
   }
   async function logout() {
     if (!sb) return;
-    // Wis lokale data zodat de volgende gebruiker een schone start heeft
-    const KEYS = ['portfolio:meta', 'portfolio:settings', 'portfolio:calc', 'portfolio:budget', 'portfolio:transactions', 'fb:last_seen', 'fb:last_sync', 'fb:display_name'];
+    const KEYS = ['portfolio:meta', 'portfolio:settings', 'portfolio:calc', 'portfolio:budget', 'portfolio:transactions', 'fb:last_seen', 'fb:last_sync', 'fb:display_name', 'fb:avatar'];
     KEYS.forEach(k => {
       try {
         localStorage.removeItem(k);
       } catch (e) {}
     });
     await sb.auth.signOut();
+  }
+  function handleAvatarFile(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      setProfileErr('Afbeelding mag maximaal 2MB zijn.');
+      return;
+    }
+    setAvatarUploading(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      // Sla op als base64 in localStorage (max ~1.5MB na base64 encoding)
+      try {
+        localStorage.setItem('fb:avatar', dataUrl);
+        setAvatarUrl(dataUrl);
+        setProfileMsg('Profielfoto opgeslagen!');
+        setTimeout(() => setProfileMsg(''), 3000);
+      } catch (e) {
+        setProfileErr('Foto te groot om op te slaan — kies een kleinere afbeelding.');
+      }
+      setAvatarUploading(false);
+    };
+    reader.onerror = () => {
+      setProfileErr('Afbeelding kon niet worden gelezen.');
+      setAvatarUploading(false);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  }
+  function removeAvatar() {
+    try {
+      localStorage.removeItem('fb:avatar');
+    } catch (e) {}
+    setAvatarUrl('');
   }
   function saveApiKey() {
     try {
@@ -3996,8 +4337,20 @@ function AccountTab() {
   }, "Mijn account"), /*#__PURE__*/React.createElement("div", {
     className: "acc-grid"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "acc-avatar"
-  }, (displayName || email || '?')[0].toUpperCase()), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "acc-avatar",
+    title: "Klik om foto te wijzigen"
+  }, avatarUrl ? /*#__PURE__*/React.createElement("img", {
+    src: avatarUrl,
+    alt: "Profielfoto"
+  }) : /*#__PURE__*/React.createElement("span", null, (displayName || email || '?')[0].toUpperCase()), /*#__PURE__*/React.createElement("div", {
+    className: "acc-avatar-overlay"
+  }, "📷"), /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: "image/jpeg,image/png,image/webp,image/gif",
+    onChange: handleAvatarFile,
+    disabled: avatarUploading,
+    title: "Profielfoto wijzigen"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "acc-name"
   }, displayName || '(geen naam ingesteld)'), /*#__PURE__*/React.createElement("div", {
     className: "acc-email"
@@ -4011,7 +4364,23 @@ function AccountTab() {
     style: {
       marginTop: 3
     }
-  }, "Laatste sync: ", lastSync))))), /*#__PURE__*/React.createElement("div", {
+  }, "Laatste sync: ", lastSync)), avatarUrl && /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      marginTop: 8,
+      fontSize: 11,
+      padding: '4px 10px',
+      color: 'var(--loss)',
+      borderColor: 'var(--loss)'
+    },
+    onClick: removeAvatar
+  }, "Foto verwijderen"), avatarUploading && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)',
+      marginTop: 6
+    }
+  }, "Uploaden...")))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("h3", null, "Profiel bewerken"), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -4221,7 +4590,6 @@ function Donut({
     }
   }, "POSITIES"));
 }
-
 function getAnthropicKey(){try{return localStorage.getItem('fb:anthropic_key')||'';}catch(e){return '';}}
 function saveAnthropicKey(k){try{localStorage.setItem('fb:anthropic_key',k);}catch(e){}}
 let _sb=null;
