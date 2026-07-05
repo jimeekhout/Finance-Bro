@@ -3920,7 +3920,10 @@ function AccountTab() {
     setSaving(false);
   }
   async function logout() {
-    if (sb) await sb.auth.signOut();
+    if (!sb) return;
+    var KEYS = ['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions','fb:last_seen','fb:last_sync','fb:display_name'];
+    KEYS.forEach(function(k){ try { localStorage.removeItem(k); } catch(e){} });
+    await sb.auth.signOut();
   }
   function saveApiKey() {
     try {
