@@ -1,0 +1,4318 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Finance Bro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #11141B; color: #ECEAE3; }
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+.pf-root{
+  --bg:#11141B; --bg2:#0C0F15; --surface:#1A1F2A; --surface2:#232938;
+  --line:#2A3140; --line2:#3A4357;
+  --ink:#ECEAE3; --muted:#8B92A2; --faint:#5C6472;
+  --gain:#79C7A0; --loss:#E2917E; --brass:#CBA135; --brass-dim:#8C7126;
+  font-family:'Inter',system-ui,sans-serif;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(203,161,53,.06), transparent 60%),
+    var(--bg);
+  color:var(--ink);
+  min-height:100vh; width:100%;
+  -webkit-font-smoothing:antialiased;
+}
+.pf-wrap{ max-width:1080px; margin:0 auto; padding:28px 22px 64px; }
+
+/* header + ticker tape */
+.pf-top{ display:flex; align-items:baseline; justify-content:space-between; gap:18px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:16px; }
+.pf-brand{ font-family:'Fraunces',serif; font-weight:600; font-size:25px; letter-spacing:.04em; }
+.pf-brand .dot{ color:var(--brass); }
+.pf-sub{ font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--faint); }
+.pf-asof{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--muted); }
+
+/* portfolio tabs */
+.tabs{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:16px; flex-wrap:wrap; }
+.tabs-list{ display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+.tab{ display:inline-flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--line); color:var(--muted); border-radius:9px; padding:8px 13px; font-size:13px; font-family:'Inter',sans-serif; cursor:pointer; transition:.14s; }
+.tab:hover{ color:var(--ink); border-color:var(--line2); }
+.tab.on{ background:var(--surface2); border-color:var(--brass-dim); color:var(--ink); }
+.tab .tab-n{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--faint); background:var(--bg2); border-radius:20px; padding:1px 7px; }
+.tab.on .tab-n{ color:var(--brass); }
+.tab.add{ color:var(--faint); border-style:dashed; }
+.tab.add:hover{ color:var(--brass); border-color:var(--brass-dim); }
+.tab-rename{ background:var(--bg2); border:1px solid var(--brass); border-radius:9px; color:var(--ink); padding:8px 12px; font-size:13px; font-family:'Inter',sans-serif; outline:none; min-width:140px; }
+.tabs-tools{ display:flex; align-items:center; gap:5px; }
+.ttool{ background:none; border:1px solid var(--line); color:var(--faint); cursor:pointer; font-size:13px; line-height:1; padding:7px 9px; border-radius:8px; transition:.14s; }
+.ttool:hover{ color:var(--ink); border-color:var(--line2); }
+.ttool.danger{ color:var(--loss); border-color:var(--loss); }
+.ttool.del{ font-size:12px; }
+.ttool.del:hover{ color:var(--loss); border-color:var(--loss); }
+.ttool.on-acc{ color:var(--brass); border-color:var(--brass-dim); background:rgba(203,161,53,.08); }
+.del-confirm{ display:inline-flex; align-items:center; gap:5px; font-size:12px; color:var(--muted); font-family:'IBM Plex Mono',monospace; }
+.tab.calc-tab{ border-color:var(--line2); }
+.tab-sep{ width:1px; height:22px; background:var(--line2); margin:0 4px; flex:none; }
+
+/* calculator tab */
+.calc-wrap{ margin-top:20px; display:flex; flex-direction:column; gap:16px; }
+.calc-section{ background:linear-gradient(180deg,var(--surface),var(--bg2)); border:1px solid var(--line); border-radius:12px; padding:22px 24px; }
+.calc-section h3{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--faint); margin:0 0 18px; font-weight:600; }
+.calc-title{ font-family:'Fraunces',serif; font-size:20px; font-weight:600; margin-bottom:8px; }
+.calc-desc{ font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:20px; }
+.calc-empty{ text-align:center; padding:40px 20px; color:var(--muted); font-size:13.5px; }
+.loan-phases{ display:flex; flex-direction:column; gap:14px; }
+.loan-phase{ display:grid; grid-template-columns:12px 1fr 140px; gap:14px; align-items:end; }
+.phase-dot{ width:10px; height:10px; border-radius:50%; margin-bottom:12px; flex:none; }
+.loan-pillars{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+.loan-pill{ background:linear-gradient(180deg,var(--surface),var(--bg2)); padding:18px 20px; }
+.loan-big{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:26px; margin-top:6px; line-height:1; }
+@media(max-width:680px){ .loan-pillars{ grid-template-columns:1fr 1fr; } .loan-phase{ grid-template-columns:12px 1fr; } }
+.loan-table{ overflow-x:auto; }
+.loan-th, .loan-tr{ display:grid; grid-template-columns:80px repeat(4, 1fr); gap:8px; padding:10px 4px; font-size:12.5px; border-bottom:1px solid var(--line); }
+.loan-th{ font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); }
+.loan-tr:last-child{ border-bottom:none; }
+.loan-tr:hover{ background:var(--surface); }
+.num-mono{ font-family:'IBM Plex Mono',monospace; text-align:right; }
+.port-rate-row{ display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:16px; }
+.port-rate-lbl{ font-size:13px; color:var(--muted); }
+.port-rate-pct{ font-size:13px; color:var(--muted); }
+.port-rate-cur{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--brass); margin-left:4px; }
+.port-rate-tip{ font-size:12px; color:var(--faint); font-style:italic; }
+.cross-banner{ margin-bottom:14px; padding:12px 16px; border-radius:9px; border:1px solid var(--brass-dim); background:rgba(203,161,53,.08); font-size:13px; color:var(--ink); line-height:1.5; }
+.cross-banner b{ color:var(--brass); }
+.cross-banner.warn{ border-color:var(--loss); background:rgba(226,145,126,.07); }
+.cross-banner.warn b{ color:var(--loss); }
+
+/* account tab */
+.acc-grid{ display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+.acc-avatar{ width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,var(--brass),var(--brass-dim)); display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-size:28px; font-weight:600; color:#1A1206; flex:none; }
+.acc-name{ font-size:18px; font-weight:600; color:var(--ink); margin-bottom:4px; }
+.acc-email{ font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--muted); margin-bottom:4px; }
+.acc-joined{ font-size:12px; color:var(--faint); }
+
+/* budget tab */
+.budget-income{ display:grid; grid-template-columns:1fr auto; gap:16px; align-items:end; margin-bottom:20px; }
+@media(max-width:680px){ .budget-income{ grid-template-columns:1fr; } }
+.budget-net-box{ background:var(--bg2); border:1px solid var(--line); border-radius:10px; padding:14px 18px; text-align:right; }
+.budget-net-big{ font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:600; color:var(--gain); }
+.tax-breakdown{ margin-top:4px; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+.tax-title{ font-size:10.5px; letter-spacing:.15em; text-transform:uppercase; color:var(--faint); padding:11px 14px; background:var(--bg2); border-bottom:1px solid var(--line); }
+.tax-rows{ display:flex; flex-direction:column; }
+.tax-row{ display:grid; grid-template-columns:1fr auto auto; gap:10px; padding:9px 14px; border-bottom:1px solid var(--line); font-size:12.5px; align-items:center; }
+.tax-row:last-child{ border-bottom:none; }
+.tax-row.korting{ background:rgba(121,199,160,.04); }
+.tax-row.total{ background:var(--bg2); font-weight:600; font-size:13px; }
+.tax-label{ color:var(--muted); }
+.tax-base{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--faint); text-align:right; }
+.tax-amt{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; text-align:right; min-width:90px; color:var(--ink); }
+.budget-cats{ display:flex; flex-direction:column; gap:8px; }
+.budget-cat-h{ display:grid; grid-template-columns:1fr 140px 60px 32px; gap:10px; font-size:10.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); padding:0 2px 6px; }
+.budget-cat-r{ display:grid; grid-template-columns:1fr 140px 60px 32px; gap:10px; align-items:center; }
+.fixed-btn{ font-family:'IBM Plex Mono',monospace; font-size:11px; padding:6px 9px; border-radius:7px; border:1px solid var(--line2); background:var(--surface); color:var(--faint); cursor:pointer; }
+.fixed-btn.on{ border-color:var(--brass-dim); color:var(--brass); background:rgba(203,161,53,.08); }
+@media(max-width:680px){ .budget-cat-h{ display:none; } .budget-cat-r{ grid-template-columns:1fr 100px 50px 28px; } }
+.budget-month-bar{ display:flex; align-items:center; gap:8px; margin-top:20px; margin-bottom:4px; flex-wrap:wrap; }
+.budget-month-sel{ flex:1; min-width:180px; font-size:14px; padding:9px 12px; }
+
+/* transactions tab */
+.trans-bar{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:20px; margin-bottom:4px; }
+.trans-h{ display:grid; grid-template-columns:90px 1fr 130px 110px 60px; gap:10px; align-items:center; padding:11px 18px; background:var(--bg2); border-bottom:1px solid var(--line); font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--faint); }
+.trans-r{ display:grid; grid-template-columns:90px 1fr 130px 110px 60px; gap:10px; align-items:center; padding:12px 18px; border-bottom:1px solid var(--line); font-size:13.5px; }
+.trans-r:last-child{ border-bottom:none; }
+.trans-r:hover{ background:var(--surface); }
+.th-btn{ cursor:pointer; user-select:none; }
+.th-btn:hover{ color:var(--ink); }
+.cat-chip{ display:inline-block; font-size:11px; padding:3px 9px; border-radius:20px; background:var(--surface2); color:var(--muted); border:1px solid var(--line2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:120px; }
+@media(max-width:680px){ .trans-h{ display:none; } .trans-r{ grid-template-columns:1fr auto; gap:4px 10px; } }
+
+/* budget vs actual bars */
+.bvg-rows{ display:flex; flex-direction:column; gap:10px; }
+.bvg-row{ display:grid; grid-template-columns:140px 1fr 90px 80px 90px; gap:10px; align-items:center; font-size:13px; }
+.bvg-label{ color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bvg-bar-track{ height:8px; background:var(--line); border-radius:4px; overflow:hidden; }
+.bvg-bar{ height:100%; border-radius:4px; transition:width .3s; }
+.bvg-amt{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; text-align:right; }
+.bvg-budget{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--faint); }
+.bvg-diff{ font-family:'IBM Plex Mono',monospace; font-size:12px; text-align:right; }
+@media(max-width:680px){ .bvg-row{ grid-template-columns:1fr auto auto; } .bvg-bar-track{ display:none; } .bvg-budget{ display:none; } }
+
+/* budget tab */
+.budget-income{ display:grid; grid-template-columns:1fr 160px auto; gap:16px; align-items:end; }
+@media(max-width:680px){ .budget-income{ grid-template-columns:1fr 1fr; } }
+.budget-net{ background:var(--bg2); border:1px solid var(--line2); border-radius:10px; padding:12px 14px; }
+.budget-net-val{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:22px; color:var(--gain); margin-top:4px; }
+.budget-net-sub{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--faint); margin-top:3px; }
+.budget-mid{ display:flex; gap:16px; flex-wrap:wrap; }
+.budget-cats{ display:flex; flex-direction:column; gap:6px; }
+.budget-cat-h{ display:grid; grid-template-columns:1fr 110px 34px 28px; gap:8px; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--faint); padding:0 2px 4px; border-bottom:1px solid var(--line); }
+.budget-cat-r{ display:grid; grid-template-columns:1fr 110px 34px 28px; gap:8px; align-items:center; }
+.cat-name-inp{ background:var(--bg2); border:1px solid var(--line2); border-radius:7px; color:var(--ink); padding:8px 10px; font-size:13px; font-family:'Inter',sans-serif; outline:none; }
+.cat-name-inp:focus{ border-color:var(--brass-dim); }
+.cat-amt-inp{ background:var(--bg2); border:1px solid var(--line2); border-radius:7px; color:var(--ink); padding:8px 10px; font-family:'IBM Plex Mono',monospace; font-size:13px; outline:none; text-align:right; }
+.cat-amt-inp:focus{ border-color:var(--brass-dim); }
+.fix-btn{ background:var(--surface2); border:1px solid var(--line2); border-radius:7px; color:var(--faint); cursor:pointer; font-size:12px; font-weight:600; height:36px; transition:.14s; }
+.fix-btn.on{ background:rgba(203,161,53,.15); border-color:var(--brass-dim); color:var(--brass); }
+.budget-total-row{ display:flex; justify-content:space-between; align-items:center; margin-top:14px; padding-top:12px; border-top:1px solid var(--line); font-size:13.5px; font-weight:600; }
+.savings-info{ display:flex; flex-direction:column; gap:8px; margin-top:14px; }
+.savings-row{ display:flex; justify-content:space-between; align-items:center; font-size:13px; padding:6px 0; border-bottom:1px solid var(--line); }
+.savings-row:last-child{ border-bottom:none; font-size:14px; }
+.budget-legend{ display:flex; flex-direction:column; gap:7px; }
+
+.tape{ margin-top:14px; border:1px solid var(--line); border-radius:8px; background:linear-gradient(var(--surface),var(--bg2)); overflow:hidden; height:38px; position:relative; }
+.tape-track{ display:flex; gap:34px; align-items:center; height:100%; white-space:nowrap; padding-left:20px; animation:scroll 38s linear infinite; }
+.tape-item{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--muted); display:inline-flex; gap:9px; align-items:center; }
+.tape-item b{ color:var(--ink); font-weight:600; letter-spacing:.03em; }
+@keyframes scroll{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+@media (prefers-reduced-motion:reduce){ .tape-track{ animation:none; flex-wrap:wrap; white-space:normal; height:auto; padding:8px 20px; } .tape{height:auto;} }
+
+/* hero pillars */
+.pillars{ display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; margin-top:22px; }
+.pillar{ background:linear-gradient(180deg,var(--surface),var(--bg2)); padding:24px 26px; }
+.pillar .lbl{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--faint); }
+.pillar .big{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:38px; letter-spacing:-.01em; margin-top:8px; line-height:1; }
+.pillar .meta{ font-family:'IBM Plex Mono',monospace; font-size:13.5px; margin-top:11px; color:var(--muted); }
+.pillar.income .big{ color:var(--brass); }
+.gain{ color:var(--gain); } .loss{ color:var(--loss); }
+.tri{ font-size:11px; }
+@media (max-width:680px){ .pillars{ grid-template-columns:1fr; } .pillar .big{ font-size:32px; } }
+
+/* mid row */
+.mid{ display:grid; grid-template-columns:300px 1fr; gap:16px; margin-top:16px; }
+@media (max-width:680px){ .mid{ grid-template-columns:1fr; } }
+.card{ background:linear-gradient(180deg,var(--surface),var(--bg2)); border:1px solid var(--line); border-radius:12px; padding:20px; }
+.card h3{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--faint); margin:0 0 16px; font-weight:600; }
+.donut-row{ display:flex; align-items:center; gap:18px; }
+.legend{ display:flex; flex-direction:column; gap:9px; min-width:0; flex:1; }
+.legend-item{ display:flex; align-items:center; gap:9px; font-size:12.5px; min-width:0; }
+.legend-item .sw{ width:9px; height:9px; border-radius:2px; flex:none; }
+.legend-item .nm{ color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.legend-item .pc{ font-family:'IBM Plex Mono',monospace; color:var(--muted); margin-left:auto; }
+
+.statgrid{ display:grid; grid-template-columns:1fr 1fr; gap:14px 22px; }
+.stat .k{ font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--faint); }
+.stat .v{ font-family:'IBM Plex Mono',monospace; font-size:20px; margin-top:5px; }
+
+/* table */
+.holds{ margin-top:16px; border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+.holds-h, .holds-r{ display:grid; grid-template-columns:1.5fr .6fr .85fr .85fr 1fr 1fr 1fr .65fr 60px; gap:9px; align-items:center; padding:13px 16px; }
+.holds-h{ background:var(--bg2); font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--faint); border-bottom:1px solid var(--line); }
+.holds-r{ border-bottom:1px solid var(--line); font-size:13.5px; }
+.holds-r:last-child{ border-bottom:none; }
+.holds-r:hover{ background:var(--surface); }
+.num{ font-family:'IBM Plex Mono',monospace; text-align:right; }
+.tk{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+.tk b{ font-family:'IBM Plex Mono',monospace; font-weight:600; letter-spacing:.04em; }
+.tk span{ font-size:11px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.xbtn{ background:none; border:none; color:var(--faint); cursor:pointer; font-size:16px; line-height:1; padding:4px; border-radius:6px; }
+.xbtn:hover{ color:var(--loss); background:var(--surface2); }
+.xcell{ display:flex; gap:2px; justify-content:flex-end; align-items:center; }
+.xbtn.ebtn{ font-size:13px; }
+.xbtn.ebtn:hover{ color:var(--brass); }
+.editable{ cursor:pointer; }
+.editable .ed-val{ border-bottom:1px dashed var(--line2); padding-bottom:1px; transition:.12s; }
+.editable:hover .ed-val{ color:var(--brass); border-bottom-color:var(--brass); }
+.edit-inp{ width:74px; max-width:100%; background:var(--bg2); border:1px solid var(--brass-dim); border-radius:6px; color:var(--ink); padding:4px 7px; font-family:'IBM Plex Mono',monospace; font-size:13px; text-align:right; outline:none; }
+.edit-inp:focus{ border-color:var(--brass); }
+@media (max-width:680px){
+  .holds-h{ display:none; }
+  .holds-r{ grid-template-columns:1fr auto; gap:6px 10px; }
+  .holds-r > *{ text-align:left; }
+  .holds-r .num::before{ content:attr(data-l); display:block; font-size:9.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); }
+  .holds-r .xcell{ grid-column:2; grid-row:1; }
+}
+
+/* actions / form */
+.actions{ display:flex; gap:10px; margin-top:18px; flex-wrap:wrap; }
+.btn{ font-family:'Inter',sans-serif; font-size:13.5px; font-weight:500; border-radius:9px; padding:11px 18px; cursor:pointer; border:1px solid var(--line2); background:var(--surface2); color:var(--ink); transition:.15s; }
+.btn:hover{ border-color:var(--brass-dim); }
+.btn.primary{ background:var(--brass); color:#1A1206; border-color:var(--brass); font-weight:600; }
+.btn.primary:hover{ filter:brightness(1.07); }
+.btn:disabled{ opacity:.5; cursor:default; }
+
+/* auto-refresh control */
+.auto-ctl{ display:flex; align-items:center; gap:9px; margin-left:auto; flex-wrap:wrap; }
+.switch{ width:38px; height:22px; border-radius:11px; border:1px solid var(--line2); background:var(--surface2); position:relative; cursor:pointer; padding:0; transition:.18s; flex:none; }
+.switch .knob{ position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%; background:var(--faint); transition:.18s; }
+.switch.on{ background:var(--brass-dim); border-color:var(--brass); }
+.switch.on .knob{ left:18px; background:var(--brass); }
+.auto-lbl{ font-size:13px; color:var(--muted); cursor:pointer; user-select:none; }
+.auto-int{ background:var(--bg2); border:1px solid var(--line2); border-radius:8px; color:var(--ink); padding:7px 9px; font-family:'IBM Plex Mono',monospace; font-size:12.5px; outline:none; cursor:pointer; }
+.auto-int:disabled{ opacity:.45; cursor:default; }
+.auto-next{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--faint); }
+@media (max-width:680px){ .auto-ctl{ margin-left:0; width:100%; } }
+.btn .spin{ display:inline-block; width:12px; height:12px; border:2px solid currentColor; border-right-color:transparent; border-radius:50%; animation:sp .7s linear infinite; vertical-align:-1px; margin-right:7px; }
+@keyframes sp{ to{ transform:rotate(360deg); } }
+
+.form{ margin-top:14px; border:1px dashed var(--line2); border-radius:12px; padding:18px; display:flex; flex-direction:column; gap:14px; }
+.form-head{ font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--brass); font-weight:600; }
+.form-row{ display:grid; grid-template-columns:.9fr 1fr auto; gap:12px; align-items:end; }
+@media (max-width:680px){ .form-row{ grid-template-columns:1fr 1fr; } }
+
+/* company search */
+.search-wrap{ position:relative; }
+.results{ position:absolute; top:100%; left:0; right:0; margin-top:6px; background:var(--surface2); border:1px solid var(--line2); border-radius:10px; overflow:hidden; z-index:30; box-shadow:0 18px 44px rgba(0,0,0,.5); max-height:300px; overflow-y:auto; }
+.result{ display:flex; align-items:center; gap:12px; padding:11px 14px; cursor:pointer; border-bottom:1px solid var(--line); }
+.result:last-child{ border-bottom:none; }
+.result:hover{ background:var(--surface); }
+.result .r-main{ min-width:0; flex:1; display:flex; flex-direction:column; gap:2px; }
+.result .r-name{ font-size:13.5px; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.result .r-ex{ font-size:11px; color:var(--faint); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.result .r-tk{ font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:12.5px; color:var(--brass); flex:none; }
+.results-state{ padding:12px 14px; font-size:12px; color:var(--muted); font-family:'IBM Plex Mono',monospace; display:flex; align-items:center; }
+.results-state .spin{ width:11px; height:11px; }
+.picked{ margin-top:9px; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); display:flex; align-items:center; gap:7px; }
+.picked b{ color:var(--brass); }
+.picked .x{ cursor:pointer; color:var(--faint); font-size:15px; margin-left:2px; }
+.picked .x:hover{ color:var(--loss); }
+.fld{ display:flex; flex-direction:column; gap:6px; }
+.fld label{ font-size:10.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--faint); }
+.fld input{ background:var(--bg2); border:1px solid var(--line2); border-radius:8px; color:var(--ink); padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:13.5px; outline:none; }
+.fld input:focus{ border-color:var(--brass-dim); }
+.fld input::placeholder{ color:var(--faint); }
+
+/* dividend calendar */
+.cal-card{ margin-top:16px; }
+.cal-bars{ display:flex; align-items:flex-end; gap:6px; height:150px; }
+.cal-col{ flex:1; display:flex; flex-direction:column; align-items:center; height:100%; }
+.cal-val{ font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--brass); height:14px; line-height:14px; }
+.cal-bartrack{ flex:1; width:100%; display:flex; align-items:flex-end; justify-content:center; }
+.cal-bar{ width:72%; max-width:34px; background:linear-gradient(180deg,var(--brass),var(--brass-dim)); border-radius:4px 4px 0 0; transition:height .35s cubic-bezier(.2,.7,.2,1), filter .15s; }
+.cal-bar.on{ filter:brightness(1.18); }
+.cal-m{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--faint); margin-top:8px; text-transform:uppercase; letter-spacing:.04em; transition:.15s; }
+.cal-m.on{ color:var(--ink); }
+.cal-detail{ margin-top:15px; padding-top:13px; border-top:1px solid var(--line); font-family:'IBM Plex Mono',monospace; font-size:12.5px; color:var(--muted); min-height:18px; }
+.cal-detail b{ color:var(--ink); }
+@media (prefers-reduced-motion:reduce){ .cal-bar{ transition:none; } }
+
+.empty{ text-align:center; padding:48px 20px; color:var(--muted); }
+.empty p{ margin:0 0 18px; font-size:14px; }
+.quick{ display:flex; gap:9px; justify-content:center; flex-wrap:wrap; }
+.chip{ font-family:'IBM Plex Mono',monospace; font-size:12.5px; padding:7px 13px; border:1px solid var(--line2); border-radius:20px; background:var(--surface); color:var(--muted); cursor:pointer; }
+.chip:hover{ color:var(--ink); border-color:var(--brass-dim); }
+.chip.imp{ color:var(--brass); border-color:var(--brass-dim); }
+.chip.imp:hover{ color:#1A1206; background:var(--brass); border-color:var(--brass); }
+
+/* import panel */
+.import{ margin-top:14px; border:1px solid var(--line2); border-radius:12px; padding:18px; background:linear-gradient(180deg,var(--surface),var(--bg2)); }
+.import h4{ margin:0 0 10px; font-size:13px; font-weight:600; letter-spacing:.02em; }
+.import ol{ margin:0 0 14px; padding-left:20px; color:var(--muted); font-size:12.5px; line-height:1.8; }
+.import ol b{ color:var(--ink); font-weight:500; }
+.import-row{ display:flex; gap:12px; flex-wrap:wrap; align-items:center; }
+.import textarea{ width:100%; box-sizing:border-box; min-height:88px; margin-top:12px; background:var(--bg2); border:1px solid var(--line2); border-radius:8px; color:var(--ink); padding:11px 13px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; line-height:1.5; resize:vertical; outline:none; }
+.import textarea:focus{ border-color:var(--brass-dim); }
+.import textarea::placeholder{ color:var(--faint); }
+.file-btn{ position:relative; overflow:hidden; display:inline-flex; align-items:center; gap:7px; }
+.file-btn input{ position:absolute; inset:0; width:100%; height:100%; opacity:0; cursor:pointer; }
+.import-msg{ margin-top:12px; font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--muted); line-height:1.5; }
+.key-inp{ flex:1; min-width:200px; background:var(--bg2); border:1px solid var(--line2); border-radius:8px; color:var(--ink); padding:10px 12px; font-family:'IBM Plex Mono',monospace; font-size:13px; outline:none; }
+.key-inp:focus{ border-color:var(--brass-dim); }
+.live-dot{ margin-left:10px; color:var(--gain); font-size:10.5px; letter-spacing:.04em; }
+.rt-note{ margin:0 0 14px; padding:11px 13px; border:1px solid var(--brass-dim); border-radius:8px; background:rgba(203,161,53,.06); font-size:12px; line-height:1.6; color:var(--muted); }
+.err{ margin-top:12px; font-size:12.5px; color:var(--loss); font-family:'IBM Plex Mono',monospace; }
+.foot{ margin-top:22px; font-size:11px; color:var(--faint); line-height:1.6; }
+
+
+.setup-overlay{position:fixed;inset:0;background:#0C0F15;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:'Inter',system-ui,sans-serif;overflow-y:auto;}
+.setup-box{background:#1A1F2A;border:1px solid #2A3140;border-radius:16px;padding:36px 32px;max-width:440px;width:90%;text-align:center;margin:auto;}
+.setup-logo{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:600;color:#ECEAE3;margin-bottom:5px;letter-spacing:.04em;}
+.setup-logo span{color:#CBA135;}
+.setup-label{display:block;text-align:left;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#5C6472;margin-bottom:7px;}
+.setup-input{width:100%;background:#0C0F15;border:1px solid #3A4357;border-radius:9px;color:#ECEAE3;padding:12px 13px;font-family:'IBM Plex Mono',monospace;font-size:13.5px;outline:none;margin-bottom:14px;}
+.setup-input:focus{border-color:#8C7126;}
+.setup-btn{width:100%;background:#CBA135;color:#1A1206;border:none;border-radius:9px;padding:13px;font-size:14.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:8px;}
+.setup-btn:hover{filter:brightness(1.08);}
+.setup-btn:disabled{opacity:.6;cursor:default;}
+.setup-err{color:#E2917E;font-size:12px;font-family:'IBM Plex Mono',monospace;margin:4px 0 10px;min-height:16px;text-align:left;}
+.auth-tabs{display:flex;gap:0;margin-bottom:22px;border:1px solid #2A3140;border-radius:9px;overflow:hidden;}
+.auth-tab{flex:1;padding:10px;font-size:13.5px;cursor:pointer;background:#0C0F15;color:#8B92A2;border:none;font-family:'Inter',sans-serif;transition:.14s;}
+.auth-tab.on{background:#1A1F2A;color:#ECEAE3;font-weight:600;}
+.forgot-link{font-size:12px;color:#CBA135;cursor:pointer;text-decoration:underline;margin-top:6px;text-align:right;display:block;}
+.user-badge{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted,#8B92A2);font-family:'IBM Plex Mono',monospace;}
+.user-badge b{color:var(--ink,#ECEAE3);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.logout-btn{background:none;border:1px solid var(--line2,#3A4357);color:var(--faint,#5C6472);border-radius:7px;padding:5px 10px;font-size:11.5px;cursor:pointer;font-family:'IBM Plex Mono',monospace;}
+.logout-btn:hover{color:var(--loss,#E2917E);border-color:var(--loss,#E2917E);}
+
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script>
+const {
+  useState,
+  useEffect,
+  useMemo,
+  useRef
+} = React;
+
+/* ============================================================
+   PORTEFEUILLE — Investment portfolio dashboard
+   Live koersen + dividend via de ingebouwde Claude web-search API.
+
+   ============================================================ */
+
+const CSS = null;
+const SEG = ["#CBA135", "#79C7A0", "#6EA8D8", "#C98AC0", "#E2917E", "#9AA0AE", "#B5915A", "#7FB8A0"];
+const MONTHS = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
+const STORE_KEY = "portfolio:holdings";
+const SETTINGS_KEY = "portfolio:settings";
+const META_KEY = "portfolio:meta";
+const CALC_KEY = "portfolio:calc";
+const BUDGET_KEY = "portfolio:budget";
+const TRANS_KEY = "portfolio:transactions";
+const DEFAULT_MONTH_BUDGET = {
+  salaryGross: "",
+  categories: [{
+    id: "c1",
+    label: "Huur / hypotheek",
+    amount: "",
+    fixed: true
+  }, {
+    id: "c2",
+    label: "Boodschappen",
+    amount: "",
+    fixed: false
+  }, {
+    id: "c3",
+    label: "Verzekeringen",
+    amount: "",
+    fixed: true
+  }, {
+    id: "c4",
+    label: "Abonnementen",
+    amount: "",
+    fixed: true
+  }, {
+    id: "c5",
+    label: "Transport",
+    amount: "",
+    fixed: false
+  }, {
+    id: "c6",
+    label: "Uit eten / vrije tijd",
+    amount: "",
+    fixed: false
+  }],
+  savingsTarget: ""
+};
+const DEFAULT_BUDGET = {
+  months: {},
+  activeMonth: new Date().toISOString().slice(0, 7)
+};
+const uid = () => Math.random().toString(36).slice(2, 9);
+const normHoldings = arr => (Array.isArray(arr) ? arr : []).map(h => ({
+  ...h,
+  currency: h.currency || "EUR",
+  fxToEur: h.fxToEur != null ? h.fxToEur : 1,
+  priceNative: h.priceNative != null ? h.priceNative : h.priceEur != null ? h.priceEur : null
+}));
+const eur = n => n == null || isNaN(n) ? "—" : "€ " + n.toLocaleString("nl-NL", {
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2
+});
+const pct = n => n == null || isNaN(n) ? "—" : (n >= 0 ? "+" : "") + n.toFixed(2) + "%";
+const CUR = {
+  EUR: "€",
+  USD: "$",
+  GBP: "£",
+  GBX: "p",
+  CHF: "CHF",
+  JPY: "¥",
+  CAD: "C$",
+  AUD: "A$",
+  HKD: "HK$",
+  SEK: "kr",
+  NOK: "kr",
+  DKK: "kr"
+};
+const curSym = c => CUR[c] || c || "€";
+const fmtCur = (n, c) => {
+  if (n == null || isNaN(n)) return "—";
+  c = c || "EUR";
+  return curSym(c) + " " + n.toLocaleString("nl-NL", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+};
+
+/* Bekende Nederlandse/Europese tickers die afwijken van hun gangbare naam */
+const NL_ALIAS = {
+  "ASR": {
+    ticker: "ASRNL",
+    name: "ASR Nederland NV",
+    currency: "EUR",
+    isin: "NL0011872643"
+  },
+  "ASRNL": {
+    ticker: "ASRNL",
+    name: "ASR Nederland NV",
+    currency: "EUR",
+    isin: "NL0011872643"
+  },
+  "AEGON": {
+    ticker: "AGN",
+    name: "Aegon NV",
+    currency: "EUR",
+    isin: "NL0000303709"
+  },
+  "ING": {
+    ticker: "INGA",
+    name: "ING Groep NV",
+    currency: "EUR",
+    isin: "NL0011821202"
+  },
+  "SHELL": {
+    ticker: "SHEL",
+    name: "Shell plc",
+    currency: "GBP",
+    isin: "GB00BP6MXD84"
+  },
+  "ABN": {
+    ticker: "ABN",
+    name: "ABN AMRO Bank NV",
+    currency: "EUR",
+    isin: "NL0011540547"
+  },
+  "ABNAMRO": {
+    ticker: "ABN",
+    name: "ABN AMRO Bank NV",
+    currency: "EUR",
+    isin: "NL0011540547"
+  },
+  "NN": {
+    ticker: "NN",
+    name: "NN Group NV",
+    currency: "EUR",
+    isin: "NL0010773842"
+  },
+  "HEINEKEN": {
+    ticker: "HEIA",
+    name: "Heineken NV",
+    currency: "EUR",
+    isin: "NL0000009165"
+  },
+  "UNILEVER": {
+    ticker: "UNA",
+    name: "Unilever NV",
+    currency: "EUR",
+    isin: "GB00B10RZP78"
+  },
+  "PHILIPS": {
+    ticker: "PHIA",
+    name: "Philips NV",
+    currency: "EUR",
+    isin: "NL0000009538"
+  },
+  "WOLTERS": {
+    ticker: "WKL",
+    name: "Wolters Kluwer NV",
+    currency: "EUR",
+    isin: "NL0000395903"
+  },
+  "BESI": {
+    ticker: "BESI",
+    name: "BE Semiconductor Industries NV",
+    currency: "EUR",
+    isin: "NL0000339760"
+  },
+  "RANDSTAD": {
+    ticker: "RAND",
+    name: "Randstad NV",
+    currency: "EUR",
+    isin: "NL0000379121"
+  },
+  "AKZO": {
+    ticker: "AKZA",
+    name: "Akzo Nobel NV",
+    currency: "EUR",
+    isin: "NL0013267909"
+  },
+  "ARCELORMITTAL": {
+    ticker: "MT",
+    name: "ArcelorMittal SA",
+    currency: "EUR",
+    isin: "LU1598757687"
+  },
+  "JUST EAT": {
+    ticker: "TKWY",
+    name: "Just Eat Takeaway.com NV",
+    currency: "EUR",
+    isin: "NL0012015705"
+  },
+  "IMCD": {
+    ticker: "IMCD",
+    name: "IMCD NV",
+    currency: "EUR",
+    isin: "NL0010801007"
+  },
+  "FLOW TRADERS": {
+    ticker: "FLOW",
+    name: "Flow Traders NV",
+    currency: "EUR",
+    isin: "NL0011675916"
+  },
+  "ADYEN": {
+    ticker: "ADYEN",
+    name: "Adyen NV",
+    currency: "EUR",
+    isin: "NL0012969182"
+  }
+};
+const SEEDS = [{
+  ticker: "VWRL",
+  name: "Vanguard FTSE All-World",
+  currency: "EUR",
+  shares: 40,
+  avgCost: 105.2
+}, {
+  ticker: "ASML",
+  name: "ASML Holding",
+  currency: "EUR",
+  shares: 5,
+  avgCost: 620.0
+}, {
+  ticker: "SHEL",
+  name: "Shell plc",
+  currency: "EUR",
+  shares: 60,
+  avgCost: 28.4
+}];
+function PortfolioDashboard() {
+  const [portfolios, setPortfolios] = useState([]);
+  const [activeId, setActiveId] = useState(null);
+  const [renaming, setRenaming] = useState(false);
+  const [renameVal, setRenameVal] = useState("");
+  const [confirmDel, setConfirmDel] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+  const activePortfolio = portfolios.find(p => p.id === activeId) || portfolios[0] || null;
+  const holdings = activePortfolio ? activePortfolio.holdings : [];
+  const setHoldings = updater => {
+    setPortfolios(prev => prev.map(p => p.id === activeId ? {
+      ...p,
+      holdings: typeof updater === "function" ? updater(p.holdings) : updater
+    } : p));
+  };
+  const [refreshing, setRefreshing] = useState(false);
+  const [asOf, setAsOf] = useState(null);
+  const [error, setError] = useState("");
+  const [showForm, setShowForm] = useState(false);
+  const [hoverMonth, setHoverMonth] = useState(null);
+  const [showImport, setShowImport] = useState(false);
+  const [importText, setImportText] = useState("");
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
+  const [noResults, setNoResults] = useState(false);
+  const [selected, setSelected] = useState(null);
+  const searchSeq = useRef(0);
+  const [editId, setEditId] = useState(null);
+  const [editField, setEditField] = useState(null);
+  const [editVal, setEditVal] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [auto, setAuto] = useState(false);
+  const [intervalMin, setIntervalMin] = useState(15);
+  const [apiKey, setApiKey] = useState("");
+  const [showRt, setShowRt] = useState(false);
+  const [activeTab, setActiveTab] = useState("portfolio"); // "portfolio" | "calc"
+  const [loan, setLoan] = useState({
+    phases: [{
+      label: "Fase 1",
+      principal: "",
+      rate: ""
+    }, {
+      label: "Fase 2",
+      principal: "",
+      rate: ""
+    }, {
+      label: "Fase 3",
+      principal: "",
+      rate: ""
+    }],
+    years: 10
+  });
+  const [portRate, setPortRate] = useState("7");
+  const [budget, setBudget] = useState(DEFAULT_BUDGET);
+  const [transactions, setTransactions] = useState([]);
+  const [rtMsg, setRtMsg] = useState("");
+  const [form, setForm] = useState({
+    ticker: "",
+    shares: "",
+    avgCost: "",
+    buyDate: "",
+    divReceived: ""
+  });
+  const didInit = useRef(false);
+
+  /* load portfolios + settings (migrate from single-portfolio store) */
+  useEffect(() => {
+    (async () => {
+      let meta = null;
+      try {
+        const rm = function () {
+          try {
+            var _v = localStorage.getItem(META_KEY);
+            return _v != null ? {
+              value: _v
+            } : null;
+          } catch (e) {
+            return null;
+          }
+        }();
+        if (rm && rm.value) meta = JSON.parse(rm.value);
+      } catch (e) {/* none yet */}
+      if (meta && Array.isArray(meta.portfolios) && meta.portfolios.length) {
+        const ps = meta.portfolios.map(p => ({
+          id: p.id || uid(),
+          name: p.name || "Portefeuille",
+          holdings: normHoldings(p.holdings)
+        }));
+        setPortfolios(ps);
+        setActiveId(meta.activeId && ps.some(p => p.id === meta.activeId) ? meta.activeId : ps[0].id);
+      } else {
+        let migrated = [];
+        try {
+          const r = function () {
+            try {
+              var _v = localStorage.getItem(STORE_KEY);
+              return _v != null ? {
+                value: _v
+              } : null;
+            } catch (e) {
+              return null;
+            }
+          }();
+          if (r && r.value) migrated = normHoldings(JSON.parse(r.value));
+        } catch (e) {/* none */}
+        const id = uid();
+        setPortfolios([{
+          id,
+          name: "Mijn portefeuille",
+          holdings: migrated
+        }]);
+        setActiveId(id);
+      }
+      try {
+        const rs = function () {
+          try {
+            var _v = localStorage.getItem(SETTINGS_KEY);
+            return _v != null ? {
+              value: _v
+            } : null;
+          } catch (e) {
+            return null;
+          }
+        }();
+        if (rs && rs.value) {
+          const st = JSON.parse(rs.value);
+          setAuto(!!st.auto);
+          if (st.intervalMin) setIntervalMin(st.intervalMin);
+          if (st.apiKey) setApiKey(st.apiKey);
+        }
+      } catch (e) {/* no saved settings yet — fine */}
+      try {
+        const rc = function () {
+          try {
+            var _v = localStorage.getItem(CALC_KEY);
+            return _v != null ? {
+              value: _v
+            } : null;
+          } catch (e) {
+            return null;
+          }
+        }();
+        if (rc && rc.value) {
+          const cd = JSON.parse(rc.value);
+          if (cd.loan) setLoan(cd.loan);
+          if (cd.portRate) setPortRate(cd.portRate);
+        }
+      } catch (e) {/* no saved calc data yet */}
+      try {
+        const rb = function () {
+          try {
+            var _v = localStorage.getItem(BUDGET_KEY);
+            return _v != null ? {
+              value: _v
+            } : null;
+          } catch (e) {
+            return null;
+          }
+        }();
+        if (rb && rb.value) {
+          const bd = JSON.parse(rb.value);
+          if (bd) {
+            // migrate old single-month format
+            if (bd.salaryGross !== undefined || bd.categories !== undefined) {
+              const month = new Date().toISOString().slice(0, 7);
+              setBudget({
+                months: {
+                  [month]: {
+                    salaryGross: bd.salaryGross || "",
+                    categories: bd.categories || DEFAULT_MONTH_BUDGET.categories,
+                    savingsTarget: bd.savingsTarget || ""
+                  }
+                },
+                activeMonth: month
+              });
+            } else {
+              setBudget(prev => ({
+                ...prev,
+                ...bd
+              }));
+            }
+          }
+        }
+      } catch (e) {/* no saved budget yet */}
+      try {
+        const rt = function () {
+          try {
+            var _v = localStorage.getItem(TRANS_KEY);
+            return _v != null ? {
+              value: _v
+            } : null;
+          } catch (e) {
+            return null;
+          }
+        }();
+        if (rt && rt.value) setTransactions(JSON.parse(rt.value));
+      } catch (e) {/* no transactions yet */}
+      setLoaded(true);
+    })();
+  }, []);
+
+  /* persist portfolios on change */
+  useEffect(() => {
+    if (!loaded) return;
+    if (!didInit.current) {
+      didInit.current = true;
+      return;
+    }
+    (function () {
+      try {
+        localStorage.setItem(META_KEY, JSON.stringify({
+          portfolios,
+          activeId
+        }));
+      } catch (e) {}
+    })();
+  }, [portfolios, activeId, loaded]);
+
+  /* persist settings on change */
+  useEffect(() => {
+    if (!loaded) return;
+    (function () {
+      try {
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+          auto,
+          intervalMin,
+          apiKey
+        }));
+      } catch (e) {}
+    })();
+  }, [auto, intervalMin, apiKey, loaded]);
+
+  /* persist calculator data on change */
+  useEffect(() => {
+    if (!loaded) return;
+    (function () {
+      try {
+        localStorage.setItem(CALC_KEY, JSON.stringify({
+          loan,
+          portRate
+        }));
+      } catch (e) {}
+    })();
+  }, [loan, portRate, loaded]);
+
+  /* persist budget on change */
+  useEffect(() => {
+    if (!loaded) return;
+    (function () {
+      try {
+        localStorage.setItem(BUDGET_KEY, JSON.stringify(budget));
+      } catch (e) {}
+    })();
+  }, [budget, loaded]);
+
+  /* persist transactions on change */
+  useEffect(() => {
+    if (!loaded) return;
+    (function () {
+      try {
+        localStorage.setItem(TRANS_KEY, JSON.stringify(transactions));
+      } catch (e) {}
+    })();
+  }, [transactions, loaded]);
+
+  /* open add form automatically when portfolio is empty */
+  useEffect(() => {
+    if (!loaded) return;
+    if (holdings.length === 0) {
+      setShowForm(true);
+      setShowImport(false);
+    } else setShowForm(false);
+  }, [activeId, loaded]);
+
+  /* periodic auto-refresh */
+  const tickerKey = holdings.map(h => h.ticker).join(",");
+  useEffect(() => {
+    if (!auto || !loaded || !tickerKey) return;
+    const id = setInterval(() => {
+      apiKey ? refreshLive() : refresh();
+    }, intervalMin * 60 * 1000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auto, intervalMin, loaded, tickerKey, apiKey]);
+
+  /* ---- derived totals ---- */
+  const t = useMemo(() => {
+    let mvTotal = 0,
+      cost = 0,
+      income = 0,
+      recTotal = 0;
+    const priced = holdings.map(h => {
+      const fx = h.fxToEur != null ? h.fxToEur : 1;
+      const priceEur = h.priceNative != null ? h.priceNative * fx : null;
+      const mv = priceEur != null ? priceEur * h.shares : null;
+      const c = h.avgCost * h.shares * fx;
+      const dy = h.dividendYield != null ? h.dividendYield : 0;
+      let recDiv = 0;
+      if (mv != null) {
+        if (h.divReceived != null) recDiv = h.divReceived;else if (h.buyDate) {
+          const yrs = Math.max(0, (Date.now() - Date.parse(h.buyDate)) / (365.25 * 864e5));
+          if (!isNaN(yrs)) recDiv = mv * (dy / 100) * yrs;
+        }
+      }
+      const v = mv != null ? mv + recDiv : null;
+      if (mv != null) {
+        mvTotal += mv;
+        income += mv * dy / 100;
+        recTotal += recDiv;
+      }
+      cost += c;
+      return {
+        ...h,
+        priceEur,
+        mv,
+        recDiv,
+        value: v,
+        cost: c
+      };
+    }).sort((a, b) => a.ticker.localeCompare(b.ticker));
+    const value = mvTotal + recTotal;
+    const gain = value - (priced.some(p => p.value != null) ? cost : 0);
+    const gainPct = cost > 0 && value > 0 ? gain / cost * 100 : null;
+    const yld = mvTotal > 0 ? income / mvTotal * 100 : null;
+    const yldCost = cost > 0 && income > 0 ? income / cost * 100 : null;
+    return {
+      priced,
+      value,
+      mvTotal,
+      recTotal,
+      cost,
+      gain,
+      gainPct,
+      income,
+      yld,
+      yldCost
+    };
+  }, [holdings]);
+  const allocation = useMemo(() => {
+    const items = t.priced.filter(p => p.mv != null && p.mv > 0).sort((a, b) => b.mv - a.mv);
+    const total = items.reduce((s, p) => s + p.mv, 0) || 1;
+    return items.map((p, i) => ({
+      ...p,
+      share: p.mv / total * 100,
+      color: SEG[i % SEG.length]
+    }));
+  }, [t.priced]);
+
+  /* ---- dividend per maand ---- */
+  const cal = useMemo(() => {
+    const months = Array.from({
+      length: 12
+    }, () => ({
+      amt: 0,
+      tickers: []
+    }));
+    let unscheduled = 0;
+    t.priced.forEach(h => {
+      if (h.value == null || !h.dividendYield) return;
+      const annual = h.value * h.dividendYield / 100;
+      const pm = Array.isArray(h.payMonths) ? h.payMonths.filter(m => m >= 1 && m <= 12) : [];
+      if (!pm.length) {
+        unscheduled += annual;
+        return;
+      }
+      const per = annual / pm.length;
+      pm.forEach(m => {
+        months[m - 1].amt += per;
+        months[m - 1].tickers.push(h.ticker);
+      });
+    });
+    const max = Math.max(...months.map(m => m.amt), 0.0001);
+    const total = months.reduce((s, m) => s + m.amt, 0) + unscheduled;
+    const best = months.reduce((bi, m, i, arr) => m.amt > arr[bi].amt ? i : bi, 0);
+    const active = months.filter(m => m.amt > 0).length;
+    return {
+      months,
+      max,
+      total,
+      unscheduled,
+      best,
+      active
+    };
+  }, [t.priced]);
+
+  /* ---- live price fetch via Anthropic API + web search ---- */
+  async function refresh(list = holdings) {
+    if (!list.length) return;
+    setRefreshing(true);
+    setError("");
+    const seen = new Set();
+    const items = list.filter(h => {
+      const k = h.ticker.toUpperCase();
+      if (seen.has(k)) return false;
+      seen.add(k);
+      return true;
+    }).map(h => `- ${h.ticker.toUpperCase()}${h.name ? ` (${h.name})` : ""}${h.currency ? `, valuta ${h.currency}` : ""}${h.isin ? `, ISIN ${h.isin}` : ""}`);
+    const prompt = `Zoek de meest recente beurskoers en de dividendgegevens op voor deze specifieke effecten:\n${items.join("\n")}\n` + `Het zijn aandelen of ETF's, veelal verhandeld op Euronext Amsterdam, NYSE of Nasdaq.\n` + `BELANGRIJK: gebruik exact het opgegeven bedrijf, de valuta en/of de ISIN om tickerverwarring te voorkomen. ` + `Veel symbolen bestaan op meerdere beurzen (bv. "ASM" = ASM International op Euronext Amsterdam in EUR, ` + `NIET Avino Silver in USD). Bij twijfel volgt de opgegeven valuta de juiste notering.\n` + `Geef per effect: ticker (exact zoals opgegeven), name (officiële naam), priceNative (actuele koers in de eigen ` + `handelsvaluta, number), currency (ISO-valutacode van die koers), fxToEur (wisselkoers om 1 eenheid van die ` + `valuta naar euro om te rekenen, number; 1 als de valuta al EUR is), dividendYield (verwacht bruto ` + `dividendrendement in %, number, 0 als geen dividend), en payMonths (maanden van uitkering als array 1-12, leeg [] als geen).\n` + `Antwoord UITSLUITEND met een geldige JSON-array, zonder uitleg, zonder markdown. Formaat:\n` + `[{"ticker":"ASM","name":"ASM International NV","priceNative":630.20,"currency":"EUR","fxToEur":1,"dividendYield":0.5,"payMonths":[5]}]`;
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": getAnthropicKey(),
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true"
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 1000,
+          messages: [{
+            role: "user",
+            content: prompt
+          }]
+        })
+      });
+      const data = await res.json();
+      const text = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("\n");
+      const s = text.indexOf("["),
+        e = text.lastIndexOf("]");
+      if (s === -1 || e === -1) throw new Error("Geen koersdata gevonden in het antwoord.");
+      const quotes = JSON.parse(text.slice(s, e + 1));
+      const byT = {};
+      quotes.forEach(q => {
+        if (q && q.ticker) byT[String(q.ticker).toUpperCase()] = q;
+      });
+      setHoldings(prev => prev.map(h => {
+        const q = byT[h.ticker.toUpperCase()];
+        if (!q) return h;
+        return {
+          ...h,
+          name: h.name || q.name || h.ticker,
+          priceNative: typeof q.priceNative === "number" ? q.priceNative : h.priceNative,
+          currency: q.currency || h.currency || "EUR",
+          fxToEur: typeof q.fxToEur === "number" ? q.fxToEur : h.fxToEur != null ? h.fxToEur : 1,
+          dividendYield: typeof q.dividendYield === "number" ? q.dividendYield : h.dividendYield,
+          payMonths: Array.isArray(q.payMonths) ? q.payMonths : h.payMonths
+        };
+      }));
+      setAsOf(new Date());
+      if (apiKey) await refreshLive(list);
+    } catch (err) {
+      setError("Koersen ophalen lukte niet — probeer het zo nog eens. (" + (err.message || err) + ")");
+    } finally {
+      setRefreshing(false);
+    }
+  }
+
+  /* ---- realtime US quotes via Finnhub (eigen gratis key) ---- */
+  async function fetchQuote(symbol, key) {
+    try {
+      const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${encodeURIComponent(symbol)}&token=${encodeURIComponent(key)}`);
+      if (!r.ok) return null;
+      const d = await r.json();
+      if (typeof d.c === "number" && d.c > 0) return {
+        price: d.c,
+        dayPct: typeof d.dp === "number" ? d.dp : null
+      };
+      return null;
+    } catch {
+      return null;
+    }
+  }
+  async function refreshLive(list = holdings) {
+    if (!apiKey) return;
+    const usd = list.filter(h => (h.currency || "EUR").toUpperCase() === "USD");
+    if (!usd.length) return;
+    const tickers = [...new Set(usd.map(h => h.ticker.toUpperCase()))];
+    const results = {};
+    await Promise.all(tickers.map(async tk => {
+      const q = await fetchQuote(tk, apiKey);
+      if (q) results[tk] = q;
+    }));
+    if (!Object.keys(results).length) return;
+    setHoldings(prev => prev.map(h => {
+      const q = results[h.ticker.toUpperCase()];
+      return q ? {
+        ...h,
+        priceNative: q.price,
+        dayPct: q.dayPct,
+        live: true
+      } : h;
+    }));
+    setAsOf(new Date());
+  }
+  async function testKey() {
+    const key = apiKey.trim();
+    if (!key) {
+      setRtMsg("Vul eerst je Finnhub-key in.");
+      return;
+    }
+    setRtMsg("Key testen…");
+    try {
+      const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=AAPL&token=${encodeURIComponent(key)}`);
+      if (r.status === 401 || r.status === 403) {
+        setRtMsg("Finnhub weigert de key (" + r.status + "). Gebruik je gewone API-key uit het Finnhub-dashboard (niet de sandbox-key) en bevestig eerst je account-e-mail.");
+        return;
+      }
+      if (r.status === 429) {
+        setRtMsg("Te veel aanvragen (429) — de gratis limiet is 60/min. Wacht even en test opnieuw.");
+        return;
+      }
+      if (!r.ok) {
+        setRtMsg("Finnhub antwoordde met status " + r.status + ". Probeer het later opnieuw.");
+        return;
+      }
+      const d = await r.json();
+      if (typeof d.c === "number" && d.c > 0) {
+        setRtMsg("Werkt — realtime koersen actief voor je Amerikaanse posities.");
+        refreshLive();
+      } else {
+        setRtMsg("Verbinding werkt, maar er kwam geen koers terug. Controleer het symbool of probeer later opnieuw.");
+      }
+    } catch (e) {
+      setRtMsg("De aanvraag werd geblokkeerd vóórdat Finnhub kon antwoorden — waarschijnlijk blokkeert deze omgeving (of een adblocker/privacy-extensie) verzoeken naar finnhub.io. Dat ligt niet aan je key.");
+    }
+  }
+
+  /* ---- mutations ---- */
+  function addHolding(h) {
+    const next = [...holdings, {
+      id: uid(),
+      name: "",
+      currency: "EUR",
+      priceNative: null,
+      fxToEur: 1,
+      dividendYield: null,
+      payMonths: null,
+      divReceived: null,
+      buyDate: null,
+      ...h
+    }];
+    setHoldings(next);
+    refresh(next);
+  }
+  function submitForm() {
+    const shares = parseFloat(form.shares);
+    const avgCost = parseFloat(form.avgCost);
+    let pick = selected;
+    if (!pick) {
+      const q = searchQuery.trim().toUpperCase();
+      if (q && q.length <= 6 && !q.includes(" ")) pick = {
+        ticker: q,
+        name: "",
+        isin: null
+      };
+    }
+    if (!pick) {
+      setError("Kies eerst een aandeel of ETF uit de zoekresultaten.");
+      return;
+    }
+    if (!(shares > 0) || !(avgCost >= 0)) {
+      setError("Vul aantal en gemiddelde aankoopkoers in.");
+      return;
+    }
+    setError("");
+    const buyDate = form.buyDate || null;
+    const divReceived = form.divReceived !== "" && form.divReceived != null ? parseFloat(String(form.divReceived).replace(",", ".")) : null;
+    if (editingId) {
+      const orig = holdings.find(h => h.id === editingId);
+      const tickerChanged = orig && orig.ticker.toUpperCase() !== pick.ticker.toUpperCase();
+      const updated = holdings.map(h => h.id === editingId ? {
+        ...h,
+        ticker: pick.ticker.toUpperCase(),
+        name: pick.name || (tickerChanged ? "" : h.name),
+        isin: pick.isin || h.isin,
+        currency: pick.currency || h.currency || "EUR",
+        shares,
+        avgCost,
+        buyDate,
+        divReceived: isNaN(divReceived) ? null : divReceived,
+        ...(tickerChanged ? {
+          priceNative: null,
+          fxToEur: 1,
+          dividendYield: null,
+          payMonths: null
+        } : {})
+      } : h);
+      setHoldings(updated);
+      if (tickerChanged) refresh(updated);
+    } else {
+      addHolding({
+        ticker: pick.ticker.toUpperCase(),
+        name: pick.name || "",
+        isin: pick.isin || null,
+        currency: pick.currency || "EUR",
+        shares,
+        avgCost,
+        buyDate,
+        divReceived: isNaN(divReceived) ? null : divReceived
+      });
+    }
+    setForm({
+      ticker: "",
+      shares: "",
+      avgCost: "",
+      buyDate: "",
+      divReceived: ""
+    });
+    setSelected(null);
+    setSearchQuery("");
+    setSearchResults([]);
+    setEditingId(null);
+    setShowForm(false);
+  }
+  function beginEditHolding(h) {
+    setEditingId(h.id);
+    setSelected({
+      ticker: h.ticker,
+      name: h.name || h.ticker,
+      isin: h.isin || null,
+      currency: h.currency || "EUR"
+    });
+    setSearchQuery(h.name || h.ticker);
+    setSearchResults([]);
+    setNoResults(false);
+    setForm({
+      ticker: "",
+      shares: String(h.shares),
+      avgCost: String(h.avgCost),
+      buyDate: h.buyDate || "",
+      divReceived: h.divReceived != null ? String(h.divReceived) : ""
+    });
+    setShowImport(false);
+    setError("");
+    setShowForm(true);
+  }
+  function toggleForm() {
+    setSelected(null);
+    setSearchQuery("");
+    setSearchResults([]);
+    setEditingId(null);
+    setForm({
+      ticker: "",
+      shares: "",
+      avgCost: "",
+      buyDate: "",
+      divReceived: ""
+    });
+    setError("");
+    setShowForm(s => !s);
+  }
+  function handleImport(data) {
+    if (data.portfolios && Array.isArray(data.portfolios) && data.portfolios.length) {
+      const ps = data.portfolios.map(p => ({
+        id: p.id || uid(),
+        name: p.name || "Portefeuille",
+        holdings: normHoldings(p.holdings || [])
+      }));
+      setPortfolios(ps);
+      setActiveId(ps[0].id);
+    }
+    if (data.loan) setLoan(data.loan);
+    if (data.portRate) setPortRate(data.portRate);
+    if (data.budget) setBudget(prev => ({
+      ...prev,
+      ...data.budget
+    }));
+    if (data.transactions) setTransactions(data.transactions);
+    if (data.settings) {
+      if (data.settings.apiKey) setApiKey(data.settings.apiKey);
+      if (data.settings.intervalMin) setIntervalMin(data.settings.intervalMin);
+    }
+  }
+  function toggleAuto() {
+    const next = !auto;
+    setAuto(next);
+    if (next && holdings.length && !refreshing) refresh();
+  }
+
+  /* ---- portefeuillebeheer ---- */
+  function resetTransient() {
+    setShowForm(false);
+    setShowImport(false);
+    setShowRt(false);
+    setEditingId(null);
+    setEditId(null);
+    setEditField(null);
+    setSelected(null);
+    setSearchQuery("");
+    setSearchResults([]);
+    setForm({
+      ticker: "",
+      shares: "",
+      avgCost: "",
+      buyDate: "",
+      divReceived: ""
+    });
+    setError("");
+    setRenaming(false);
+    setConfirmDel(false);
+    setAsOf(null);
+  }
+  function switchPortfolio(id) {
+    if (id === activeId) return;
+    resetTransient();
+    setActiveId(id);
+  }
+  function newPortfolio() {
+    const base = "Portefeuille";
+    let n = portfolios.length + 1;
+    const names = new Set(portfolios.map(p => p.name));
+    while (names.has(`${base} ${n}`)) n++;
+    const id = uid();
+    setPortfolios(prev => [...prev, {
+      id,
+      name: `${base} ${n}`,
+      holdings: []
+    }]);
+    resetTransient();
+    setActiveId(id);
+  }
+  function startRename() {
+    setRenameVal(activePortfolio ? activePortfolio.name : "");
+    setConfirmDel(false);
+    setRenaming(true);
+  }
+  function commitRename() {
+    const nm = renameVal.trim();
+    if (nm) setPortfolios(prev => prev.map(p => p.id === activeId ? {
+      ...p,
+      name: nm
+    } : p));
+    setRenaming(false);
+  }
+  function deletePortfolio() {
+    if (portfolios.length <= 1) return;
+    const remaining = portfolios.filter(p => p.id !== activeId);
+    resetTransient();
+    setPortfolios(remaining);
+    setActiveId(remaining[0].id);
+  }
+  const remove = id => setHoldings(p => p.filter(h => h.id !== id));
+  function startEdit(h, field) {
+    setEditId(h.id);
+    setEditField(field);
+    setEditVal(String(h[field]));
+  }
+  function cancelEdit() {
+    setEditId(null);
+    setEditField(null);
+    setEditVal("");
+  }
+  function commitEdit(id, field) {
+    const n = parseFloat(String(editVal).replace(",", "."));
+    const ok = !isNaN(n) && (field === "avgCost" ? n >= 0 : n > 0);
+    if (ok) setHoldings(prev => prev.map(h => h.id === id ? {
+      ...h,
+      [field]: n
+    } : h));
+    setEditId(null);
+    setEditField(null);
+    setEditVal("");
+  }
+
+  /* ---- import uit DeGiro (CSV-export of geplakte tekst) ---- */
+  function handleFile(e) {
+    const f = e.target.files && e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const txt = String(reader.result || "");
+      setImportText(txt);
+      importDegiro(txt);
+    };
+    reader.readAsText(f);
+    e.target.value = "";
+  }
+  async function importDegiro(raw) {
+    const text = (raw != null ? raw : importText) || "";
+    if (text.trim().length < 5) {
+      setImportMsg("Plak je export of kies eerst een CSV-bestand.");
+      return;
+    }
+    setImporting(true);
+    setImportMsg("Export inlezen…");
+    const prompt = `Hieronder staat een export uit DeGiro (transactieoverzicht of portefeuille, meestal Nederlandstalig CSV).\n` + `Leid hieruit de HUIDIGE posities af. Als het transacties zijn: tel per product de gekochte minus verkochte ` + `stuks op, laat posities met netto 0 weg, en bereken de gewogen gemiddelde aankoopkoers per stuk in EUR.\n` + `Geef per positie: ticker (beurssymbool zoals ASML of TSLA — zoek dit op via ISIN of productnaam), ` + `name (productnaam), isin indien bekend, currency (ISO-valutacode van het product, bv EUR of USD), ` + `shares (number, netto aantal), avgCost (number, gewogen gemiddelde aankoopkoers per stuk in DE EIGEN ` + `valuta van het product, niet omgerekend).\n` + `Antwoord UITSLUITEND met een geldige JSON-array zonder uitleg of markdown. Voorbeeld:\n` + `[{"ticker":"TSLA","name":"Tesla Inc","isin":"US88160R1014","currency":"USD","shares":5,"avgCost":210.4}]\n\n` + `EXPORT:\n` + text.slice(0, 40000);
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": getAnthropicKey(),
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true"
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 1000,
+          messages: [{
+            role: "user",
+            content: prompt
+          }]
+        })
+      });
+      const data = await res.json();
+      const out = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("\n");
+      const s = out.indexOf("["),
+        e = out.lastIndexOf("]");
+      if (s === -1 || e === -1) throw new Error("kon geen posities herkennen");
+      const parsed = JSON.parse(out.slice(s, e + 1));
+      const clean = parsed.filter(p => p && p.ticker && Number(p.shares) > 0).map(p => ({
+        ticker: String(p.ticker).toUpperCase().trim(),
+        name: p.name || "",
+        isin: p.isin || null,
+        currency: p.currency || "EUR",
+        shares: Number(p.shares),
+        avgCost: Number(p.avgCost) || 0
+      }));
+      if (!clean.length) throw new Error("geen posities gevonden in de export");
+      const map = {};
+      holdings.forEach(h => {
+        map[h.ticker.toUpperCase()] = h;
+      });
+      clean.forEach(c => {
+        const ex = map[c.ticker];
+        map[c.ticker] = ex ? {
+          ...ex,
+          shares: c.shares,
+          avgCost: c.avgCost,
+          name: ex.name || c.name,
+          isin: c.isin || ex.isin,
+          currency: c.currency || ex.currency || "EUR"
+        } : {
+          id: uid(),
+          priceNative: null,
+          fxToEur: 1,
+          currency: "EUR",
+          dividendYield: null,
+          payMonths: null,
+          ...c
+        };
+      });
+      const merged = Object.values(map);
+      setHoldings(merged);
+      setImportText("");
+      setShowImport(false);
+      setImportMsg("");
+      await refresh(merged);
+    } catch (err) {
+      setImportMsg("Importeren lukte niet (" + (err.message || err) + "). Probeer het transactieoverzicht (Account.csv) of plak je posities.");
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  /* ---- zoeken op bedrijfsnaam ---- */
+  async function runQuery(q) {
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": getAnthropicKey(),
+          "anthropic-version": "2023-06-01",
+          "anthropic-dangerous-direct-browser-access": "true"
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 1000,
+          messages: [{
+            role: "user",
+            content: `Zoek beursgenoteerde aandelen of ETF's die passen bij de zoekterm: "${q}". ` + `Geef maximaal 6 beste matches, de bekendste eerst. Per match: ticker (officieel beurssymbool, ` + `voor Euronext Amsterdam gebruik het volledige symbool inclusief NL-suffix waar van toepassing, ` + `bv "ASRNL" voor ASR Nederland, "INGA" voor ING, "HEIA" voor Heineken), ` + `name (officiële naam), exchange (korte beursnaam), ` + `currency (ISO-valutacode), isin indien bekend. ` + `Antwoord UITSLUITEND met een geldige JSON-array zonder uitleg of markdown. ` + `Voorbeeld: [{"ticker":"ASRNL","name":"ASR Nederland NV","exchange":"Euronext Amsterdam","currency":"EUR","isin":"NL0011872643"}]`
+          }]
+        })
+      });
+      const data = await res.json();
+      const out = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("\n");
+      const s = out.indexOf("["),
+        e = out.lastIndexOf("]");
+      if (s === -1 || e === -1) return [];
+      const arr = JSON.parse(out.slice(s, e + 1));
+      return arr.filter(x => x && x.ticker).slice(0, 6).map(x => ({
+        ticker: String(x.ticker).toUpperCase().trim(),
+        name: x.name || "",
+        exchange: x.exchange || "",
+        currency: x.currency || "EUR",
+        isin: x.isin || null
+      }));
+    } catch {
+      return [];
+    }
+  }
+  async function doSearch(q) {
+    q = (q || "").trim();
+    if (q.length < 2) {
+      setSearchResults([]);
+      setSearching(false);
+      return;
+    }
+    const id = ++searchSeq.current;
+    setSearching(true);
+    setNoResults(false);
+
+    /* check alias map first */
+    const key = q.toUpperCase().replace(/\s+/g, " ").trim();
+    const aliasHits = Object.entries(NL_ALIAS).filter(([k]) => k.startsWith(key) || k.includes(key)).map(([, v]) => ({
+      ...v,
+      exchange: "Euronext Amsterdam"
+    }));
+    const apiHits = await runQuery(q);
+    if (id !== searchSeq.current) return;
+
+    /* merge: alias first, deduplicate by ticker */
+    const seen = new Set();
+    const merged = [...aliasHits, ...apiHits].filter(r => {
+      if (seen.has(r.ticker)) return false;
+      seen.add(r.ticker);
+      return true;
+    }).slice(0, 7);
+    setSearchResults(merged);
+    setNoResults(merged.length === 0);
+    setSearching(false);
+  }
+  useEffect(() => {
+    if (!showForm) return;
+    if (selected) {
+      setSearchResults([]);
+      setNoResults(false);
+      return;
+    }
+    const q = searchQuery.trim();
+    if (q.length < 2) {
+      setSearchResults([]);
+      setNoResults(false);
+      setSearching(false);
+      return;
+    }
+    const h = setTimeout(() => doSearch(q), 550);
+    return () => clearTimeout(h);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, selected, showForm]);
+  function pickResult(r) {
+    searchSeq.current++;
+    setSelected(r);
+    setSearchQuery(r.name || r.ticker);
+    setSearchResults([]);
+    setNoResults(false);
+    setError("");
+  }
+  function clearPick() {
+    setSelected(null);
+    setSearchQuery("");
+    setSearchResults([]);
+  }
+
+  /* ---- studieschuld berekening ---- */
+  const loanCalc = useMemo(() => {
+    const phases = loan.phases.map(p => ({
+      principal: parseFloat(String(p.principal).replace(",", ".")) || 0,
+      rate: parseFloat(String(p.rate).replace(",", ".")) || 0
+    }));
+    const total0 = phases.reduce((s, p) => s + p.principal, 0);
+    if (total0 <= 0) return null;
+
+    // Weighted average rate for combined curve
+    const wavg = phases.reduce((s, p) => s + p.rate * p.principal, 0) / (total0 || 1);
+    const years = Math.max(1, Math.min(30, Number(loan.years) || 10));
+    const points = [];
+    for (let y = 0; y <= years; y++) {
+      const row = {
+        year: y,
+        total: 0,
+        phases: []
+      };
+      phases.forEach(p => {
+        const v = p.principal * Math.pow(1 + p.rate / 100, y);
+        row.phases.push(v);
+        row.total += v;
+      });
+      points.push(row);
+    }
+    const finalTotal = points[points.length - 1].total;
+    const interest = finalTotal - total0;
+    return {
+      points,
+      total0,
+      finalTotal,
+      interest,
+      wavg,
+      years
+    };
+  }, [loan]);
+  if (!loaded) return /*#__PURE__*/React.createElement("div", {
+    className: "pf-root"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pf-wrap"
+  }));
+  const monthly = t.income / 12;
+  const editCell = (h, field, label, display) => /*#__PURE__*/React.createElement("div", {
+    className: "num editable",
+    "data-l": label,
+    title: "Klik om aan te passen",
+    onClick: () => !(editId === h.id && editField === field) && startEdit(h, field)
+  }, editId === h.id && editField === field ? /*#__PURE__*/React.createElement("input", {
+    className: "edit-inp",
+    autoFocus: true,
+    value: editVal,
+    inputMode: "decimal",
+    onChange: e => setEditVal(e.target.value),
+    onBlur: () => commitEdit(h.id, field),
+    onClick: e => e.stopPropagation(),
+    onKeyDown: e => {
+      if (e.key === "Enter") commitEdit(h.id, field);
+      if (e.key === "Escape") cancelEdit();
+    }
+  }) : /*#__PURE__*/React.createElement("span", {
+    className: "ed-val"
+  }, display));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "pf-root"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pf-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pf-top"
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "pf-brand"
+  }, "Finance Bro", /*#__PURE__*/React.createElement("span", {
+    className: "dot"
+  }, ".")), /*#__PURE__*/React.createElement("div", {
+    className: "pf-sub"
+  }, "Aandelen · ETF's · Dividend")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 12,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pf-asof"
+  }, asOf ? "Bijgewerkt " + asOf.toLocaleTimeString("nl-NL", {
+    hour: "2-digit",
+    minute: "2-digit"
+  }) : "Nog niet bijgewerkt", apiKey && holdings.some(h => h.live) && /*#__PURE__*/React.createElement("span", {
+    className: "live-dot"
+  }, "● realtime (US)")), /*#__PURE__*/React.createElement(ImportPanel, {
+    onImport: handleImport
+  }), /*#__PURE__*/React.createElement(ExportButton, {
+    portfolios: portfolios,
+    loan: loan,
+    portRate: portRate,
+    budget: budget,
+    transactions: transactions,
+    apiKey: apiKey,
+    auto: auto,
+    intervalMin: intervalMin
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn" + (activeTab === "account" ? " primary" : ""),
+    style: {
+      fontSize: 12,
+      padding: "7px 13px"
+    },
+    onClick: () => {
+      setActiveTab("account");
+      resetTransient();
+    }
+  }, "👤 Account"))), /*#__PURE__*/React.createElement("div", {
+    className: "tabs"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tabs-list"
+  }, portfolios.map(p => renaming && p.id === activeId && activeTab === "portfolio" ? /*#__PURE__*/React.createElement("input", {
+    key: p.id,
+    className: "tab-rename",
+    autoFocus: true,
+    value: renameVal,
+    onChange: e => setRenameVal(e.target.value),
+    onBlur: commitRename,
+    onKeyDown: e => {
+      if (e.key === "Enter") commitRename();
+      if (e.key === "Escape") setRenaming(false);
+    }
+  }) : /*#__PURE__*/React.createElement("button", {
+    key: p.id,
+    className: "tab" + (p.id === activeId && activeTab === "portfolio" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("portfolio");
+      switchPortfolio(p.id);
+    }
+  }, p.name, /*#__PURE__*/React.createElement("span", {
+    className: "tab-n"
+  }, p.holdings.length))), /*#__PURE__*/React.createElement("button", {
+    className: "tab add",
+    onClick: newPortfolio,
+    title: "Nieuwe portefeuille"
+  }, "+ nieuw"), /*#__PURE__*/React.createElement("span", {
+    className: "tab-sep"
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "tab calc-tab" + (activeTab === "calc" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("calc");
+      resetTransient();
+    }
+  }, "📊 Rekenmachine"), /*#__PURE__*/React.createElement("button", {
+    className: "tab calc-tab" + (activeTab === "budget" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("budget");
+      resetTransient();
+    }
+  }, "💶 Budget"), /*#__PURE__*/React.createElement("button", {
+    className: "tab calc-tab" + (activeTab === "trans" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("trans");
+      resetTransient();
+    }
+  }, "📋 Uitgaven")), /*#__PURE__*/React.createElement("div", {
+    className: "tabs-tools"
+  }, activeTab === "portfolio" && activePortfolio && !renaming && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+    className: "ttool",
+    onClick: startRename,
+    title: "Hernoemen"
+  }, "✎"), portfolios.length > 1 && (confirmDel ? /*#__PURE__*/React.createElement("span", {
+    className: "del-confirm"
+  }, "Verwijderen?", /*#__PURE__*/React.createElement("button", {
+    className: "ttool danger",
+    onClick: deletePortfolio
+  }, "ja"), /*#__PURE__*/React.createElement("button", {
+    className: "ttool",
+    onClick: () => setConfirmDel(false)
+  }, "nee")) : /*#__PURE__*/React.createElement("button", {
+    className: "ttool del",
+    onClick: () => setConfirmDel(true),
+    title: "Verwijderen"
+  }, "verwijder"))))), activeTab === "calc" && /*#__PURE__*/React.createElement(CalcTab, {
+    loan: loan,
+    setLoan: setLoan,
+    loanCalc: loanCalc,
+    portfolioValue: t.mvTotal,
+    portRate: portRate,
+    setPortRate: setPortRate
+  }), activeTab === "budget" && /*#__PURE__*/React.createElement(BudgetTab, {
+    budget: budget,
+    setBudget: setBudget
+  }), activeTab === "trans" && /*#__PURE__*/React.createElement(TransactionsTab, {
+    transactions: transactions,
+    setTransactions: setTransactions,
+    budget: budget
+  }), activeTab === "account" && /*#__PURE__*/React.createElement(AccountTab, null), activeTab === "portfolio" && /*#__PURE__*/React.createElement(React.Fragment, null, holdings.some(h => h.priceNative != null) && /*#__PURE__*/React.createElement("div", {
+    className: "tape"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tape-track"
+  }, [...holdings, ...holdings].filter(h => h.priceNative != null).map((h, i) => /*#__PURE__*/React.createElement("span", {
+    className: "tape-item",
+    key: i
+  }, /*#__PURE__*/React.createElement("b", null, h.ticker), " ", fmtCur(h.priceNative, h.currency), h.live && h.dayPct != null && /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: h.dayPct >= 0 ? "var(--gain)" : "var(--loss)"
+    }
+  }, h.dayPct >= 0 ? "▲" : "▼", Math.abs(h.dayPct).toFixed(2), "%"), h.dividendYield != null && /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--brass)"
+    }
+  }, h.dividendYield.toFixed(1), "%"))))), /*#__PURE__*/React.createElement("div", {
+    className: "pillars"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pillar"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Totale waarde"), /*#__PURE__*/React.createElement("div", {
+    className: "big"
+  }, eur(t.value)), /*#__PURE__*/React.createElement("div", {
+    className: "meta"
+  }, t.value > 0 ? /*#__PURE__*/React.createElement("span", {
+    className: t.gain >= 0 ? "gain" : "loss"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "tri"
+  }, t.gain >= 0 ? "▲" : "▼"), " ", eur(Math.abs(t.gain)), " · ", pct(t.gainPct)) : "—", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--faint)"
+    }
+  }, "  ·  inleg ", eur(t.cost)), t.recTotal > 0 && /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--brass)"
+    }
+  }, "  ·  incl. ", eur(t.recTotal), " ontvangen dividend"))), /*#__PURE__*/React.createElement("div", {
+    className: "pillar income"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Jaarlijks dividend"), /*#__PURE__*/React.createElement("div", {
+    className: "big"
+  }, eur(t.income)), /*#__PURE__*/React.createElement("div", {
+    className: "meta"
+  }, t.yld != null ? /*#__PURE__*/React.createElement(React.Fragment, null, "op inleg ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--brass)"
+    }
+  }, t.yldCost != null ? t.yldCost.toFixed(2) : "—", "%"), " · op waarde ", t.yld.toFixed(2), "% · ± ", eur(monthly), "/mnd") : "—"))), holdings.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "card",
+    style: {
+      marginTop: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "empty"
+  }, /*#__PURE__*/React.createElement("p", null, "Nog geen posities — zoek hieronder een aandeel of ETF om te beginnen."), /*#__PURE__*/React.createElement("div", {
+    className: "quick"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "chip imp",
+    onClick: () => {
+      setShowImport(true);
+      setShowForm(false);
+    }
+  }, "⇪ importeer uit DeGiro"), SEEDS.map(s => /*#__PURE__*/React.createElement("button", {
+    key: s.ticker,
+    className: "chip",
+    onClick: () => addHolding(s)
+  }, "+ ", s.ticker))))) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "mid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("h3", null, "Allocatie"), allocation.length ? /*#__PURE__*/React.createElement("div", {
+    className: "donut-row"
+  }, /*#__PURE__*/React.createElement(Donut, {
+    data: allocation
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "legend"
+  }, allocation.slice(0, 6).map(a => /*#__PURE__*/React.createElement("div", {
+    className: "legend-item",
+    key: a.id
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "sw",
+    style: {
+      background: a.color
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "nm"
+  }, a.ticker), /*#__PURE__*/React.createElement("span", {
+    className: "pc"
+  }, a.share.toFixed(0), "%"))))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "var(--muted)",
+      fontSize: 13
+    }
+  }, "Ververs de koersen om de verdeling te zien.")), /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("h3", null, "Rendement"), /*#__PURE__*/React.createElement("div", {
+    className: "statgrid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "k"
+  }, "Inleg"), /*#__PURE__*/React.createElement("div", {
+    className: "v"
+  }, eur(t.cost))), /*#__PURE__*/React.createElement("div", {
+    className: "stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "k"
+  }, "Waarde nu"), /*#__PURE__*/React.createElement("div", {
+    className: "v"
+  }, eur(t.value))), /*#__PURE__*/React.createElement("div", {
+    className: "stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "k"
+  }, "Winst / verlies"), /*#__PURE__*/React.createElement("div", {
+    className: "v " + (t.gain >= 0 ? "gain" : "loss")
+  }, eur(t.gain))), /*#__PURE__*/React.createElement("div", {
+    className: "stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "k"
+  }, "Rendement"), /*#__PURE__*/React.createElement("div", {
+    className: "v " + (t.gain >= 0 ? "gain" : "loss")
+  }, pct(t.gainPct))), /*#__PURE__*/React.createElement("div", {
+    className: "stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "k"
+  }, "Dividend / jaar"), /*#__PURE__*/React.createElement("div", {
+    className: "v",
+    style: {
+      color: "var(--brass)"
+    }
+  }, eur(t.income))), /*#__PURE__*/React.createElement("div", {
+    className: "stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "k"
+  }, "Rend. op inleg"), /*#__PURE__*/React.createElement("div", {
+    className: "v",
+    style: {
+      color: "var(--brass)"
+    }
+  }, t.yldCost != null ? t.yldCost.toFixed(2) + "%" : "—")), /*#__PURE__*/React.createElement("div", {
+    className: "stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "k"
+  }, "Ontvangen dividend"), /*#__PURE__*/React.createElement("div", {
+    className: "v",
+    style: {
+      color: "var(--brass)"
+    }
+  }, eur(t.recTotal))), /*#__PURE__*/React.createElement("div", {
+    className: "stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "k"
+  }, "Marktwaarde"), /*#__PURE__*/React.createElement("div", {
+    className: "v"
+  }, eur(t.mvTotal)))))), t.income > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "card cal-card"
+  }, /*#__PURE__*/React.createElement("h3", null, "Dividendkalender · indicatief per maand"), /*#__PURE__*/React.createElement("div", {
+    className: "cal-bars"
+  }, cal.months.map((m, i) => {
+    const hRatio = m.amt / cal.max * 100;
+    const on = hoverMonth === i;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "cal-col",
+      key: i,
+      onMouseEnter: () => setHoverMonth(i),
+      onMouseLeave: () => setHoverMonth(null)
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "cal-val"
+    }, m.amt > 0 ? "€" + Math.round(m.amt) : ""), /*#__PURE__*/React.createElement("div", {
+      className: "cal-bartrack"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "cal-bar" + (on ? " on" : ""),
+      style: {
+        height: (m.amt > 0 ? Math.max(hRatio, 4) : 0) + "%"
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "cal-m" + (on ? " on" : "")
+    }, MONTHS[i]));
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "cal-detail"
+  }, hoverMonth != null && cal.months[hoverMonth].amt > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("b", null, MONTHS[hoverMonth]), " · ", eur(cal.months[hoverMonth].amt), " · ", cal.months[hoverMonth].tickers.join(", ")) : /*#__PURE__*/React.createElement(React.Fragment, null, "Beste maand ", /*#__PURE__*/React.createElement("b", null, MONTHS[cal.best]), " (", eur(cal.months[cal.best].amt), ") · uitkering in ", cal.active, " van 12 maanden", cal.unscheduled > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, " · ", eur(cal.unscheduled), " schema onbekend") : null))), /*#__PURE__*/React.createElement("div", {
+    className: "holds"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "holds-h"
+  }, /*#__PURE__*/React.createElement("div", null, "Positie"), /*#__PURE__*/React.createElement("div", {
+    className: "num"
+  }, "Aantal"), /*#__PURE__*/React.createElement("div", {
+    className: "num"
+  }, "GAK"), /*#__PURE__*/React.createElement("div", {
+    className: "num"
+  }, "Koers"), /*#__PURE__*/React.createElement("div", {
+    className: "num"
+  }, "Inleg"), /*#__PURE__*/React.createElement("div", {
+    className: "num"
+  }, "Waarde"), /*#__PURE__*/React.createElement("div", {
+    className: "num"
+  }, "W / V"), /*#__PURE__*/React.createElement("div", {
+    className: "num"
+  }, "Div %"), /*#__PURE__*/React.createElement("div", null)), t.priced.map(h => {
+    const wv = h.value != null ? h.value - h.cost : null;
+    const wvp = h.cost > 0 && h.value != null ? wv / h.cost * 100 : null;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "holds-r",
+      key: h.id
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "tk"
+    }, /*#__PURE__*/React.createElement("b", null, h.ticker), /*#__PURE__*/React.createElement("span", null, h.buyDate ? "sinds " + new Date(h.buyDate).toLocaleDateString("nl-NL", {
+      month: "short",
+      year: "numeric"
+    }) : h.name || "—")), editCell(h, "shares", "Aantal", h.shares), editCell(h, "avgCost", "GAK", fmtCur(h.avgCost, h.currency)), editCell(h, "priceNative", "Koers", fmtCur(h.priceNative, h.currency)), /*#__PURE__*/React.createElement("div", {
+      className: "num",
+      "data-l": "Inleg"
+    }, eur(h.cost)), /*#__PURE__*/React.createElement("div", {
+      className: "num",
+      "data-l": "Waarde"
+    }, eur(h.value), h.recDiv > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11,
+        color: "var(--brass)"
+      }
+    }, "incl. ", eur(h.recDiv), " div"))), /*#__PURE__*/React.createElement("div", {
+      className: "num " + (wv == null ? "" : wv >= 0 ? "gain" : "loss"),
+      "data-l": "W/V"
+    }, wv == null ? "—" : eur(wv), /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
+      style: {
+        fontSize: 11
+      }
+    }, wvp == null ? "" : pct(wvp))), /*#__PURE__*/React.createElement("div", {
+      className: "num",
+      "data-l": "Div",
+      style: {
+        color: "var(--brass)"
+      }
+    }, h.dividendYield != null ? h.dividendYield.toFixed(1) + "%" : "—"), /*#__PURE__*/React.createElement("div", {
+      className: "xcell"
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "xbtn ebtn",
+      onClick: () => beginEditHolding(h),
+      title: "Bewerken"
+    }, "✎"), /*#__PURE__*/React.createElement("button", {
+      className: "xbtn",
+      onClick: () => remove(h.id),
+      title: "Verwijderen"
+    }, "×")));
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "actions"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    onClick: () => refresh(),
+    disabled: refreshing
+  }, refreshing && /*#__PURE__*/React.createElement("span", {
+    className: "spin"
+  }), refreshing ? "Koersen ophalen…" : "⟳ Ververs koersen"), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: toggleForm
+  }, showForm ? "Annuleren" : "+ Positie toevoegen"), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => setShowImport(s => !s)
+  }, showImport ? "Annuleren" : "⇪ Importeer uit DeGiro"), /*#__PURE__*/React.createElement("button", {
+    className: "btn" + (apiKey ? " primary" : ""),
+    onClick: () => setShowRt(s => !s)
+  }, apiKey ? "⚡ Realtime ✓" : "⚡ Realtime"), /*#__PURE__*/React.createElement("div", {
+    className: "auto-ctl"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "switch" + (auto ? " on" : ""),
+    onClick: toggleAuto,
+    role: "switch",
+    "aria-checked": auto,
+    title: "Automatisch verversen aan/uit"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "knob"
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "auto-lbl",
+    onClick: toggleAuto
+  }, "Auto-verversen"), /*#__PURE__*/React.createElement("select", {
+    className: "auto-int",
+    value: intervalMin,
+    onChange: e => setIntervalMin(Number(e.target.value)),
+    disabled: !auto
+  }, /*#__PURE__*/React.createElement("option", {
+    value: 1
+  }, "1 min"), /*#__PURE__*/React.createElement("option", {
+    value: 5
+  }, "5 min"), /*#__PURE__*/React.createElement("option", {
+    value: 15
+  }, "15 min"), /*#__PURE__*/React.createElement("option", {
+    value: 30
+  }, "30 min"), /*#__PURE__*/React.createElement("option", {
+    value: 60
+  }, "60 min")), auto && asOf && /*#__PURE__*/React.createElement("span", {
+    className: "auto-next"
+  }, "volgende ~", new Date(asOf.getTime() + intervalMin * 60000).toLocaleTimeString("nl-NL", {
+    hour: "2-digit",
+    minute: "2-digit"
+  }))))), showForm && /*#__PURE__*/React.createElement("div", {
+    className: "form"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "form-head"
+  }, editingId ? "Positie bewerken" : "Nieuwe positie"), /*#__PURE__*/React.createElement("div", {
+    className: "fld search-wrap"
+  }, /*#__PURE__*/React.createElement("label", null, "Zoek aandeel of ETF"), /*#__PURE__*/React.createElement("input", {
+    value: searchQuery,
+    placeholder: "bv. Vanguard All-World, ASML, Shell…",
+    autoFocus: true,
+    onChange: e => {
+      setSelected(null);
+      setSearchQuery(e.target.value);
+    },
+    onKeyDown: e => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        doSearch(searchQuery);
+      }
+      if (e.key === "Escape") setSearchResults([]);
+    }
+  }), !selected && searchQuery.trim().length >= 2 && (searching || searchResults.length > 0 || noResults) && /*#__PURE__*/React.createElement("div", {
+    className: "results"
+  }, searching && /*#__PURE__*/React.createElement("div", {
+    className: "results-state"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "spin"
+  }), "Zoeken…"), !searching && searchResults.map((r, i) => /*#__PURE__*/React.createElement("div", {
+    className: "result",
+    key: r.ticker + i,
+    onClick: () => pickResult(r)
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "r-main"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "r-name"
+  }, r.name || r.ticker), r.exchange && /*#__PURE__*/React.createElement("span", {
+    className: "r-ex"
+  }, r.exchange, r.isin ? " · " + r.isin : "")), /*#__PURE__*/React.createElement("span", {
+    className: "r-tk"
+  }, r.ticker))), !searching && noResults && /*#__PURE__*/React.createElement("div", {
+    className: "results-state"
+  }, "Geen resultaten — probeer een andere term.")), selected && /*#__PURE__*/React.createElement("div", {
+    className: "picked"
+  }, "gekozen: ", /*#__PURE__*/React.createElement("b", null, selected.ticker), " · ", selected.name || "—", /*#__PURE__*/React.createElement("span", {
+    className: "x",
+    onClick: clearPick,
+    title: "Wissen"
+  }, "×"))), /*#__PURE__*/React.createElement("div", {
+    className: "form-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Aantal"), /*#__PURE__*/React.createElement("input", {
+    value: form.shares,
+    placeholder: "0",
+    inputMode: "decimal",
+    onChange: e => setForm({
+      ...form,
+      shares: e.target.value
+    }),
+    onKeyDown: e => e.key === "Enter" && submitForm()
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Gem. aankoop (", curSym(selected && selected.currency || "EUR"), ")"), /*#__PURE__*/React.createElement("input", {
+    value: form.avgCost,
+    placeholder: "0,00",
+    inputMode: "decimal",
+    onChange: e => setForm({
+      ...form,
+      avgCost: e.target.value
+    }),
+    onKeyDown: e => e.key === "Enter" && submitForm()
+  })), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    onClick: submitForm
+  }, editingId ? "Opslaan" : "Toevoegen")), /*#__PURE__*/React.createElement("div", {
+    className: "form-row"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Aankoopdatum (optioneel)"), /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: form.buyDate,
+    onChange: e => setForm({
+      ...form,
+      buyDate: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Ontvangen dividend € (optioneel)"), /*#__PURE__*/React.createElement("input", {
+    value: form.divReceived,
+    placeholder: "leeg = schat o.b.v. datum",
+    inputMode: "decimal",
+    onChange: e => setForm({
+      ...form,
+      divReceived: e.target.value
+    }),
+    onKeyDown: e => e.key === "Enter" && submitForm()
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld",
+    style: {
+      justifyContent: "flex-end"
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: "var(--faint)",
+      lineHeight: 1.5
+    }
+  }, "Telt mee in \"waarde nu\". Leeg laten = schatting uit datum × rendement.")))), showImport && /*#__PURE__*/React.createElement("div", {
+    className: "import"
+  }, /*#__PURE__*/React.createElement("h4", null, "Importeer uit DeGiro"), /*#__PURE__*/React.createElement("ol", null, /*#__PURE__*/React.createElement("li", null, "Log in op DeGiro → ", /*#__PURE__*/React.createElement("b", null, "Inbox → Rekeningoverzicht"), "."), /*#__PURE__*/React.createElement("li", null, "Kies een begindatum vóór je eerste aankoop en klik op ", /*#__PURE__*/React.createElement("b", null, "Export → CSV"), "."), /*#__PURE__*/React.createElement("li", null, "Sleep het bestand hieronder, of plak de inhoud. Ik reken posities en gemiddelde aankoopkoers uit.")), /*#__PURE__*/React.createElement("div", {
+    className: "import-row"
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "btn primary file-btn"
+  }, importing ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+    className: "spin"
+  }), "Bezig…") : "Kies CSV-bestand", /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: ".csv,.txt",
+    onChange: handleFile,
+    disabled: importing
+  })), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--faint)",
+      fontSize: 12,
+      fontFamily: "'IBM Plex Mono',monospace"
+    }
+  }, "of plak hieronder")), /*#__PURE__*/React.createElement("textarea", {
+    value: importText,
+    placeholder: "Plak hier de inhoud van je DeGiro-export…",
+    onChange: e => setImportText(e.target.value),
+    disabled: importing
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "import-row",
+    style: {
+      marginTop: 10
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    onClick: () => importDegiro(),
+    disabled: importing
+  }, importing && /*#__PURE__*/React.createElement("span", {
+    className: "spin"
+  }), importing ? "Importeren…" : "Importeer posities")), importMsg && /*#__PURE__*/React.createElement("div", {
+    className: "import-msg"
+  }, importMsg)), showRt && /*#__PURE__*/React.createElement("div", {
+    className: "import"
+  }, /*#__PURE__*/React.createElement("h4", null, "Realtime koersen (Finnhub)"), /*#__PURE__*/React.createElement("ol", null, /*#__PURE__*/React.createElement("li", null, "Maak gratis een account op ", /*#__PURE__*/React.createElement("b", null, "finnhub.io"), " en kopieer je API-key (geen creditcard nodig)."), /*#__PURE__*/React.createElement("li", null, "Plak 'm hieronder. Amerikaanse aandelen zoals Tesla krijgen dan realtime koersen; Europese noteringen blijven op de zoekkoers."), /*#__PURE__*/React.createElement("li", null, "Zet eventueel \"Auto-verversen\" op 1 min voor een live gevoel.")), /*#__PURE__*/React.createElement("div", {
+    className: "rt-note"
+  }, "Let op: binnen de Claude-chat worden verzoeken naar finnhub.io geblokkeerd door de omgeving — realtime werkt hier dus niet. Draai je dit dashboard in je eigen omgeving (een gehost of lokaal React-project), dan werkt je key wél, inclusief realtime. In de chat blijft de zoekgebaseerde koers actief."), /*#__PURE__*/React.createElement("div", {
+    className: "import-row"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "key-inp",
+    type: "password",
+    value: apiKey,
+    placeholder: "Finnhub API-key",
+    onChange: e => {
+      setApiKey(e.target.value);
+      setRtMsg("");
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: testKey
+  }, "Testen"), apiKey && /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => {
+      setApiKey("");
+      setRtMsg("Key verwijderd.");
+    }
+  }, "Wissen")), rtMsg && /*#__PURE__*/React.createElement("div", {
+    className: "import-msg"
+  }, rtMsg)), error && /*#__PURE__*/React.createElement("div", {
+    className: "err"
+  }, error), /*#__PURE__*/React.createElement("div", {
+    className: "foot"
+  }, "Koersen en dividendrendement worden live opgehaald via webzoekresultaten; koers en GAK staan in de eigen valuta van het product (bv. USD voor Amerikaanse aandelen) en worden voor de portefeuilletotalen omgerekend naar euro tegen de actuele wisselkoers. Omdat ook je inleg tegen de huidige koers wordt omgerekend, is het euro-resultaat een benadering die de wisselkoersbeweging sinds aankoop niet meeneemt. Waarden kunnen enkele minuten vertraagd zijn. Met een eigen (gratis) Finnhub-key worden Amerikaanse aandelen realtime opgehaald; Europese noteringen blijven op de zoekkoers. Ontvangen dividend (handmatig ingevuld, of geschat uit aankoopdatum × rendement) wordt bij \"waarde nu\" opgeteld, dus winst/verlies toont het totaalrendement inclusief dividend. De dividendkalender verdeelt het jaarbedrag gelijk over de uitkeringsmaanden — een schatting. Geen beleggingsadvies."))));
+}
+
+/* ---- Rekenmachine tab ---- */
+function CalcTab({
+  loan,
+  setLoan,
+  loanCalc,
+  portfolioValue,
+  portRate,
+  setPortRate
+}) {
+  const setPhase = (i, key, val) => setLoan(l => ({
+    ...l,
+    phases: l.phases.map((p, j) => j === i ? {
+      ...p,
+      [key]: val
+    } : p)
+  }));
+  const phaseColors = ["#CBA135", "#79C7A0", "#6EA8D8"];
+  const portV0 = portfolioValue || 0;
+  const portR = parseFloat(String(portRate).replace(",", ".")) || 0;
+  const combined = React.useMemo(() => {
+    if (!loanCalc) return null;
+    const rows = loanCalc.points.map(lp => {
+      const pv = portV0 * Math.pow(1 + portR / 100, lp.year);
+      return {
+        year: lp.year,
+        loan: lp.total,
+        port: pv,
+        diff: pv - lp.total
+      };
+    });
+    let crossover = null;
+    for (let i = 1; i < rows.length; i++) {
+      if (rows[i - 1].diff < 0 && rows[i].diff >= 0) {
+        const t = -rows[i - 1].diff / (rows[i].diff - rows[i - 1].diff);
+        crossover = rows[i - 1].year + t;
+        break;
+      }
+      if (rows[i - 1].diff >= 0 && i === 1) {
+        crossover = 0;
+        break;
+      }
+    }
+    return {
+      rows,
+      crossover
+    };
+  }, [loanCalc, portV0, portR]);
+  return /*#__PURE__*/React.createElement("div", {
+    className: "calc-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-title"
+  }, "Studieschuld calculator"), /*#__PURE__*/React.createElement("div", {
+    className: "calc-desc"
+  }, "Voer per fase de hoofdsom en het rentepercentage in. De grafiek toont hoe je totale studieschuld zich ontwikkelt over de looptijd, zonder aflossing."), /*#__PURE__*/React.createElement("div", {
+    className: "loan-phases"
+  }, loan.phases.map((p, i) => /*#__PURE__*/React.createElement("div", {
+    className: "loan-phase",
+    key: i
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "phase-dot",
+    style: {
+      background: phaseColors[i]
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, p.label, " — Hoofdsom (€)"), /*#__PURE__*/React.createElement("input", {
+    value: p.principal,
+    placeholder: "bv. 15000",
+    inputMode: "decimal",
+    onChange: e => setPhase(i, "principal", e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Rente (%)"), /*#__PURE__*/React.createElement("input", {
+    value: p.rate,
+    placeholder: "bv. 2.56",
+    inputMode: "decimal",
+    onChange: e => setPhase(i, "rate", e.target.value)
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "loan-phase",
+    style: {
+      gap: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "phase-dot",
+    style: {
+      background: "var(--faint)"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Looptijd (jaren)"), /*#__PURE__*/React.createElement("input", {
+    value: loan.years,
+    inputMode: "numeric",
+    onChange: e => setLoan(l => ({
+      ...l,
+      years: e.target.value
+    }))
+  }))))), loanCalc && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "loan-pillars"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Totale schuld nu"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big"
+  }, eur(loanCalc.total0))), /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Schuld na ", loanCalc.years, " jaar"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big loss"
+  }, eur(loanCalc.finalTotal))), /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Opgebouwde rente"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big",
+    style: {
+      color: "var(--loss)"
+    }
+  }, eur(loanCalc.interest))), /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Gem. rentepercentage"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big"
+  }, loanCalc.wavg.toFixed(2), "%"))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Portefeuille vs. studieschuld"), /*#__PURE__*/React.createElement("div", {
+    className: "port-rate-row"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "port-rate-lbl"
+  }, "Verwacht rendement aandelen"), /*#__PURE__*/React.createElement("div", {
+    className: "fld",
+    style: {
+      maxWidth: 130
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: portRate,
+    placeholder: "bv. 7",
+    inputMode: "decimal",
+    onChange: e => setPortRate(e.target.value)
+  })), /*#__PURE__*/React.createElement("span", {
+    className: "port-rate-pct"
+  }, "% / jaar"), portV0 > 0 && /*#__PURE__*/React.createElement("span", {
+    className: "port-rate-cur"
+  }, "Huidig: ", eur(portV0)), portV0 === 0 && /*#__PURE__*/React.createElement("span", {
+    className: "port-rate-tip"
+  }, "Voeg posities toe aan je portefeuille om de vergelijking te zien.")), combined && portV0 > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, combined.crossover != null ? /*#__PURE__*/React.createElement("div", {
+    className: "cross-banner"
+  }, "🎯 Je portefeuille overtreft je studieschuld rond ", /*#__PURE__*/React.createElement("b", null, new Date().getFullYear() + Math.round(combined.crossover), " (jaar ", Math.round(combined.crossover), ")"), combined.crossover === 0 && " — je portefeuille is al groter dan je schuld!") : /*#__PURE__*/React.createElement("div", {
+    className: "cross-banner warn"
+  }, "⚠ Met ", portR, "% rendement haalt je portefeuille je studieschuld niet in binnen ", loanCalc.years, " jaar. Verhoog het verwachte rendement of verleng de looptijd."), /*#__PURE__*/React.createElement(CombinedChart, {
+    combined: combined,
+    years: loanCalc.years
+  }))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Schuldontwikkeling over ", loanCalc.years, " jaar"), /*#__PURE__*/React.createElement(LoanChart, {
+    calc: loanCalc,
+    colors: phaseColors,
+    phases: loan.phases
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Jaar-voor-jaar overzicht"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-table"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "loan-th"
+  }, /*#__PURE__*/React.createElement("div", null, "Jaar"), loan.phases.map((p, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "num"
+  }, p.label)), /*#__PURE__*/React.createElement("div", {
+    className: "num"
+  }, "Totaal"), /*#__PURE__*/React.createElement("div", {
+    className: "num"
+  }, "+Rente")), loanCalc.points.map((row, idx) => /*#__PURE__*/React.createElement("div", {
+    className: "loan-tr",
+    key: idx
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "num-mono"
+  }, new Date().getFullYear() + row.year), row.phases.map((v, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    className: "num num-mono",
+    style: {
+      color: phaseColors[i]
+    }
+  }, eur(v))), /*#__PURE__*/React.createElement("div", {
+    className: "num num-mono"
+  }, eur(row.total)), /*#__PURE__*/React.createElement("div", {
+    className: "num num-mono loss"
+  }, idx === 0 ? "—" : "+" + eur(row.total - loanCalc.points[0].total))))))), !loanCalc && /*#__PURE__*/React.createElement("div", {
+    className: "calc-empty"
+  }, "Vul hierboven de hoofdsom en het rentepercentage in van je leningfase(s) om de grafiek te zien."));
+}
+
+/* ---- SVG lijndiagram voor studieschuld ---- */
+function LoanChart({
+  calc,
+  colors,
+  phases
+}) {
+  const W = 680,
+    H = 260,
+    PAD = {
+      t: 16,
+      r: 20,
+      b: 40,
+      l: 80
+    };
+  const iW = W - PAD.l - PAD.r,
+    iH = H - PAD.t - PAD.b;
+  const allVals = calc.points.flatMap(p => p.phases);
+  const maxV = Math.max(...allVals, calc.points[calc.points.length - 1].total);
+  const minV = 0;
+  const xOf = yr => PAD.l + yr / calc.years * iW;
+  const yOf = v => PAD.t + iH - (v - minV) / (maxV - minV || 1) * iH;
+  const totalLine = calc.points.map((p, i) => `${i === 0 ? "M" : "L"}${xOf(p.year)},${yOf(p.total)}`).join(" ");
+  const phaseLines = phases.map((_, pi) => calc.points.map((p, i) => `${i === 0 ? "M" : "L"}${xOf(p.year)},${yOf(p.phases[pi])}`).join(" "));
+  const ticks = 5;
+  const yTicks = Array.from({
+    length: ticks + 1
+  }, (_, i) => minV + (maxV - minV) * (i / ticks));
+  return /*#__PURE__*/React.createElement("svg", {
+    viewBox: `0 0 ${W} ${H}`,
+    style: {
+      width: "100%",
+      maxWidth: W,
+      display: "block",
+      overflow: "visible"
+    }
+  }, yTicks.map((v, i) => /*#__PURE__*/React.createElement("g", {
+    key: i
+  }, /*#__PURE__*/React.createElement("line", {
+    x1: PAD.l,
+    x2: W - PAD.r,
+    y1: yOf(v),
+    y2: yOf(v),
+    stroke: "var(--line)",
+    strokeWidth: "1"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: PAD.l - 8,
+    y: yOf(v) + 4,
+    textAnchor: "end",
+    fill: "var(--faint)",
+    style: {
+      font: "11px 'IBM Plex Mono',monospace"
+    }
+  }, v >= 1000 ? "€" + Math.round(v / 1000) + "k" : "€" + Math.round(v)))), calc.points.filter((_, i) => i % Math.max(1, Math.floor(calc.years / 10)) === 0).map(p => /*#__PURE__*/React.createElement("text", {
+    key: p.year,
+    x: xOf(p.year),
+    y: H - PAD.b + 18,
+    textAnchor: "middle",
+    fill: "var(--faint)",
+    style: {
+      font: "11px 'IBM Plex Mono',monospace"
+    }
+  }, new Date().getFullYear() + p.year)), phaseLines.map((d, i) => phases[i] && parseFloat(phases[i].principal) > 0 && /*#__PURE__*/React.createElement("path", {
+    key: i,
+    d: d,
+    fill: "none",
+    stroke: colors[i],
+    strokeWidth: "1.5",
+    strokeDasharray: "5,4",
+    opacity: "0.6"
+  })), /*#__PURE__*/React.createElement("path", {
+    d: totalLine,
+    fill: "none",
+    stroke: "var(--brass)",
+    strokeWidth: "2.5",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }), (() => {
+    const last = calc.points[calc.points.length - 1];
+    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("circle", {
+      cx: xOf(last.year),
+      cy: yOf(last.total),
+      r: "5",
+      fill: "var(--brass)"
+    }), /*#__PURE__*/React.createElement("text", {
+      x: xOf(last.year) - 8,
+      y: yOf(last.total) - 12,
+      textAnchor: "end",
+      fill: "var(--brass)",
+      style: {
+        font: "600 12px 'IBM Plex Mono',monospace"
+      }
+    }, eur(last.total)));
+  })(), /*#__PURE__*/React.createElement("g", {
+    transform: `translate(${PAD.l}, ${H - 8})`
+  }, /*#__PURE__*/React.createElement("line", {
+    x1: "0",
+    x2: "18",
+    y1: "0",
+    y2: "0",
+    stroke: "var(--brass)",
+    strokeWidth: "2.5"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "22",
+    y: "4",
+    fill: "var(--muted)",
+    style: {
+      font: "11px Inter,sans-serif"
+    }
+  }, "Totaal"), phases.map((p, i) => parseFloat(p.principal) > 0 && /*#__PURE__*/React.createElement("g", {
+    key: i,
+    transform: `translate(${80 + i * 90}, 0)`
+  }, /*#__PURE__*/React.createElement("line", {
+    x1: "0",
+    x2: "14",
+    y1: "0",
+    y2: "0",
+    stroke: colors[i],
+    strokeWidth: "1.5",
+    strokeDasharray: "5,4",
+    opacity: "0.6"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "18",
+    y: "4",
+    fill: "var(--muted)",
+    style: {
+      font: "11px Inter,sans-serif"
+    }
+  }, p.label)))));
+}
+
+/* ---- gecombineerde grafiek: portefeuille vs studieschuld ---- */
+function CombinedChart({
+  combined,
+  years
+}) {
+  const W = 680,
+    H = 280,
+    PAD = {
+      t: 20,
+      r: 20,
+      b: 44,
+      l: 82
+    };
+  const iW = W - PAD.l - PAD.r,
+    iH = H - PAD.t - PAD.b;
+  const allV = combined.rows.flatMap(r => [r.loan, r.port]).filter(v => isFinite(v) && v > 0);
+  if (!allV.length) return null;
+  const maxV = Math.max(...allV) * 1.05;
+  const minV = 0;
+  const xOf = yr => PAD.l + yr / years * iW;
+  const yOf = v => PAD.t + iH - Math.max(0, Math.min(1, (v - minV) / (maxV - minV))) * iH;
+  const loanPath = combined.rows.map((r, i) => `${i === 0 ? "M" : "L"}${xOf(r.year)},${yOf(r.loan)}`).join(" ");
+  const portPath = combined.rows.map((r, i) => `${i === 0 ? "M" : "L"}${xOf(r.year)},${yOf(r.port)}`).join(" ");
+  const ticks = 5;
+  const yTicks = Array.from({
+    length: ticks + 1
+  }, (_, i) => minV + (maxV - minV) * (i / ticks));
+  const xTicks = combined.rows.filter((_, i) => i % Math.max(1, Math.floor(years / 10)) === 0);
+  const cx = combined.crossover;
+  return /*#__PURE__*/React.createElement("svg", {
+    viewBox: `0 0 ${W} ${H}`,
+    style: {
+      width: "100%",
+      maxWidth: W,
+      display: "block",
+      overflow: "visible",
+      marginTop: 16
+    }
+  }, yTicks.map((v, i) => /*#__PURE__*/React.createElement("g", {
+    key: i
+  }, /*#__PURE__*/React.createElement("line", {
+    x1: PAD.l,
+    x2: W - PAD.r,
+    y1: yOf(v),
+    y2: yOf(v),
+    stroke: "var(--line)",
+    strokeWidth: "1"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: PAD.l - 8,
+    y: yOf(v) + 4,
+    textAnchor: "end",
+    fill: "var(--faint)",
+    style: {
+      font: "11px 'IBM Plex Mono',monospace"
+    }
+  }, v >= 1000 ? "€" + Math.round(v / 1000) + "k" : "€" + Math.round(v)))), xTicks.map(r => /*#__PURE__*/React.createElement("text", {
+    key: r.year,
+    x: xOf(r.year),
+    y: H - PAD.b + 18,
+    textAnchor: "middle",
+    fill: "var(--faint)",
+    style: {
+      font: "11px 'IBM Plex Mono',monospace"
+    }
+  }, new Date().getFullYear() + r.year)), combined.rows.length > 1 && (() => {
+    const above = combined.rows.map((r, i) => `${i === 0 ? "M" : "L"}${xOf(r.year)},${yOf(Math.max(r.loan, r.port))}`).join(" ");
+    const below = [...combined.rows].reverse().map((r, i) => `${i === 0 ? "M" : "L"}${xOf(r.year)},${yOf(Math.min(r.loan, r.port))}`).join(" ");
+    return /*#__PURE__*/React.createElement("path", {
+      d: above + " " + below + " Z",
+      fill: "var(--brass)",
+      opacity: "0.06"
+    });
+  })(), /*#__PURE__*/React.createElement("path", {
+    d: loanPath,
+    fill: "none",
+    stroke: "var(--loss)",
+    strokeWidth: "2.5",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }), /*#__PURE__*/React.createElement("path", {
+    d: portPath,
+    fill: "none",
+    stroke: "var(--gain)",
+    strokeWidth: "2.5",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  }), cx != null && cx > 0 && cx <= years && (() => {
+    const x = xOf(cx);
+    const crossVal = combined.rows[0].loan * 1; // approx via interpolation
+    const r0 = combined.rows[Math.floor(cx)],
+      r1 = combined.rows[Math.min(Math.ceil(cx), combined.rows.length - 1)];
+    const t = cx - Math.floor(cx);
+    const cv = r0 && r1 ? r0.loan + (r1.loan - r0.loan) * t : 0;
+    const y = yOf(cv);
+    return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("line", {
+      x1: x,
+      x2: x,
+      y1: PAD.t,
+      y2: H - PAD.b,
+      stroke: "var(--brass)",
+      strokeWidth: "1",
+      strokeDasharray: "4,3",
+      opacity: "0.6"
+    }), /*#__PURE__*/React.createElement("circle", {
+      cx: x,
+      cy: y,
+      r: "7",
+      fill: "var(--brass)",
+      opacity: "0.9"
+    }), /*#__PURE__*/React.createElement("text", {
+      x: x + 10,
+      y: y - 8,
+      fill: "var(--brass)",
+      style: {
+        font: "600 11.5px 'IBM Plex Mono',monospace"
+      }
+    }, new Date().getFullYear() + Math.round(cx)));
+  })(), /*#__PURE__*/React.createElement("g", {
+    transform: `translate(${PAD.l},${H - 6})`
+  }, /*#__PURE__*/React.createElement("line", {
+    x1: "0",
+    x2: "18",
+    y1: "0",
+    y2: "0",
+    stroke: "var(--gain)",
+    strokeWidth: "2.5"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "22",
+    y: "4",
+    fill: "var(--muted)",
+    style: {
+      font: "11px Inter,sans-serif"
+    }
+  }, "Portefeuille"), /*#__PURE__*/React.createElement("line", {
+    x1: "110",
+    x2: "128",
+    y1: "0",
+    y2: "0",
+    stroke: "var(--loss)",
+    strokeWidth: "2.5"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "132",
+    y: "4",
+    fill: "var(--muted)",
+    style: {
+      font: "11px Inter,sans-serif"
+    }
+  }, "Studieschuld"), cx != null && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("circle", {
+    cx: "250",
+    cy: "0",
+    r: "4",
+    fill: "var(--brass)"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "258",
+    y: "4",
+    fill: "var(--muted)",
+    style: {
+      font: "11px Inter,sans-serif"
+    }
+  }, "Kruispunt"))));
+}
+
+/* ---- Budget tab ---- */
+/* ---- NL belastingberekening 2025 ---- */
+function calcNLTax(gross) {
+  // Schijven 2025 (box 1)
+  const brackets = [{
+    limit: 38441,
+    rate: 0.3582
+  }, {
+    limit: 76817,
+    rate: 0.3748
+  }, {
+    limit: Infinity,
+    rate: 0.495
+  }];
+  let tax = 0,
+    rem = Math.max(0, gross);
+  let prev = 0;
+  for (const b of brackets) {
+    const slice = Math.min(rem, b.limit - prev);
+    if (slice <= 0) break;
+    tax += slice * b.rate;
+    rem -= slice;
+    prev = b.limit;
+  }
+  // Algemene heffingskorting 2025: max €3.068, afbouw 6.63% boven WML ~€23.303
+  const ahk_max = 3068;
+  const ahk_afb_start = 23303;
+  const ahk = gross <= ahk_afb_start ? ahk_max : Math.max(0, ahk_max - (gross - ahk_afb_start) * 0.0663);
+
+  // Arbeidskorting 2025: max €5.599, opbouw t/m €43.071 dan afbouw 6.51% t/m €124.935
+  let ak = 0;
+  if (gross <= 11491) ak = gross * 0.08231;else if (gross <= 24821) ak = 945 + (gross - 11491) * 0.29861;else if (gross <= 43071) ak = 4926 + (gross - 24821) * 0.03085;else if (gross <= 124935) ak = Math.max(0, 5599 - (gross - 43071) * 0.0651);else ak = 0;
+  const totalKortingen = Math.min(tax, ahk + ak);
+  const netTax = Math.max(0, tax - totalKortingen);
+  const net = gross - netTax;
+  const effectiveRate = gross > 0 ? netTax / gross * 100 : 0;
+  return {
+    gross,
+    tax,
+    netTax,
+    net,
+    ahk,
+    ak,
+    effectiveRate
+  };
+}
+function BudgetTab({
+  budget,
+  setBudget
+}) {
+  const n = v => parseFloat(String(v || "").replace(",", ".")) || 0;
+  const budUid = () => Math.random().toString(36).slice(2, 9);
+  const today = new Date().toISOString().slice(0, 7);
+  const activeMonth = budget.activeMonth || today;
+  const monthData = budget.months && budget.months[activeMonth] || {
+    ...DEFAULT_MONTH_BUDGET
+  };
+
+  /* helpers to update the active month */
+  const setField = (k, v) => setBudget(b => ({
+    ...b,
+    months: {
+      ...b.months,
+      [activeMonth]: {
+        ...(b.months[activeMonth] || DEFAULT_MONTH_BUDGET),
+        [k]: v
+      }
+    }
+  }));
+  const setCat = (id, k, v) => setBudget(b => ({
+    ...b,
+    months: {
+      ...b.months,
+      [activeMonth]: {
+        ...(b.months[activeMonth] || DEFAULT_MONTH_BUDGET),
+        categories: (b.months[activeMonth]?.categories || DEFAULT_MONTH_BUDGET.categories).map(c => c.id === id ? {
+          ...c,
+          [k]: v
+        } : c)
+      }
+    }
+  }));
+  const addCat = () => setBudget(b => {
+    const cur = b.months[activeMonth] || DEFAULT_MONTH_BUDGET;
+    return {
+      ...b,
+      months: {
+        ...b.months,
+        [activeMonth]: {
+          ...cur,
+          categories: [...(cur.categories || []), {
+            id: budUid(),
+            label: "",
+            amount: "",
+            fixed: false
+          }]
+        }
+      }
+    };
+  });
+  const delCat = id => setBudget(b => {
+    const cur = b.months[activeMonth] || DEFAULT_MONTH_BUDGET;
+    return {
+      ...b,
+      months: {
+        ...b.months,
+        [activeMonth]: {
+          ...cur,
+          categories: (cur.categories || []).filter(c => c.id !== id)
+        }
+      }
+    };
+  });
+
+  /* add/copy month helpers */
+  function addMonth(ym, copyFrom) {
+    setBudget(b => {
+      const source = copyFrom && b.months[copyFrom] ? b.months[copyFrom] : DEFAULT_MONTH_BUDGET;
+      const newMonthData = copyFrom ? {
+        ...source,
+        categories: source.categories.map(c => ({
+          ...c,
+          id: budUid()
+        }))
+      } : {
+        ...DEFAULT_MONTH_BUDGET
+      };
+      return {
+        ...b,
+        activeMonth: ym,
+        months: {
+          ...b.months,
+          [ym]: newMonthData
+        }
+      };
+    });
+  }
+  function deleteMonth(ym) {
+    setBudget(b => {
+      const newMonths = {
+        ...b.months
+      };
+      delete newMonths[ym];
+      const keys = Object.keys(newMonths).sort();
+      return {
+        ...b,
+        months: newMonths,
+        activeMonth: keys[keys.length - 1] || today
+      };
+    });
+  }
+
+  /* month selector options */
+  const existingMonths = Object.keys(budget.months || {}).sort().reverse();
+  if (!existingMonths.includes(activeMonth)) existingMonths.unshift(activeMonth);
+
+  /* generate next/prev month strings */
+  function offsetMonth(ym, delta) {
+    const [y, m] = ym.split("-").map(Number);
+    const d = new Date(y, m - 1 + delta, 1);
+    return d.toISOString().slice(0, 7);
+  }
+  const prevMonth = offsetMonth(activeMonth, -1);
+  const nextMonth = offsetMonth(activeMonth, 1);
+  const monthLabel = ym => {
+    const [y, m] = ym.split("-");
+    return new Date(Number(y), Number(m) - 1).toLocaleDateString("nl-NL", {
+      month: "long",
+      year: "numeric"
+    });
+  };
+  const gross = n(monthData.salaryGross);
+  const nlTax = calcNLTax(gross);
+  const netMth = nlTax.net / 12;
+  const cats = monthData.categories || [];
+  const totalCosts = cats.reduce((s, c) => s + n(c.amount), 0);
+  const fixedCosts = cats.filter(c => c.fixed).reduce((s, c) => s + n(c.amount), 0);
+  const varCosts = totalCosts - fixedCosts;
+  const savingsTarget = n(monthData.savingsTarget);
+  const leftover = netMth - totalCosts;
+  const surplus = leftover - savingsTarget;
+  const catColors = ["#6EA8D8", "#C98AC0", "#E2917E", "#9AA0AE", "#B5915A", "#7FB8A0", "#CBA135", "#79C7A0", "#6EA8D8", "#C98AC0"];
+  const donutData = [...cats.filter(c => n(c.amount) > 0).map((c, i) => ({
+    id: c.id,
+    label: c.label || "—",
+    value: n(c.amount),
+    color: catColors[i % catColors.length]
+  })), ...(savingsTarget > 0 ? [{
+    id: "sav",
+    label: "Spaardoel",
+    value: savingsTarget,
+    color: "#79C7A0"
+  }] : []), ...(surplus > 0 ? [{
+    id: "sur",
+    label: "Vrij besteedbaar",
+    value: surplus,
+    color: "#CBA135"
+  }] : [])];
+  const donutTotal = donutData.reduce((s, d) => s + d.value, 0) || 1;
+  const brackets2025 = [{
+    label: "Schijf 1 (t/m €38.441)",
+    rate: "35,82%",
+    rateN: 0.3582,
+    max: 38441
+  }, {
+    label: "Schijf 2 (€38.441–€76.817)",
+    rate: "37,48%",
+    rateN: 0.3748,
+    max: 76817
+  }, {
+    label: "Schijf 3 (>€76.817)",
+    rate: "49,5%",
+    rateN: 0.495,
+    max: Infinity
+  }];
+  return /*#__PURE__*/React.createElement("div", {
+    className: "calc-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "budget-month-bar"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      padding: "7px 11px"
+    },
+    onClick: () => {
+      if (!(budget.months || {})[prevMonth]) addMonth(prevMonth, null);else setBudget(b => ({
+        ...b,
+        activeMonth: prevMonth
+      }));
+    }
+  }, "‹"), /*#__PURE__*/React.createElement("select", {
+    className: "auto-int budget-month-sel",
+    value: activeMonth,
+    onChange: e => {
+      const v = e.target.value;
+      if (v === "__new__") {
+        addMonth(nextMonth, null);
+      } else if (v === "__copy__") {
+        addMonth(nextMonth, activeMonth);
+      } else setBudget(b => ({
+        ...b,
+        activeMonth: v
+      }));
+    }
+  }, existingMonths.map(m => /*#__PURE__*/React.createElement("option", {
+    key: m,
+    value: m
+  }, monthLabel(m))), /*#__PURE__*/React.createElement("option", {
+    disabled: true
+  }, "──────────"), /*#__PURE__*/React.createElement("option", {
+    value: "__new__"
+  }, "+ Nieuwe maand toevoegen"), /*#__PURE__*/React.createElement("option", {
+    value: "__copy__"
+  }, "+ Kopieer huidige maand")), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      padding: "7px 11px"
+    },
+    onClick: () => {
+      if (!(budget.months || {})[nextMonth]) addMonth(nextMonth, null);else setBudget(b => ({
+        ...b,
+        activeMonth: nextMonth
+      }));
+    }
+  }, "›"), Object.keys(budget.months || {}).length > 1 && /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      padding: "7px 11px",
+      color: "var(--loss)",
+      fontSize: 12
+    },
+    onClick: () => {
+      if (window.confirm(`Maand ${monthLabel(activeMonth)} verwijderen?`)) deleteMonth(activeMonth);
+    }
+  }, "verwijder")), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-title"
+  }, "Budget — ", monthLabel(activeMonth)), /*#__PURE__*/React.createElement("div", {
+    className: "calc-desc"
+  }, "Vul je bruto jaarsalaris in. De Nederlandse belastingschijven 2025 worden automatisch toegepast."), /*#__PURE__*/React.createElement("div", {
+    className: "budget-income"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Bruto jaarsalaris (€)"), /*#__PURE__*/React.createElement("input", {
+    value: monthData.salaryGross || "",
+    placeholder: "bv. 45000",
+    inputMode: "decimal",
+    onChange: e => setField("salaryGross", e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "budget-net-box"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Netto per maand"), /*#__PURE__*/React.createElement("div", {
+    className: "budget-net-big"
+  }, eur(netMth)), /*#__PURE__*/React.createElement("div", {
+    className: "lbl",
+    style: {
+      marginTop: 4
+    }
+  }, "Effectief tarief ", nlTax.effectiveRate.toFixed(1), "%"))), gross > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "tax-breakdown"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tax-title"
+  }, "Belastingopbouw 2025"), /*#__PURE__*/React.createElement("div", {
+    className: "tax-rows"
+  }, brackets2025.map((b, i) => {
+    const prev = i === 0 ? 0 : brackets2025[i - 1].max;
+    const slice = Math.max(0, Math.min(gross, b.max) - prev);
+    if (slice <= 0) return null;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "tax-row",
+      key: i
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "tax-label"
+    }, b.label, " · ", b.rate), /*#__PURE__*/React.createElement("span", {
+      className: "tax-base"
+    }, eur(slice), " × ", b.rate), /*#__PURE__*/React.createElement("span", {
+      className: "tax-amt loss"
+    }, "−", eur(slice * b.rateN)));
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "tax-row korting"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "tax-label"
+  }, "Alg. heffingskorting"), /*#__PURE__*/React.createElement("span", {
+    className: "tax-base"
+  }, "korting"), /*#__PURE__*/React.createElement("span", {
+    className: "tax-amt gain"
+  }, "+", eur(nlTax.ahk))), /*#__PURE__*/React.createElement("div", {
+    className: "tax-row korting"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "tax-label"
+  }, "Arbeidskorting"), /*#__PURE__*/React.createElement("span", {
+    className: "tax-base"
+  }, "korting"), /*#__PURE__*/React.createElement("span", {
+    className: "tax-amt gain"
+  }, "+", eur(nlTax.ak))), /*#__PURE__*/React.createElement("div", {
+    className: "tax-row total"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "tax-label"
+  }, "Totale belasting"), /*#__PURE__*/React.createElement("span", {
+    className: "tax-base"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "tax-amt loss"
+  }, "−", eur(nlTax.netTax))), /*#__PURE__*/React.createElement("div", {
+    className: "tax-row total"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "tax-label"
+  }, "Netto jaarsalaris"), /*#__PURE__*/React.createElement("span", {
+    className: "tax-base"
+  }), /*#__PURE__*/React.createElement("span", {
+    className: "tax-amt"
+  }, eur(nlTax.net)))))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Maandelijkse kosten"), /*#__PURE__*/React.createElement("div", {
+    className: "budget-cats"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "budget-cat-h"
+  }, /*#__PURE__*/React.createElement("span", null, "Omschrijving"), /*#__PURE__*/React.createElement("span", null, "Bedrag / mnd"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      textAlign: "center"
+    }
+  }, "Vast"), /*#__PURE__*/React.createElement("span", null)), cats.map(c => /*#__PURE__*/React.createElement("div", {
+    className: "budget-cat-r",
+    key: c.id
+  }, /*#__PURE__*/React.createElement("input", {
+    value: c.label,
+    placeholder: "bv. Huur",
+    onChange: e => setCat(c.id, "label", e.target.value),
+    style: {
+      background: "var(--bg2)",
+      border: "1px solid var(--line2)",
+      borderRadius: 7,
+      color: "var(--ink)",
+      padding: "8px 11px",
+      fontFamily: "Inter,sans-serif",
+      fontSize: 13,
+      outline: "none",
+      width: "100%"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--faint)",
+      fontSize: 13
+    }
+  }, "€"), /*#__PURE__*/React.createElement("input", {
+    value: c.amount,
+    placeholder: "0",
+    inputMode: "decimal",
+    onChange: e => setCat(c.id, "amount", e.target.value),
+    style: {
+      background: "var(--bg2)",
+      border: "1px solid var(--line2)",
+      borderRadius: 7,
+      color: "var(--ink)",
+      padding: "8px 11px",
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 13,
+      outline: "none",
+      width: "100%",
+      textAlign: "right"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "fixed-btn" + (c.fixed ? " on" : ""),
+    onClick: () => setCat(c.id, "fixed", !c.fixed)
+  }, c.fixed ? "vast" : "var")), /*#__PURE__*/React.createElement("button", {
+    className: "xbtn",
+    onClick: () => delCat(c.id)
+  }, "×"))), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      marginTop: 10,
+      alignSelf: "flex-start"
+    },
+    onClick: addCat
+  }, "+ Kostenpost toevoegen"))), netMth > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "loan-pillars"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Netto per maand"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big"
+  }, eur(netMth))), /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Vaste kosten"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big loss"
+  }, eur(fixedCosts))), /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Variabele kosten"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big",
+    style: {
+      color: "var(--loss)"
+    }
+  }, eur(varCosts))), /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Ruimte na kosten"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big " + (leftover >= 0 ? "gain" : "loss")
+  }, eur(leftover)))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Spaardoel"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 16,
+      alignItems: "center",
+      flexWrap: "wrap",
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fld",
+    style: {
+      maxWidth: 200
+    }
+  }, /*#__PURE__*/React.createElement("label", null, "Maandelijks spaardoel (€)"), /*#__PURE__*/React.createElement("input", {
+    value: monthData.savingsTarget || "",
+    placeholder: "bv. 500",
+    inputMode: "decimal",
+    onChange: e => setField("savingsTarget", e.target.value)
+  })), savingsTarget > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 13,
+      color: surplus >= 0 ? "var(--gain)" : "var(--loss)"
+    }
+  }, surplus >= 0 ? `✓ +${eur(surplus)} vrij besteedbaar` : `✗ ${eur(Math.abs(surplus))} tekort`)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 24
+    }
+  }, /*#__PURE__*/React.createElement(BudgetDonut, {
+    data: donutData,
+    total: donutTotal,
+    center: eur(netMth)
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexDirection: "column",
+      gap: 8,
+      flex: 1,
+      minWidth: 0
+    }
+  }, donutData.map(d => /*#__PURE__*/React.createElement("div", {
+    key: d.id,
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 9,
+      fontSize: 12.5
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 9,
+      height: 9,
+      borderRadius: 2,
+      background: d.color,
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--ink)",
+      flex: 1,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
+    }
+  }, d.label), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: "var(--muted)",
+      flexShrink: 0
+    }
+  }, eur(d.value)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: "var(--faint)",
+      fontSize: 11,
+      flexShrink: 0
+    }
+  }, Math.round(d.value / donutTotal * 100), "%"))))))));
+}
+
+/* ---- uitgaven tracker ---- */
+function TransactionsTab({
+  transactions,
+  setTransactions,
+  budget
+}) {
+  const tuid = () => Math.random().toString(36).slice(2, 9);
+  const today = new Date().toISOString().slice(0, 10);
+  const n = v => parseFloat(String(v || "").replace(",", ".")) || 0;
+  const [form, setForm] = React.useState({
+    date: today,
+    amount: "",
+    category: "",
+    note: "",
+    type: "uitgave"
+  });
+  const [showForm, setShowForm] = React.useState(false);
+  const [filterMonth, setFilterMonth] = React.useState(today.slice(0, 7));
+  const [filterCat, setFilterCat] = React.useState("alle");
+  const [editId, setEditId] = React.useState(null);
+  const [sortField, setSortField] = React.useState("date");
+  const [sortDir, setSortDir] = React.useState("desc");
+  const activeMon = budget.activeMonth || new Date().toISOString().slice(0, 7);
+  const activeBudget = budget.months && budget.months[activeMon] || DEFAULT_MONTH_BUDGET;
+  const budgetCats = activeBudget.categories.map(c => c.label).filter(Boolean);
+  const allCats = [...new Set([...budgetCats, ...transactions.map(t => t.category).filter(Boolean)])].sort();
+  function saveForm() {
+    const amt = parseFloat(String(form.amount).replace(",", "."));
+    if (isNaN(amt) || amt <= 0) return;
+    const entry = {
+      ...form,
+      amount: amt,
+      id: editId || tuid()
+    };
+    if (editId) {
+      setTransactions(prev => prev.map(t => t.id === editId ? entry : t));
+      setEditId(null);
+    } else {
+      setTransactions(prev => [entry, ...prev]);
+    }
+    setForm({
+      date: today,
+      amount: "",
+      category: form.category,
+      note: "",
+      type: "uitgave"
+    });
+    setShowForm(false);
+  }
+  function startEdit(t) {
+    setForm({
+      date: t.date,
+      amount: String(t.amount),
+      category: t.category || "",
+      note: t.note || "",
+      type: t.type || "uitgave"
+    });
+    setEditId(t.id);
+    setShowForm(true);
+  }
+  function del(id) {
+    setTransactions(prev => prev.filter(t => t.id !== id));
+  }
+  function toggleSort(f) {
+    if (sortField === f) setSortDir(d => d === "asc" ? "desc" : "asc");else {
+      setSortField(f);
+      setSortDir("desc");
+    }
+  }
+
+  /* filter + sort */
+  const filtered = transactions.filter(t => t.date && t.date.startsWith(filterMonth)).filter(t => filterCat === "alle" || t.category === filterCat).sort((a, b) => {
+    let va = a[sortField],
+      vb = b[sortField];
+    if (sortField === "amount") {
+      va = Number(va);
+      vb = Number(vb);
+    }
+    if (va < vb) return sortDir === "asc" ? -1 : 1;
+    if (va > vb) return sortDir === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  /* totals for this month */
+  const monthTrans = transactions.filter(t => t.date && t.date.startsWith(filterMonth));
+  const totalOut = monthTrans.filter(t => t.type !== "inkomst").reduce((s, t) => s + n(t.amount), 0);
+  const totalIn = monthTrans.filter(t => t.type === "inkomst").reduce((s, t) => s + n(t.amount), 0);
+
+  /* budget comparison per category */
+  const budgetMap = {};
+  activeBudget.categories.forEach(c => {
+    if (c.label) budgetMap[c.label] = n(c.amount);
+  });
+  const spentByCat = {};
+  monthTrans.filter(t => t.type !== "inkomst").forEach(t => {
+    if (t.category) spentByCat[t.category] = (spentByCat[t.category] || 0) + n(t.amount);
+  });
+
+  /* all months present in data for the selector */
+  const months = [...new Set(transactions.map(t => t.date && t.date.slice(0, 7)).filter(Boolean))].sort().reverse();
+  if (!months.includes(filterMonth)) months.unshift(filterMonth);
+  const sortArrow = f => sortField === f ? sortDir === "asc" ? " ↑" : " ↓" : "";
+  return /*#__PURE__*/React.createElement("div", {
+    className: "calc-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "trans-bar"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10,
+      alignItems: "center",
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("select", {
+    className: "auto-int",
+    value: filterMonth,
+    onChange: e => setFilterMonth(e.target.value)
+  }, months.map(m => /*#__PURE__*/React.createElement("option", {
+    key: m,
+    value: m
+  }, m))), /*#__PURE__*/React.createElement("select", {
+    className: "auto-int",
+    value: filterCat,
+    onChange: e => setFilterCat(e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "alle"
+  }, "Alle categorieën"), allCats.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c,
+    value: c
+  }, c)))), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    onClick: () => {
+      setEditId(null);
+      setForm({
+        date: today,
+        amount: "",
+        category: "",
+        note: "",
+        type: "uitgave"
+      });
+      setShowForm(s => !s);
+    }
+  }, showForm && !editId ? "Annuleren" : "+ Transactie")), showForm && /*#__PURE__*/React.createElement("div", {
+    className: "form",
+    style: {
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "form-head"
+  }, editId ? "Transactie bewerken" : "Nieuwe transactie"), /*#__PURE__*/React.createElement("div", {
+    className: "form-row",
+    style: {
+      gridTemplateColumns: "1fr 1fr 1fr auto"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Type"), /*#__PURE__*/React.createElement("select", {
+    className: "auto-int",
+    style: {
+      width: "100%"
+    },
+    value: form.type,
+    onChange: e => setForm({
+      ...form,
+      type: e.target.value
+    })
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "uitgave"
+  }, "Uitgave"), /*#__PURE__*/React.createElement("option", {
+    value: "inkomst"
+  }, "Inkomst"))), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Bedrag (€)"), /*#__PURE__*/React.createElement("input", {
+    value: form.amount,
+    placeholder: "0,00",
+    inputMode: "decimal",
+    onChange: e => setForm({
+      ...form,
+      amount: e.target.value
+    }),
+    onKeyDown: e => e.key === "Enter" && saveForm()
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Datum"), /*#__PURE__*/React.createElement("input", {
+    type: "date",
+    value: form.date,
+    onChange: e => setForm({
+      ...form,
+      date: e.target.value
+    })
+  })), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    style: {
+      alignSelf: "flex-end"
+    },
+    onClick: saveForm
+  }, editId ? "Opslaan" : "Toevoegen")), /*#__PURE__*/React.createElement("div", {
+    className: "form-row",
+    style: {
+      gridTemplateColumns: "1fr 1fr"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Categorie"), /*#__PURE__*/React.createElement("input", {
+    list: "cat-list",
+    value: form.category,
+    placeholder: "bv. Boodschappen",
+    onChange: e => setForm({
+      ...form,
+      category: e.target.value
+    })
+  }), /*#__PURE__*/React.createElement("datalist", {
+    id: "cat-list"
+  }, allCats.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c,
+    value: c
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Omschrijving (optioneel)"), /*#__PURE__*/React.createElement("input", {
+    value: form.note,
+    placeholder: "bv. Albert Heijn",
+    onChange: e => setForm({
+      ...form,
+      note: e.target.value
+    }),
+    onKeyDown: e => e.key === "Enter" && saveForm()
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "loan-pillars",
+    style: {
+      gridTemplateColumns: "1fr 1fr 1fr"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Uitgaven ", filterMonth), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big loss"
+  }, eur(totalOut))), /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Inkomsten ", filterMonth), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big gain"
+  }, eur(totalIn))), /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Saldo"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big " + (totalIn - totalOut >= 0 ? "gain" : "loss")
+  }, eur(totalIn - totalOut)))), Object.keys(budgetMap).length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Begroting vs. werkelijk — ", filterMonth), /*#__PURE__*/React.createElement("div", {
+    className: "bvg-rows"
+  }, Object.entries(budgetMap).map(([cat, bgt]) => {
+    const spent = spentByCat[cat] || 0;
+    const pct = bgt > 0 ? Math.min(100, spent / bgt * 100) : 0;
+    const over = spent > bgt;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "bvg-row",
+      key: cat
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "bvg-label"
+    }, cat), /*#__PURE__*/React.createElement("div", {
+      className: "bvg-bar-track"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "bvg-bar",
+      style: {
+        width: pct + "%",
+        background: over ? "var(--loss)" : "var(--gain)"
+      }
+    })), /*#__PURE__*/React.createElement("div", {
+      className: "bvg-amt " + (over ? "loss" : "gain")
+    }, eur(spent)), /*#__PURE__*/React.createElement("div", {
+      className: "bvg-budget"
+    }, "/ ", eur(bgt)), /*#__PURE__*/React.createElement("div", {
+      className: "bvg-diff " + (over ? "loss" : "gain")
+    }, over ? "−" + eur(spent - bgt) : "+" + eur(bgt - spent)));
+  }), Object.keys(spentByCat).filter(c => !budgetMap[c]).map(cat => /*#__PURE__*/React.createElement("div", {
+    className: "bvg-row",
+    key: cat
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bvg-label",
+    style: {
+      color: "var(--faint)"
+    }
+  }, cat, " ", /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11
+    }
+  }, "(geen begroting)")), /*#__PURE__*/React.createElement("div", {
+    className: "bvg-bar-track"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "bvg-bar",
+    style: {
+      width: "100%",
+      background: "var(--faint)"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "bvg-amt"
+  }, eur(spentByCat[cat])), /*#__PURE__*/React.createElement("div", {
+    className: "bvg-budget"
+  }, "/ —"), /*#__PURE__*/React.createElement("div", {
+    className: "bvg-diff"
+  }))))), /*#__PURE__*/React.createElement("div", {
+    className: "holds"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "trans-h"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "th-btn",
+    onClick: () => toggleSort("date")
+  }, "Datum", sortArrow("date")), /*#__PURE__*/React.createElement("div", null, "Omschrijving"), /*#__PURE__*/React.createElement("div", {
+    className: "th-btn",
+    onClick: () => toggleSort("category")
+  }, "Categorie", sortArrow("category")), /*#__PURE__*/React.createElement("div", {
+    className: "num th-btn",
+    onClick: () => toggleSort("amount")
+  }, "Bedrag", sortArrow("amount")), /*#__PURE__*/React.createElement("div", null)), filtered.length === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "empty",
+    style: {
+      padding: "32px 20px"
+    }
+  }, /*#__PURE__*/React.createElement("p", null, "Nog geen transacties voor ", filterMonth, ". Klik op \"+ Transactie\" om te beginnen.")), filtered.map(t => /*#__PURE__*/React.createElement("div", {
+    className: "trans-r",
+    key: t.id
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "num-mono",
+    style: {
+      fontSize: 12,
+      color: "var(--muted)"
+    }
+  }, t.date), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap"
+    }
+  }, t.note || /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--faint)"
+    }
+  }, "—")), /*#__PURE__*/React.createElement("div", null, t.category && /*#__PURE__*/React.createElement("span", {
+    className: "cat-chip"
+  }, t.category)), /*#__PURE__*/React.createElement("div", {
+    className: "num num-mono " + (t.type === "inkomst" ? "gain" : "loss")
+  }, t.type === "inkomst" ? "+" : "−", eur(n(t.amount))), /*#__PURE__*/React.createElement("div", {
+    className: "xcell"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "xbtn ebtn",
+    onClick: () => startEdit(t),
+    title: "Bewerken"
+  }, "✎"), /*#__PURE__*/React.createElement("button", {
+    className: "xbtn",
+    onClick: () => del(t.id),
+    title: "Verwijderen"
+  }, "×"))))));
+}
+
+/* ---- import vanuit PortfolioDashboard ---- */
+function ImportPanel({
+  onImport
+}) {
+  const [show, setShow] = useState(false);
+  const [json, setJson] = useState("");
+  const [err, setErr] = useState("");
+  const [success, setSuccess] = useState(false);
+  function doImport() {
+    setErr("");
+    try {
+      const data = JSON.parse(json.trim());
+      if (!data.version || !data.portfolios) {
+        setErr("Ongeldige export — zorg dat je de volledige JSON plakt.");
+        return;
+      }
+      onImport(data);
+      setSuccess(true);
+      setJson("");
+      setTimeout(() => {
+        setShow(false);
+        setSuccess(false);
+      }, 2000);
+    } catch (e) {
+      setErr("Ongeldige JSON — controleer of je de volledige tekst hebt gekopieerd.");
+    }
+  }
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      fontSize: 12,
+      padding: "7px 13px"
+    },
+    onClick: () => {
+      setShow(true);
+      setErr("");
+      setJson("");
+      setSuccess(false);
+    }
+  }, "⬆ Importeer data"), show && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,.75)",
+      zIndex: 999,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    },
+    onClick: () => setShow(false)
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "var(--surface2)",
+      border: "1px solid var(--line2)",
+      borderRadius: 14,
+      padding: 28,
+      maxWidth: 560,
+      width: "90%",
+      display: "flex",
+      flexDirection: "column",
+      gap: 14
+    },
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'Fraunces',serif",
+      fontSize: 18,
+      fontWeight: 600
+    }
+  }, "Importeer vanuit PortfolioDashboard"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "var(--muted)",
+      lineHeight: 1.6
+    }
+  }, "Klik in het PortfolioDashboard op ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: "var(--ink)"
+    }
+  }, "\"⬇ Exporteer data\""), " rechtsboven, kopieer de JSON en plak hem hieronder."), /*#__PURE__*/React.createElement("textarea", {
+    value: json,
+    onChange: e => {
+      setJson(e.target.value);
+      setErr("");
+    },
+    placeholder: "{\"version\":1,\"portfolios\":[...],...}",
+    style: {
+      minHeight: 180,
+      background: "var(--bg2)",
+      border: "1px solid var(--line2)",
+      borderRadius: 8,
+      color: "var(--ink)",
+      padding: 12,
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 11.5,
+      resize: "vertical",
+      outline: "none"
+    }
+  }), err && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "var(--loss)",
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 12
+    }
+  }, err), success && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "var(--gain)",
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 12
+    }
+  }, "✓ Data succesvol geïmporteerd!"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 10
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    onClick: doImport,
+    disabled: !json.trim()
+  }, "Importeren"), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => setShow(false)
+  }, "Annuleren")))));
+}
+
+/* ---- export ---- */
+function ExportButton({
+  portfolios,
+  loan,
+  portRate,
+  budget,
+  transactions,
+  apiKey,
+  auto,
+  intervalMin
+}) {
+  const [copied, setCopied] = useState(false);
+  const [showPanel, setShowPanel] = useState(false);
+  function exportData() {
+    const data = {
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      portfolios,
+      loan,
+      portRate,
+      budget,
+      transactions,
+      settings: {
+        apiKey,
+        auto,
+        intervalMin
+      }
+    };
+    const json = JSON.stringify(data, null, 2);
+    navigator.clipboard.writeText(json).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
+    }).catch(() => {
+      // fallback: show in textarea
+      setShowPanel(true);
+    });
+  }
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      fontSize: 12,
+      padding: "7px 13px"
+    },
+    onClick: exportData
+  }, copied ? "✓ Gekopieerd!" : "⬇ Exporteer data"), showPanel && /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      inset: 0,
+      background: "rgba(0,0,0,.7)",
+      zIndex: 999,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center"
+    },
+    onClick: () => setShowPanel(false)
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "var(--surface2)",
+      border: "1px solid var(--line2)",
+      borderRadius: 12,
+      padding: 24,
+      maxWidth: 560,
+      width: "90%",
+      maxHeight: "80vh",
+      display: "flex",
+      flexDirection: "column",
+      gap: 12
+    },
+    onClick: e => e.stopPropagation()
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: "var(--muted)"
+    }
+  }, "Kopieer de onderstaande JSON en plak hem in een ander apparaat via \"Importeer data\"."), /*#__PURE__*/React.createElement("textarea", {
+    readOnly: true,
+    value: JSON.stringify({
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      portfolios,
+      loan,
+      portRate,
+      budget,
+      transactions,
+      settings: {
+        apiKey,
+        auto,
+        intervalMin
+      }
+    }, null, 2),
+    style: {
+      flex: 1,
+      minHeight: 300,
+      background: "var(--bg2)",
+      border: "1px solid var(--line2)",
+      borderRadius: 8,
+      color: "var(--ink)",
+      padding: 12,
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 11,
+      resize: "none"
+    },
+    onFocus: e => e.target.select()
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    onClick: () => setShowPanel(false)
+  }, "Sluiten"))));
+}
+
+/* ---- account tab ---- */
+function AccountTab() {
+  const sb = typeof getSb === 'function' ? getSb() : null;
+  const [user, setUser] = useState(null);
+  const [displayName, setDisplayName] = useState('');
+  const [email, setEmail] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [passMsg, setPassMsg] = useState('');
+  const [profileMsg, setProfileMsg] = useState('');
+  const [passErr, setPassErr] = useState('');
+  const [profileErr, setProfileErr] = useState('');
+  const [apiKey, setApiKey] = useState(() => {
+    try {
+      return localStorage.getItem('fb:anthropic_key') || '';
+    } catch (e) {
+      return '';
+    }
+  });
+  const [apiMsg, setApiMsg] = useState('');
+  const [resetSent, setResetSent] = useState(false);
+  useEffect(() => {
+    if (!sb) return;
+    sb.auth.getUser().then(({
+      data
+    }) => {
+      if (data && data.user) {
+        setUser(data.user);
+        setEmail(data.user.email || '');
+        setDisplayName(data.user.user_metadata && data.user.user_metadata.display_name || '');
+      }
+    });
+  }, []);
+  async function saveProfile() {
+    if (!sb) return;
+    setSaving(true);
+    setProfileMsg('');
+    setProfileErr('');
+    const updates = {
+      data: {
+        display_name: displayName.trim()
+      }
+    };
+    if (email.trim() && user && email.trim() !== user.email) updates.email = email.trim();
+    const {
+      error
+    } = await sb.auth.updateUser(updates);
+    if (error) {
+      setProfileErr('Fout: ' + error.message);
+    } else {
+      setProfileMsg('Profiel opgeslagen!');
+    }
+    setSaving(false);
+  }
+  async function sendPasswordReset() {
+    if (!sb || !user) return;
+    setPassMsg('');
+    setPassErr('');
+    setSaving(true);
+    const {
+      error
+    } = await sb.auth.resetPasswordForEmail(user.email, {
+      redirectTo: window.location.href
+    });
+    if (error) {
+      setPassErr('Fout: ' + error.message);
+    } else {
+      setPassMsg('Reset-link verstuurd naar ' + user.email + '. Klik op de link in de e-mail om een nieuw wachtwoord in te stellen.');
+      setResetSent(true);
+    }
+    setSaving(false);
+  }
+  async function logout() {
+    if (sb) await sb.auth.signOut();
+  }
+  function saveApiKey() {
+    try {
+      localStorage.setItem('fb:anthropic_key', apiKey.trim());
+      setApiMsg('Key opgeslagen!');
+      setTimeout(() => setApiMsg(''), 2500);
+    } catch (e) {}
+  }
+  const joined = user && user.created_at ? new Date(user.created_at).toLocaleDateString('nl-NL', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }) : '—';
+  return /*#__PURE__*/React.createElement("div", {
+    className: "calc-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-title"
+  }, "Mijn account"), /*#__PURE__*/React.createElement("div", {
+    className: "acc-grid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "acc-avatar"
+  }, (displayName || email || '?')[0].toUpperCase()), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "acc-name"
+  }, displayName || '(geen naam ingesteld)'), /*#__PURE__*/React.createElement("div", {
+    className: "acc-email"
+  }, email), /*#__PURE__*/React.createElement("div", {
+    className: "acc-joined"
+  }, "Lid sinds ", joined)))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Profiel bewerken"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 14,
+      maxWidth: 460
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Weergavenaam"), /*#__PURE__*/React.createElement("input", {
+    value: displayName,
+    placeholder: "Jan de Vries",
+    onChange: e => setDisplayName(e.target.value),
+    onKeyDown: e => e.key === 'Enter' && saveProfile()
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "E-mailadres"), /*#__PURE__*/React.createElement("input", {
+    type: "email",
+    value: email,
+    placeholder: "jij@voorbeeld.nl",
+    onChange: e => setEmail(e.target.value),
+    onKeyDown: e => e.key === 'Enter' && saveProfile()
+  })), profileErr && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'var(--loss)',
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 12
+    }
+  }, profileErr), profileMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'var(--gain)',
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 12
+    }
+  }, "✓ ", profileMsg), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    style: {
+      alignSelf: 'flex-start'
+    },
+    onClick: saveProfile,
+    disabled: saving
+  }, saving ? 'Opslaan...' : 'Profiel opslaan'))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Wachtwoord wijzigen"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 14,
+      maxWidth: 460
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: 'var(--muted)',
+      lineHeight: 1.6
+    }
+  }, "Veilig wachtwoord wijzigen gaat via e-mail. Klik op de knop hieronder — je ontvangt een beveiligde link op ", /*#__PURE__*/React.createElement("b", {
+    style: {
+      color: 'var(--ink)'
+    }
+  }, email), ". Na het klikken op die link kun je een nieuw wachtwoord instellen."), passErr && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'var(--loss)',
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 12
+    }
+  }, passErr), passMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'var(--gain)',
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 12,
+      lineHeight: 1.5
+    }
+  }, "✓ ", passMsg), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    style: {
+      alignSelf: 'flex-start'
+    },
+    onClick: sendPasswordReset,
+    disabled: saving || resetSent
+  }, saving ? 'Versturen...' : resetSent ? '✓ Reset-link verstuurd' : '✉ Stuur reset-link per e-mail'), resetSent && /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      alignSelf: 'flex-start',
+      fontSize: 12
+    },
+    onClick: () => {
+      setResetSent(false);
+      setPassMsg('');
+    }
+  }, "Opnieuw versturen"))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Anthropic API-key"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 14,
+      maxWidth: 460
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-desc",
+    style: {
+      marginBottom: 0
+    }
+  }, "De API-key wordt gebruikt voor live koersen, zoeken op bedrijfsnaam en de DeGiro-import. Haal gratis een key op via", ' ', /*#__PURE__*/React.createElement("a", {
+    href: "https://console.anthropic.com",
+    target: "_blank",
+    rel: "noopener",
+    style: {
+      color: 'var(--brass)'
+    }
+  }, "console.anthropic.com"), "."), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "API-key"), /*#__PURE__*/React.createElement("input", {
+    type: "password",
+    value: apiKey,
+    placeholder: "sk-ant-...",
+    onChange: e => setApiKey(e.target.value),
+    onKeyDown: e => e.key === 'Enter' && saveApiKey()
+  })), apiMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'var(--gain)',
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 12
+    }
+  }, "✓ ", apiMsg), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    style: {
+      alignSelf: 'flex-start'
+    },
+    onClick: saveApiKey
+  }, "Key opslaan"))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Sessie beëindigen"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: 'var(--muted)',
+      marginBottom: 16,
+      lineHeight: 1.6
+    }
+  }, "Je data wordt in de cloud bewaard. Na uitloggen kun je opnieuw inloggen op elk apparaat."), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      color: 'var(--loss)',
+      borderColor: 'var(--loss)'
+    },
+    onClick: logout
+  }, "Uitloggen")));
+}
+
+/* ---- hand-rolled donut (geen externe chart-library) ---- */
+function Donut({
+  data
+}) {
+  const r = 46,
+    sw = 16,
+    c = 2 * Math.PI * r;
+  let acc = 0;
+  return /*#__PURE__*/React.createElement("svg", {
+    width: "120",
+    height: "120",
+    viewBox: "0 0 120 120",
+    style: {
+      flex: "none"
+    }
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "60",
+    cy: "60",
+    r: r,
+    fill: "none",
+    stroke: "var(--line)",
+    strokeWidth: sw
+  }), data.map(d => {
+    const len = d.share / 100 * c;
+    const seg = /*#__PURE__*/React.createElement("circle", {
+      key: d.id,
+      cx: "60",
+      cy: "60",
+      r: r,
+      fill: "none",
+      stroke: d.color,
+      strokeWidth: sw,
+      strokeDasharray: `${len} ${c - len}`,
+      strokeDashoffset: -acc,
+      transform: "rotate(-90 60 60)",
+      strokeLinecap: "butt"
+    });
+    acc += len;
+    return seg;
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "60",
+    y: "57",
+    textAnchor: "middle",
+    fill: "var(--ink)",
+    style: {
+      font: "600 16px 'IBM Plex Mono',monospace"
+    }
+  }, data.length), /*#__PURE__*/React.createElement("text", {
+    x: "60",
+    y: "73",
+    textAnchor: "middle",
+    fill: "var(--faint)",
+    style: {
+      font: "10px Inter,sans-serif",
+      letterSpacing: ".1em"
+    }
+  }, "POSITIES"));
+}
+
+const SB_TABLE = 'user_data';
+function getAnthropicKey(){try{return localStorage.getItem('fb:anthropic_key')||'';}catch(e){return '';}}
+function saveAnthropicKey(k){try{localStorage.setItem('fb:anthropic_key',k);}catch(e){}}
+let _sb=null;
+function getSb(){
+  if(_sb)return _sb;
+  var L=(typeof window!=='undefined'&&window.supabase)?window.supabase:null;
+  if(!L)return null;
+  try{_sb=L.createClient('https://ceklzeyrlttfbcbceruk.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNla2x6ZXlybHR0ZmJjYmNlcnVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxOTA3ODUsImV4cCI6MjA5ODc2Njc4NX0.j6UxTcmLAhe9KDCxZa_05Ape6PJrU0II368G9HrDZQc');}catch(e){return null;}
+  return _sb;
+}
+async function sbSave(uid,payload){
+  var sb=getSb();if(!sb)return;
+  try{await sb.from(SB_TABLE).upsert({user_id:uid,data:payload,updated_at:new Date().toISOString()},{onConflict:'user_id'});}catch(e){}
+}
+async function sbLoad(uid){
+  var sb=getSb();if(!sb)return null;
+  try{
+    var r=await sb.from(SB_TABLE).select('data,last_seen,updated_at').eq('user_id',uid).single();
+    if(!r.data)return null;
+    try{if(r.data.last_seen)localStorage.setItem('fb:last_seen',r.data.last_seen);if(r.data.updated_at)localStorage.setItem('fb:last_sync',r.data.updated_at);}catch(e){}
+    return r.data.data;
+  }catch(e){return null;}
+}
+async function sbUpdateLastSeen(uid){
+  var sb=getSb();if(!sb||!uid)return;
+  try{await sb.from(SB_TABLE).upsert({user_id:uid,last_seen:new Date().toISOString()},{onConflict:'user_id'});}catch(e){}
+}
+
+function AuthScreen({onLogin}){
+  var [tab,setTab]=React.useState('login');
+  var [email,setEmail]=React.useState('');
+  var [pass,setPass]=React.useState('');
+  var [name,setName]=React.useState('');
+  var [err,setErr]=React.useState('');
+  var [ok,setOk]=React.useState('');
+  var [busy,setBusy]=React.useState(false);
+  var [forgotSent,setForgotSent]=React.useState(false);
+
+  async function doLogin(){
+    setErr('');setOk('');setBusy(true);
+    var r=await getSb().auth.signInWithPassword({email:email.trim(),password:pass});
+    if(r.error){setErr(r.error.message.includes('Invalid login')?'Onjuist e-mailadres of wachtwoord.':r.error.message.includes('not confirmed')?'E-mail nog niet bevestigd.':'Fout: '+r.error.message);setBusy(false);return;}
+    onLogin(r.data.user);setBusy(false);
+  }
+  async function doRegister(){
+    setErr('');setOk('');setBusy(true);
+    var r=await getSb().auth.signUp({email:email.trim(),password:pass,options:{data:{display_name:name.trim()}}});
+    if(r.error){setErr(r.error.message.includes('already')?'Al geregistreerd, probeer in te loggen.':'Fout: '+r.error.message);setBusy(false);return;}
+    if(r.data.session){onLogin(r.data.user);setBusy(false);return;}
+    setOk('Account aangemaakt! Check je e-mail voor een bevestigingslink.');setBusy(false);
+  }
+  async function doForgot(){
+    if(!email.trim()){setErr('Vul eerst je e-mailadres in.');return;}
+    setErr('');setBusy(true);
+    var r=await getSb().auth.resetPasswordForEmail(email.trim(),{redirectTo:window.location.href});
+    if(r.error){setErr('Fout: '+r.error.message);}else{setOk('Reset-link verstuurd naar '+email.trim());setForgotSent(true);}
+    setBusy(false);
+  }
+  var onKey=function(e){if(e.key==='Enter')tab==='login'?doLogin():doRegister();};
+
+  return React.createElement('div',{className:'setup-overlay'},
+    React.createElement('div',{className:'setup-box'},
+      React.createElement('div',{className:'setup-logo'},'Finance Bro',React.createElement('span',null,'.')),
+      React.createElement('div',{className:'auth-tabs'},
+        React.createElement('button',{className:'auth-tab'+(tab==='login'?' on':''),onClick:function(){setTab('login');setErr('');setOk('');setForgotSent(false);}},'Inloggen'),
+        React.createElement('button',{className:'auth-tab'+(tab==='register'?' on':''),onClick:function(){setTab('register');setErr('');setOk('');}},'Account aanmaken')
+      ),
+      tab==='register'&&React.createElement(React.Fragment,null,
+        React.createElement('label',{className:'setup-label'},'Naam'),
+        React.createElement('input',{className:'setup-input',placeholder:'Jan de Vries',value:name,onChange:function(e){setName(e.target.value);},onKeyDown:onKey})
+      ),
+      React.createElement('label',{className:'setup-label'},'E-mailadres'),
+      React.createElement('input',{className:'setup-input',type:'email',placeholder:'jij@voorbeeld.nl',value:email,onChange:function(e){setEmail(e.target.value);},onKeyDown:onKey}),
+      React.createElement('label',{className:'setup-label'},'Wachtwoord'),
+      React.createElement('input',{className:'setup-input',type:'password',placeholder:'••••••••',value:pass,onChange:function(e){setPass(e.target.value);},onKeyDown:onKey}),
+      err&&React.createElement('div',{className:'setup-err'},err),
+      ok&&React.createElement('div',{style:{color:'#79C7A0',fontSize:12,fontFamily:'monospace',marginBottom:8,textAlign:'left',lineHeight:1.5}},ok),
+      React.createElement('button',{className:'setup-btn',onClick:tab==='login'?doLogin:doRegister,disabled:busy},busy?'Even geduld...':(tab==='login'?'Inloggen':'Account aanmaken')),
+      tab==='login'&&React.createElement('span',{className:'forgot-link',onClick:doForgot},forgotSent?'✓ Reset-link verstuurd':'Wachtwoord vergeten?')
+    )
+  );
+}
+
+var SbUserContext=React.createContext(null);
+function useSbUser(){return React.useContext(SbUserContext);}
+
+var _OrigPD=PortfolioDashboard;
+PortfolioDashboard=function(props){
+  return React.createElement(SbUserContext.Provider,{value:props.sbUser},React.createElement(_OrigPD,null));
+};
+
+function AppRoot(){
+  var [user,setUser]=React.useState(null);
+  var [checking,setChecking]=React.useState(true);
+  var [dataKey,setDataKey]=React.useState(0);
+
+  React.useEffect(function(){
+    var fn=function(){setDataKey(function(k){return k+1;});};
+    window.addEventListener('fb-data-loaded',fn);
+    return function(){window.removeEventListener('fb-data-loaded',fn);};
+  },[]);
+
+  React.useEffect(function(){
+    var sb=getSb();
+    if(!sb){setChecking(false);return;}
+    var t=setTimeout(function(){setChecking(false);},6000);
+    sb.auth.getSession().then(function(r){
+      clearTimeout(t);
+      if(r.data&&r.data.session)setUser(r.data.session.user);
+      setChecking(false);
+    }).catch(function(){clearTimeout(t);setChecking(false);});
+    var sub=sb.auth.onAuthStateChange(function(_e,session){
+      setUser(session?session.user:null);
+    });
+    return function(){sub.data.subscription.unsubscribe();};
+  },[]);
+
+  if(checking)return React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'#5C6472',fontFamily:'monospace',fontSize:14,flexDirection:'column',gap:12}},
+    React.createElement('div',null,'Finance Bro laden...'),
+    React.createElement('div',{style:{fontSize:11,color:'#2A3140'}},'Verbinding maken...')
+  );
+  if(!user)return React.createElement(AuthScreen,{onLogin:setUser});
+  return React.createElement(PortfolioDashboard,{sbUser:user,key:dataKey});
+}
+
+// Cloud sync
+(function(){
+  var _orig=localStorage.setItem.bind(localStorage);
+  var KEYS=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions'];
+  var _t=null;
+  localStorage.setItem=function(k,v){
+    _orig(k,v);
+    if(KEYS.indexOf(k)!==-1){
+      clearTimeout(_t);
+      _t=setTimeout(async function(){
+        var sb=getSb();if(!sb)return;
+        try{
+          var r=await sb.auth.getSession();
+          if(!r.data||!r.data.session)return;
+          var p={};
+          KEYS.forEach(function(k2){try{p[k2]=JSON.parse(localStorage.getItem(k2));}catch(e){}});
+          await sbSave(r.data.session.user.id,p);
+        }catch(e){}
+      },1500);
+    }
+  };
+})();
+
+// Data laden bij inloggen
+(function(){
+  var sb=getSb();if(!sb)return;
+  var _loaded=false;
+  sb.auth.onAuthStateChange(async function(event,session){
+    if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session&&!_loaded){
+      _loaded=true;
+      sbUpdateLastSeen(session.user.id);
+      var saved=await sbLoad(session.user.id);
+      if(saved){
+        var KEYS=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions'];
+        var changed=false;
+        KEYS.forEach(function(k){
+          if(saved[k]!==undefined){
+            try{var cur=localStorage.getItem(k),nv=JSON.stringify(saved[k]);if(cur!==nv){localStorage.setItem(k,nv);changed=true;}}catch(e){}
+          }
+        });
+        if(changed)window.dispatchEvent(new CustomEvent('fb-data-loaded'));
+      }
+    }
+    if(event==='SIGNED_OUT')_loaded=false;
+  });
+})();
+
+// Mount: wacht tot React + Supabase geladen zijn
+(function mount(n){
+  n=n||0;
+  if(!window.React||!window.ReactDOM){
+    if(n<200){setTimeout(function(){mount(n+1);},25);}
+    else{console.error('React niet geladen');}
+    return;
+  }
+  // Supabase is optioneel — als het na 3s nog niet er is, toch starten
+  var L=window.supabase||null;
+  if(!L&&n<120){setTimeout(function(){mount(n+1);},25);return;}
+  if(L&&!_sb){try{_sb=L.createClient('https://ceklzeyrlttfbcbceruk.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNla2x6ZXlybHR0ZmJjYmNlcnVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxOTA3ODUsImV4cCI6MjA5ODc2Njc4NX0.j6UxTcmLAhe9KDCxZa_05Ape6PJrU0II368G9HrDZQc');}catch(e){}}
+  ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(AppRoot));
+})();
+  </script>
+</body>
+</html>
