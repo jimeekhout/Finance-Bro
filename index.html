@@ -3835,34 +3835,65 @@ function AccountTab() {
   const [resetSent, setResetSent] = useState(false);
   useEffect(() => {
     if (!sb) return;
+    const timeout = setTimeout(() => setProfileErr('Laden duurt lang — controleer je verbinding.'), 8000);
     sb.auth.getUser().then(({
-      data
+      data,
+      error
     }) => {
+      clearTimeout(timeout);
+      if (error) {
+        setProfileErr('Kon gebruiker niet laden: ' + error.message);
+        return;
+      }
       if (data && data.user) {
         setUser(data.user);
         setEmail(data.user.email || '');
-        setDisplayName(data.user.user_metadata && data.user.user_metadata.display_name || '');
+        // Probeer naam uit user_metadata, anders uit localStorage
+        const metaName = data.user.user_metadata && data.user.user_metadata.display_name;
+        const localName = localStorage.getItem('fb:display_name') || '';
+        setDisplayName(metaName || localName || '');
       }
+    }).catch(e => {
+      clearTimeout(timeout);
+      setProfileErr('Verbindingsfout: ' + e.message);
     });
   }, []);
   async function saveProfile() {
-    if (!sb) return;
+    if (!sb) {
+      setProfileErr('Geen verbinding met Supabase.');
+      return;
+    }
     setSaving(true);
     setProfileMsg('');
     setProfileErr('');
-    const updates = {
-      data: {
-        display_name: displayName.trim()
+    try {
+      // Sla naam ook lokaal op als snelle fallback
+      localStorage.setItem('fb:display_name', displayName.trim());
+      const updates = {
+        data: {
+          display_name: displayName.trim()
+        }
+      };
+      if (email.trim() && user && email.trim() !== user.email) updates.email = email.trim();
+
+      // Timeout van 10 seconden
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Verzoek duurde te lang (timeout). Probeer opnieuw.')), 10000));
+      const {
+        error
+      } = await Promise.race([sb.auth.updateUser(updates), timeoutPromise]);
+      if (error) {
+        setProfileErr('Fout: ' + error.message);
+      } else {
+        setProfileMsg('Profiel opgeslagen!');
+        setTimeout(() => setProfileMsg(''), 3000);
+        // Herlaad gebruikersdata
+        const {
+          data
+        } = await sb.auth.getUser();
+        if (data && data.user) setUser(data.user);
       }
-    };
-    if (email.trim() && user && email.trim() !== user.email) updates.email = email.trim();
-    const {
-      error
-    } = await sb.auth.updateUser(updates);
-    if (error) {
-      setProfileErr('Fout: ' + error.message);
-    } else {
-      setProfileMsg('Profiel opgeslagen!');
+    } catch (e) {
+      setProfileErr(e.message || 'Opslaan mislukt.');
     }
     setSaving(false);
   }
@@ -3871,16 +3902,20 @@ function AccountTab() {
     setPassMsg('');
     setPassErr('');
     setSaving(true);
-    const {
-      error
-    } = await sb.auth.resetPasswordForEmail(user.email, {
-      redirectTo: window.location.href
-    });
-    if (error) {
-      setPassErr('Fout: ' + error.message);
-    } else {
-      setPassMsg('Reset-link verstuurd naar ' + user.email + '. Klik op de link in de e-mail om een nieuw wachtwoord in te stellen.');
-      setResetSent(true);
+    try {
+      const {
+        error
+      } = await sb.auth.resetPasswordForEmail(user.email, {
+        redirectTo: window.location.href
+      });
+      if (error) {
+        setPassErr('Fout: ' + error.message);
+      } else {
+        setPassMsg('Reset-link verstuurd naar ' + user.email + '. Klik op de link in de e-mail om een nieuw wachtwoord in te stellen.');
+        setResetSent(true);
+      }
+    } catch (e) {
+      setPassErr('Verbindingsfout: ' + e.message);
     }
     setSaving(false);
   }
@@ -3899,6 +3934,34 @@ function AccountTab() {
     month: 'long',
     year: 'numeric'
   }) : '—';
+  const lastSeen = (() => {
+    try {
+      const v = localStorage.getItem('fb:last_seen');
+      return v ? new Date(v).toLocaleString('nl-NL', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) : '—';
+    } catch (e) {
+      return '—';
+    }
+  })();
+  const lastSync = (() => {
+    try {
+      const v = localStorage.getItem('fb:last_sync');
+      return v ? new Date(v).toLocaleString('nl-NL', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) : '—';
+    } catch (e) {
+      return '—';
+    }
+  })();
   return /*#__PURE__*/React.createElement("div", {
     className: "calc-wrap"
   }, /*#__PURE__*/React.createElement("div", {
@@ -3915,7 +3978,15 @@ function AccountTab() {
     className: "acc-email"
   }, email), /*#__PURE__*/React.createElement("div", {
     className: "acc-joined"
-  }, "Lid sinds ", joined)))), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", null, "Lid sinds ", joined), lastSeen !== '—' && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 3
+    }
+  }, "Laatste login: ", lastSeen), lastSync !== '—' && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 3
+    }
+  }, "Laatste sync: ", lastSync))))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("h3", null, "Profiel bewerken"), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -3977,7 +4048,7 @@ function AccountTab() {
     style: {
       color: 'var(--ink)'
     }
-  }, email), ". Na het klikken op die link kun je een nieuw wachtwoord instellen."), passErr && /*#__PURE__*/React.createElement("div", {
+  }, email), "."), passErr && /*#__PURE__*/React.createElement("div", {
     style: {
       color: 'var(--loss)',
       fontFamily: "'IBM Plex Mono',monospace",
@@ -4126,7 +4197,6 @@ function Donut({
   }, "POSITIES"));
 }
 
-const SB_TABLE = 'user_data';
 function getAnthropicKey(){try{return localStorage.getItem('fb:anthropic_key')||'';}catch(e){return '';}}
 function saveAnthropicKey(k){try{localStorage.setItem('fb:anthropic_key',k);}catch(e){}}
 let _sb=null;
@@ -4137,10 +4207,9 @@ function getSb(){
   try{_sb=L.createClient('https://ceklzeyrlttfbcbceruk.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNla2x6ZXlybHR0ZmJjYmNlcnVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxOTA3ODUsImV4cCI6MjA5ODc2Njc4NX0.j6UxTcmLAhe9KDCxZa_05Ape6PJrU0II368G9HrDZQc');}catch(e){return null;}
   return _sb;
 }
-async function sbSave(uid,payload){
-  var sb=getSb();if(!sb)return;
-  try{await sb.from(SB_TABLE).upsert({user_id:uid,data:payload,updated_at:new Date().toISOString()},{onConflict:'user_id'});}catch(e){}
-}
+const SB_TABLE='user_data';
+async function sbSave(uid,payload){var sb=getSb();if(!sb)return;try{await sb.from(SB_TABLE).upsert({user_id:uid,data:payload,updated_at:new Date().toISOString()},{onConflict:'user_id'});}catch(e){}}
+async function sbUpdateLastSeen(uid){var sb=getSb();if(!sb||!uid)return;try{await sb.from(SB_TABLE).upsert({user_id:uid,last_seen:new Date().toISOString()},{onConflict:'user_id'});}catch(e){}}
 async function sbLoad(uid){
   var sb=getSb();if(!sb)return null;
   try{
@@ -4150,11 +4219,6 @@ async function sbLoad(uid){
     return r.data.data;
   }catch(e){return null;}
 }
-async function sbUpdateLastSeen(uid){
-  var sb=getSb();if(!sb||!uid)return;
-  try{await sb.from(SB_TABLE).upsert({user_id:uid,last_seen:new Date().toISOString()},{onConflict:'user_id'});}catch(e){}
-}
-
 function AuthScreen({onLogin}){
   var [tab,setTab]=React.useState('login');
   var [email,setEmail]=React.useState('');
@@ -4164,150 +4228,38 @@ function AuthScreen({onLogin}){
   var [ok,setOk]=React.useState('');
   var [busy,setBusy]=React.useState(false);
   var [forgotSent,setForgotSent]=React.useState(false);
-
-  async function doLogin(){
-    setErr('');setOk('');setBusy(true);
-    var r=await getSb().auth.signInWithPassword({email:email.trim(),password:pass});
-    if(r.error){setErr(r.error.message.includes('Invalid login')?'Onjuist e-mailadres of wachtwoord.':r.error.message.includes('not confirmed')?'E-mail nog niet bevestigd.':'Fout: '+r.error.message);setBusy(false);return;}
-    onLogin(r.data.user);setBusy(false);
-  }
-  async function doRegister(){
-    setErr('');setOk('');setBusy(true);
-    var r=await getSb().auth.signUp({email:email.trim(),password:pass,options:{data:{display_name:name.trim()}}});
-    if(r.error){setErr(r.error.message.includes('already')?'Al geregistreerd, probeer in te loggen.':'Fout: '+r.error.message);setBusy(false);return;}
-    if(r.data.session){onLogin(r.data.user);setBusy(false);return;}
-    setOk('Account aangemaakt! Check je e-mail voor een bevestigingslink.');setBusy(false);
-  }
-  async function doForgot(){
-    if(!email.trim()){setErr('Vul eerst je e-mailadres in.');return;}
-    setErr('');setBusy(true);
-    var r=await getSb().auth.resetPasswordForEmail(email.trim(),{redirectTo:window.location.href});
-    if(r.error){setErr('Fout: '+r.error.message);}else{setOk('Reset-link verstuurd naar '+email.trim());setForgotSent(true);}
-    setBusy(false);
-  }
+  async function doLogin(){setErr('');setOk('');setBusy(true);var r=await getSb().auth.signInWithPassword({email:email.trim(),password:pass});if(r.error){setErr(r.error.message.includes('Invalid login')?'Onjuist e-mailadres of wachtwoord.':r.error.message.includes('not confirmed')?'E-mail nog niet bevestigd.':'Fout: '+r.error.message);setBusy(false);return;}onLogin(r.data.user);setBusy(false);}
+  async function doRegister(){setErr('');setOk('');setBusy(true);var r=await getSb().auth.signUp({email:email.trim(),password:pass,options:{data:{display_name:name.trim()}}});if(r.error){setErr(r.error.message.includes('already')?'Al geregistreerd, probeer in te loggen.':'Fout: '+r.error.message);setBusy(false);return;}if(r.data.session){onLogin(r.data.user);setBusy(false);return;}setOk('Account aangemaakt! Check je e-mail voor een bevestigingslink.');setBusy(false);}
+  async function doForgot(){if(!email.trim()){setErr('Vul eerst je e-mailadres in.');return;}setErr('');setBusy(true);var r=await getSb().auth.resetPasswordForEmail(email.trim(),{redirectTo:window.location.href});if(r.error){setErr('Fout: '+r.error.message);}else{setOk('Reset-link verstuurd naar '+email.trim());setForgotSent(true);}setBusy(false);}
   var onKey=function(e){if(e.key==='Enter')tab==='login'?doLogin():doRegister();};
-
-  return React.createElement('div',{className:'setup-overlay'},
-    React.createElement('div',{className:'setup-box'},
-      React.createElement('div',{className:'setup-logo'},'Finance Bro',React.createElement('span',null,'.')),
-      React.createElement('div',{className:'auth-tabs'},
-        React.createElement('button',{className:'auth-tab'+(tab==='login'?' on':''),onClick:function(){setTab('login');setErr('');setOk('');setForgotSent(false);}},'Inloggen'),
-        React.createElement('button',{className:'auth-tab'+(tab==='register'?' on':''),onClick:function(){setTab('register');setErr('');setOk('');}},'Account aanmaken')
-      ),
-      tab==='register'&&React.createElement(React.Fragment,null,
-        React.createElement('label',{className:'setup-label'},'Naam'),
-        React.createElement('input',{className:'setup-input',placeholder:'Jan de Vries',value:name,onChange:function(e){setName(e.target.value);},onKeyDown:onKey})
-      ),
-      React.createElement('label',{className:'setup-label'},'E-mailadres'),
-      React.createElement('input',{className:'setup-input',type:'email',placeholder:'jij@voorbeeld.nl',value:email,onChange:function(e){setEmail(e.target.value);},onKeyDown:onKey}),
-      React.createElement('label',{className:'setup-label'},'Wachtwoord'),
-      React.createElement('input',{className:'setup-input',type:'password',placeholder:'••••••••',value:pass,onChange:function(e){setPass(e.target.value);},onKeyDown:onKey}),
-      err&&React.createElement('div',{className:'setup-err'},err),
-      ok&&React.createElement('div',{style:{color:'#79C7A0',fontSize:12,fontFamily:'monospace',marginBottom:8,textAlign:'left',lineHeight:1.5}},ok),
-      React.createElement('button',{className:'setup-btn',onClick:tab==='login'?doLogin:doRegister,disabled:busy},busy?'Even geduld...':(tab==='login'?'Inloggen':'Account aanmaken')),
-      tab==='login'&&React.createElement('span',{className:'forgot-link',onClick:doForgot},forgotSent?'✓ Reset-link verstuurd':'Wachtwoord vergeten?')
-    )
-  );
+  return React.createElement('div',{className:'setup-overlay'},React.createElement('div',{className:'setup-box'},React.createElement('div',{className:'setup-logo'},'Finance Bro',React.createElement('span',null,'.')),React.createElement('div',{className:'auth-tabs'},React.createElement('button',{className:'auth-tab'+(tab==='login'?' on':''),onClick:function(){setTab('login');setErr('');setOk('');setForgotSent(false);}},'Inloggen'),React.createElement('button',{className:'auth-tab'+(tab==='register'?' on':''),onClick:function(){setTab('register');setErr('');setOk('');}},'Account aanmaken')),tab==='register'&&React.createElement(React.Fragment,null,React.createElement('label',{className:'setup-label'},'Naam'),React.createElement('input',{className:'setup-input',placeholder:'Jan de Vries',value:name,onChange:function(e){setName(e.target.value);},onKeyDown:onKey})),React.createElement('label',{className:'setup-label'},'E-mailadres'),React.createElement('input',{className:'setup-input',type:'email',placeholder:'jij@voorbeeld.nl',value:email,onChange:function(e){setEmail(e.target.value);},onKeyDown:onKey}),React.createElement('label',{className:'setup-label'},'Wachtwoord'),React.createElement('input',{className:'setup-input',type:'password',placeholder:'••••••••',value:pass,onChange:function(e){setPass(e.target.value);},onKeyDown:onKey}),err&&React.createElement('div',{className:'setup-err'},err),ok&&React.createElement('div',{style:{color:'#79C7A0',fontSize:12,fontFamily:'monospace',marginBottom:8,textAlign:'left',lineHeight:1.5}},ok),React.createElement('button',{className:'setup-btn',onClick:tab==='login'?doLogin:doRegister,disabled:busy},busy?'Even geduld...':(tab==='login'?'Inloggen':'Account aanmaken')),tab==='login'&&React.createElement('span',{className:'forgot-link',onClick:doForgot},forgotSent?'✓ Reset-link verstuurd':'Wachtwoord vergeten?')));
 }
-
 var SbUserContext=React.createContext(null);
 function useSbUser(){return React.useContext(SbUserContext);}
-
 var _OrigPD=PortfolioDashboard;
-PortfolioDashboard=function(props){
-  return React.createElement(SbUserContext.Provider,{value:props.sbUser},React.createElement(_OrigPD,null));
-};
-
+PortfolioDashboard=function(props){return React.createElement(SbUserContext.Provider,{value:props.sbUser},React.createElement(_OrigPD,null));};
 function AppRoot(){
   var [user,setUser]=React.useState(null);
   var [checking,setChecking]=React.useState(true);
   var [dataKey,setDataKey]=React.useState(0);
-
+  React.useEffect(function(){var fn=function(){setDataKey(function(k){return k+1;});};window.addEventListener('fb-data-loaded',fn);return function(){window.removeEventListener('fb-data-loaded',fn);};},[]);
   React.useEffect(function(){
-    var fn=function(){setDataKey(function(k){return k+1;});};
-    window.addEventListener('fb-data-loaded',fn);
-    return function(){window.removeEventListener('fb-data-loaded',fn);};
-  },[]);
-
-  React.useEffect(function(){
-    var sb=getSb();
-    if(!sb){setChecking(false);return;}
+    var sb=getSb();if(!sb){setChecking(false);return;}
     var t=setTimeout(function(){setChecking(false);},6000);
-    sb.auth.getSession().then(function(r){
-      clearTimeout(t);
-      if(r.data&&r.data.session)setUser(r.data.session.user);
-      setChecking(false);
-    }).catch(function(){clearTimeout(t);setChecking(false);});
-    var sub=sb.auth.onAuthStateChange(function(_e,session){
-      setUser(session?session.user:null);
-    });
+    sb.auth.getSession().then(function(r){clearTimeout(t);if(r.data&&r.data.session)setUser(r.data.session.user);setChecking(false);}).catch(function(){clearTimeout(t);setChecking(false);});
+    var sub=sb.auth.onAuthStateChange(function(_e,session){setUser(session?session.user:null);});
     return function(){sub.data.subscription.unsubscribe();};
   },[]);
-
-  if(checking)return React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'#5C6472',fontFamily:'monospace',fontSize:14,flexDirection:'column',gap:12}},
-    React.createElement('div',null,'Finance Bro laden...'),
-    React.createElement('div',{style:{fontSize:11,color:'#2A3140'}},'Verbinding maken...')
-  );
+  if(checking)return React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'#5C6472',fontFamily:'monospace',fontSize:14,flexDirection:'column',gap:12}},React.createElement('div',null,'Finance Bro laden...'),React.createElement('div',{style:{fontSize:11,color:'#2A3140'}},'Verbinding maken...'));
   if(!user)return React.createElement(AuthScreen,{onLogin:setUser});
   return React.createElement(PortfolioDashboard,{sbUser:user,key:dataKey});
 }
+(function(){var _orig=localStorage.setItem.bind(localStorage);var KEYS=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions'];var _t=null;localStorage.setItem=function(k,v){_orig(k,v);if(KEYS.indexOf(k)!==-1){clearTimeout(_t);_t=setTimeout(async function(){var sb=getSb();if(!sb)return;try{var r=await sb.auth.getSession();if(!r.data||!r.data.session)return;var p={};KEYS.forEach(function(k2){try{p[k2]=JSON.parse(localStorage.getItem(k2));}catch(e){}});await sbSave(r.data.session.user.id,p);}catch(e){}},1500);}};})();
+(function(){var sb=getSb();if(!sb)return;var _loaded=false;sb.auth.onAuthStateChange(async function(event,session){if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session&&!_loaded){_loaded=true;sbUpdateLastSeen(session.user.id);var saved=await sbLoad(session.user.id);if(saved){var KEYS=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions'];var changed=false;KEYS.forEach(function(k){if(saved[k]!==undefined){try{var cur=localStorage.getItem(k),nv=JSON.stringify(saved[k]);if(cur!==nv){localStorage.setItem(k,nv);changed=true;}}catch(e){}}});if(changed)window.dispatchEvent(new CustomEvent('fb-data-loaded'));}}if(event==='SIGNED_OUT')_loaded=false;});})();
 
-// Cloud sync
-(function(){
-  var _orig=localStorage.setItem.bind(localStorage);
-  var KEYS=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions'];
-  var _t=null;
-  localStorage.setItem=function(k,v){
-    _orig(k,v);
-    if(KEYS.indexOf(k)!==-1){
-      clearTimeout(_t);
-      _t=setTimeout(async function(){
-        var sb=getSb();if(!sb)return;
-        try{
-          var r=await sb.auth.getSession();
-          if(!r.data||!r.data.session)return;
-          var p={};
-          KEYS.forEach(function(k2){try{p[k2]=JSON.parse(localStorage.getItem(k2));}catch(e){}});
-          await sbSave(r.data.session.user.id,p);
-        }catch(e){}
-      },1500);
-    }
-  };
-})();
-
-// Data laden bij inloggen
-(function(){
-  var sb=getSb();if(!sb)return;
-  var _loaded=false;
-  sb.auth.onAuthStateChange(async function(event,session){
-    if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session&&!_loaded){
-      _loaded=true;
-      sbUpdateLastSeen(session.user.id);
-      var saved=await sbLoad(session.user.id);
-      if(saved){
-        var KEYS=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions'];
-        var changed=false;
-        KEYS.forEach(function(k){
-          if(saved[k]!==undefined){
-            try{var cur=localStorage.getItem(k),nv=JSON.stringify(saved[k]);if(cur!==nv){localStorage.setItem(k,nv);changed=true;}}catch(e){}
-          }
-        });
-        if(changed)window.dispatchEvent(new CustomEvent('fb-data-loaded'));
-      }
-    }
-    if(event==='SIGNED_OUT')_loaded=false;
-  });
-})();
-
-// Mount: wacht tot React + Supabase geladen zijn
 (function mount(n){
   n=n||0;
-  if(!window.React||!window.ReactDOM){
-    if(n<200){setTimeout(function(){mount(n+1);},25);}
-    else{console.error('React niet geladen');}
-    return;
-  }
-  // Supabase is optioneel — als het na 3s nog niet er is, toch starten
+  if(!window.React||!window.ReactDOM){if(n<200){setTimeout(function(){mount(n+1);},25);}return;}
   var L=window.supabase||null;
   if(!L&&n<120){setTimeout(function(){mount(n+1);},25);return;}
   if(L&&!_sb){try{_sb=L.createClient('https://ceklzeyrlttfbcbceruk.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNla2x6ZXlybHR0ZmJjYmNlcnVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxOTA3ODUsImV4cCI6MjA5ODc2Njc4NX0.j6UxTcmLAhe9KDCxZa_05Ape6PJrU0II368G9HrDZQc');}catch(e){}}
