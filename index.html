@@ -15,9 +15,10 @@ body { background: #F5F5F0; color: #1A1A18; }
 
 /* ── layout met sidebar ── */
 .app-shell{ display:flex; min-height:100vh; }
-.sidebar{ width:220px; min-height:100vh; background:#0E1118; border-right:1px solid var(--line); display:flex; flex-direction:column; padding:0; flex:none; position:fixed; left:0; top:0; bottom:0; z-index:100; }
+.sidebar{ width:220px; min-height:100vh; background:var(--surface); border-right:1px solid var(--line); display:flex; flex-direction:column; padding:0; flex:none; position:fixed; left:0; top:0; bottom:0; z-index:100; }
 .sidebar-brand{ padding:24px 20px 20px; border-bottom:1px solid var(--line); }
-.sidebar-brand .pf-brand{ font-size:22px; }
+.sidebar-brand .pf-brand{ font-size:22px; color:var(--ink); }
+.sidebar-brand .pf-sub{ color:var(--muted); }
 .sidebar-nav{ flex:1; padding:12px 10px; display:flex; flex-direction:column; gap:4px; overflow-y:auto; }
 .nav-item{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:9px; color:var(--muted); font-size:13.5px; font-family:'Inter',sans-serif; cursor:pointer; transition:.14s; border:none; background:none; width:100%; text-align:left; }
 .nav-item:hover{ color:var(--ink); background:var(--surface); }
@@ -374,10 +375,10 @@ body { background: #F5F5F0; color: #1A1A18; }
 .auth-tab{flex:1;padding:10px;font-size:13.5px;cursor:pointer;background:#0C0F15;color:#8B92A2;border:none;font-family:'Geist Sans','Inter',sans-serif;transition:.14s;}
 .auth-tab.on{background:#1A1F2A;color:#ECEAE3;font-weight:600;}
 .forgot-link{font-size:12px;color:#CBA135;cursor:pointer;text-decoration:underline;margin-top:6px;text-align:right;display:block;}
-.user-badge{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted,#8B92A2);font-family:'IBM Plex Mono',monospace;}
-.user-badge b{color:var(--ink,#ECEAE3);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.logout-btn{background:none;border:1px solid var(--line2,#3A4357);color:var(--faint,#5C6472);border-radius:7px;padding:5px 10px;font-size:11.5px;cursor:pointer;font-family:'IBM Plex Mono',monospace;}
-.logout-btn:hover{color:var(--loss,#E2917E);border-color:var(--loss,#E2917E);}
+.user-badge{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+.user-badge b{color:var(--ink);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.logout-btn{background:none;border:1px solid var(--line2);color:var(--faint);border-radius:7px;padding:5px 10px;font-size:11.5px;cursor:pointer;font-family:'IBM Plex Mono',monospace;}
+.logout-btn:hover{color:var(--loss);border-color:var(--loss);}
 
   </style>
 </head>
