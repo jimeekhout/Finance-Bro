@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #11141B; color: #ECEAE3; }
 
@@ -325,6 +326,7 @@ body { background: #11141B; color: #ECEAE3; }
 .setup-input:focus{border-color:#8C7126;}
 .setup-btn{width:100%;background:#CBA135;color:#1A1206;border:none;border-radius:9px;padding:13px;font-size:14.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:8px;}
 .setup-btn:hover{filter:brightness(1.08);}
+.setup-btn:disabled{opacity:.6;cursor:default;}
 .setup-err{color:#E2917E;font-size:12px;font-family:'IBM Plex Mono',monospace;margin:4px 0 10px;min-height:16px;text-align:left;}
 .auth-tabs{display:flex;gap:0;margin-bottom:22px;border:1px solid #2A3140;border-radius:9px;overflow:hidden;}
 .auth-tab{flex:1;padding:10px;font-size:13.5px;cursor:pointer;background:#0C0F15;color:#8B92A2;border:none;font-family:'Inter',sans-serif;transition:.14s;}
@@ -334,40 +336,17 @@ body { background: #11141B; color: #ECEAE3; }
 .user-badge b{color:var(--ink,#ECEAE3);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .logout-btn{background:none;border:1px solid var(--line2,#3A4357);color:var(--faint,#5C6472);border-radius:7px;padding:5px 10px;font-size:11.5px;cursor:pointer;font-family:'IBM Plex Mono',monospace;}
 .logout-btn:hover{color:var(--loss,#E2917E);border-color:var(--loss,#E2917E);}
-.ttool.on-acc{color:var(--brass);border-color:var(--brass-dim);background:rgba(203,161,53,.08);}
 
+  
   </style>
 </head>
 <body>
   <div id="root"></div>
-
-  <!-- 1. React -->
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-
-  <!-- 2. Supabase (met fallback) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-
-  <!-- 3. Helpers (geen JSX, kan direct) -->
   <script>
-const ANT_KEY_LS = 'fb:anthropic_key';
-function getAnthropicKey() { try { return localStorage.getItem(ANT_KEY_LS) || ''; } catch(e) { return ''; } }
-function saveAnthropicKey(k) { try { localStorage.setItem(ANT_KEY_LS, k); } catch(e) {} }
-function getSbUrl() { return 'https://ceklzeyrlttfbcbceruk.supabase.co'; }
-function getSbKey() { return 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNla2x6ZXlybHR0ZmJjYmNlcnVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxOTA3ODUsImV4cCI6MjA5ODc2Njc4NX0.j6UxTcmLAhe9KDCxZa_05Ape6PJrU0II368G9HrDZQc'; }
-function saveSbCreds() {}
-let _sb = null;
-function getSb() {
-  if (_sb) return _sb;
-  const L = (typeof window !== 'undefined' && window.supabase) ? window.supabase : null;
-  if (!L) return null;
-  try { _sb = L.createClient('https://ceklzeyrlttfbcbceruk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNla2x6ZXlybHR0ZmJjYmNlcnVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxOTA3ODUsImV4cCI6MjA5ODc2Njc4NX0.j6UxTcmLAhe9KDCxZa_05Ape6PJrU0II368G9HrDZQc'); } catch(e) { return null; }
-  return _sb;
-}
-</script>
-
-  <!-- 4. App (getranspileerde JSX) -->
-  <script>const {
+const {
   useState,
   useEffect,
   useMemo,
@@ -1644,18 +1623,7 @@ function PortfolioDashboard() {
     minute: "2-digit"
   }) : "Nog niet bijgewerkt", apiKey && holdings.some(h => h.live) && /*#__PURE__*/React.createElement("span", {
     className: "live-dot"
-  }, "● realtime (US)")), /*#__PURE__*/React.createElement(ImportPanel, {
-    onImport: handleImport
-  }), /*#__PURE__*/React.createElement(ExportButton, {
-    portfolios: portfolios,
-    loan: loan,
-    portRate: portRate,
-    budget: budget,
-    transactions: transactions,
-    apiKey: apiKey,
-    auto: auto,
-    intervalMin: intervalMin
-  }), /*#__PURE__*/React.createElement("button", {
+  }, "● realtime (US)")), /*#__PURE__*/React.createElement("button", {
     className: "btn" + (activeTab === "account" ? " primary" : ""),
     style: {
       fontSize: 12,
@@ -1669,33 +1637,13 @@ function PortfolioDashboard() {
     className: "tabs"
   }, /*#__PURE__*/React.createElement("div", {
     className: "tabs-list"
-  }, portfolios.map(p => renaming && p.id === activeId && activeTab === "portfolio" ? /*#__PURE__*/React.createElement("input", {
-    key: p.id,
-    className: "tab-rename",
-    autoFocus: true,
-    value: renameVal,
-    onChange: e => setRenameVal(e.target.value),
-    onBlur: commitRename,
-    onKeyDown: e => {
-      if (e.key === "Enter") commitRename();
-      if (e.key === "Escape") setRenaming(false);
-    }
-  }) : /*#__PURE__*/React.createElement("button", {
-    key: p.id,
-    className: "tab" + (p.id === activeId && activeTab === "portfolio" ? " on" : ""),
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "tab calc-tab" + (activeTab === "portfolio" ? " on" : ""),
     onClick: () => {
       setActiveTab("portfolio");
-      switchPortfolio(p.id);
+      resetTransient();
     }
-  }, p.name, /*#__PURE__*/React.createElement("span", {
-    className: "tab-n"
-  }, p.holdings.length))), /*#__PURE__*/React.createElement("button", {
-    className: "tab add",
-    onClick: newPortfolio,
-    title: "Nieuwe portefeuille"
-  }, "+ nieuw"), /*#__PURE__*/React.createElement("span", {
-    className: "tab-sep"
-  }), /*#__PURE__*/React.createElement("button", {
+  }, "📈 Aandelenportefeuille"), /*#__PURE__*/React.createElement("button", {
     className: "tab calc-tab" + (activeTab === "calc" ? " on" : ""),
     onClick: () => {
       setActiveTab("calc");
@@ -1713,9 +1661,51 @@ function PortfolioDashboard() {
       setActiveTab("trans");
       resetTransient();
     }
-  }, "📋 Uitgaven")), /*#__PURE__*/React.createElement("div", {
+  }, "📋 Uitgaven"))), activeTab === "calc" && /*#__PURE__*/React.createElement(CalcTab, {
+    loan: loan,
+    setLoan: setLoan,
+    loanCalc: loanCalc,
+    portfolioValue: t.mvTotal,
+    portRate: portRate,
+    setPortRate: setPortRate
+  }), activeTab === "budget" && /*#__PURE__*/React.createElement(BudgetTab, {
+    budget: budget,
+    setBudget: setBudget
+  }), activeTab === "trans" && /*#__PURE__*/React.createElement(TransactionsTab, {
+    transactions: transactions,
+    setTransactions: setTransactions,
+    budget: budget
+  }), activeTab === "account" && /*#__PURE__*/React.createElement(AccountTab, null), activeTab === "portfolio" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "tabs",
+    style: {
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "tabs-list"
+  }, portfolios.map(p => renaming && p.id === activeId ? /*#__PURE__*/React.createElement("input", {
+    key: p.id,
+    className: "tab-rename",
+    autoFocus: true,
+    value: renameVal,
+    onChange: e => setRenameVal(e.target.value),
+    onBlur: commitRename,
+    onKeyDown: e => {
+      if (e.key === "Enter") commitRename();
+      if (e.key === "Escape") setRenaming(false);
+    }
+  }) : /*#__PURE__*/React.createElement("button", {
+    key: p.id,
+    className: "tab" + (p.id === activeId ? " on" : ""),
+    onClick: () => switchPortfolio(p.id)
+  }, p.name, /*#__PURE__*/React.createElement("span", {
+    className: "tab-n"
+  }, p.holdings.length))), /*#__PURE__*/React.createElement("button", {
+    className: "tab add",
+    onClick: newPortfolio,
+    title: "Nieuwe portefeuille"
+  }, "+ nieuw")), /*#__PURE__*/React.createElement("div", {
     className: "tabs-tools"
-  }, activeTab === "portfolio" && activePortfolio && !renaming && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
+  }, activePortfolio && !renaming && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("button", {
     className: "ttool",
     onClick: startRename,
     title: "Hernoemen"
@@ -1731,21 +1721,18 @@ function PortfolioDashboard() {
     className: "ttool del",
     onClick: () => setConfirmDel(true),
     title: "Verwijderen"
-  }, "verwijder"))))), activeTab === "calc" && /*#__PURE__*/React.createElement(CalcTab, {
+  }, "verwijder"))), /*#__PURE__*/React.createElement(ImportPanel, {
+    onImport: handleImport
+  }), /*#__PURE__*/React.createElement(ExportButton, {
+    portfolios: portfolios,
     loan: loan,
-    setLoan: setLoan,
-    loanCalc: loanCalc,
-    portfolioValue: t.mvTotal,
     portRate: portRate,
-    setPortRate: setPortRate
-  }), activeTab === "budget" && /*#__PURE__*/React.createElement(BudgetTab, {
     budget: budget,
-    setBudget: setBudget
-  }), activeTab === "trans" && /*#__PURE__*/React.createElement(TransactionsTab, {
     transactions: transactions,
-    setTransactions: setTransactions,
-    budget: budget
-  }), activeTab === "account" && /*#__PURE__*/React.createElement(AccountTab, null), activeTab === "portfolio" && /*#__PURE__*/React.createElement(React.Fragment, null, holdings.some(h => h.priceNative != null) && /*#__PURE__*/React.createElement("div", {
+    apiKey: apiKey,
+    auto: auto,
+    intervalMin: intervalMin
+  }))), holdings.some(h => h.priceNative != null) && /*#__PURE__*/React.createElement("div", {
     className: "tape"
   }, /*#__PURE__*/React.createElement("div", {
     className: "tape-track"
@@ -2755,169 +2742,199 @@ function BudgetTab({
   budget,
   setBudget
 }) {
-  const n = v => parseFloat(String(v || "").replace(",", ".")) || 0;
-  const budUid = () => Math.random().toString(36).slice(2, 9);
+  const uid = () => Math.random().toString(36).slice(2, 9);
+  const n = v => parseFloat(String(v || '').replace(',', '.')) || 0;
   const today = new Date().toISOString().slice(0, 7);
-  const activeMonth = budget.activeMonth || today;
-  const monthData = budget.months && budget.months[activeMonth] || {
-    ...DEFAULT_MONTH_BUDGET
+
+  // Veilige state — nooit undefined
+  const months = budget && budget.months || {};
+  const activeMonth = budget && budget.activeMonth || today;
+  const monthData = months[activeMonth] || {
+    salaryGross: '',
+    savingsTarget: '',
+    categories: [{
+      id: 'c1',
+      label: 'Huur / hypotheek',
+      amount: '',
+      fixed: true
+    }, {
+      id: 'c2',
+      label: 'Boodschappen',
+      amount: '',
+      fixed: false
+    }, {
+      id: 'c3',
+      label: 'Verzekeringen',
+      amount: '',
+      fixed: true
+    }, {
+      id: 'c4',
+      label: 'Abonnementen',
+      amount: '',
+      fixed: true
+    }, {
+      id: 'c5',
+      label: 'Transport',
+      amount: '',
+      fixed: false
+    }, {
+      id: 'c6',
+      label: 'Uit eten / vrije tijd',
+      amount: '',
+      fixed: false
+    }]
   };
+  const [confirmDel, setConfirmDel] = useState(false);
 
-  /* helpers to update the active month */
-  const setField = (k, v) => setBudget(b => ({
+  // Zet huidige maand als er niets is
+  useEffect(() => {
+    if (!budget || !budget.months || Object.keys(budget.months).length === 0) {
+      setBudget({
+        months: {
+          [today]: monthData
+        },
+        activeMonth: today
+      });
+    }
+  }, []); // eslint-disable-line
+
+  const upd = patch => setBudget(b => ({
     ...b,
     months: {
-      ...b.months,
+      ...(b.months || {}),
       [activeMonth]: {
-        ...(b.months[activeMonth] || DEFAULT_MONTH_BUDGET),
-        [k]: v
+        ...monthData,
+        ...patch
       }
     }
   }));
-  const setCat = (id, k, v) => setBudget(b => ({
-    ...b,
-    months: {
-      ...b.months,
-      [activeMonth]: {
-        ...(b.months[activeMonth] || DEFAULT_MONTH_BUDGET),
-        categories: (b.months[activeMonth]?.categories || DEFAULT_MONTH_BUDGET.categories).map(c => c.id === id ? {
-          ...c,
-          [k]: v
-        } : c)
-      }
-    }
-  }));
-  const addCat = () => setBudget(b => {
-    const cur = b.months[activeMonth] || DEFAULT_MONTH_BUDGET;
-    return {
-      ...b,
-      months: {
-        ...b.months,
-        [activeMonth]: {
-          ...cur,
-          categories: [...(cur.categories || []), {
-            id: budUid(),
-            label: "",
-            amount: "",
-            fixed: false
-          }]
-        }
-      }
-    };
+  const setField = (k, v) => upd({
+    [k]: v
   });
-  const delCat = id => setBudget(b => {
-    const cur = b.months[activeMonth] || DEFAULT_MONTH_BUDGET;
-    return {
-      ...b,
-      months: {
-        ...b.months,
-        [activeMonth]: {
-          ...cur,
-          categories: (cur.categories || []).filter(c => c.id !== id)
-        }
-      }
-    };
+  const setCat = (id, k, v) => upd({
+    categories: monthData.categories.map(c => c.id === id ? {
+      ...c,
+      [k]: v
+    } : c)
+  });
+  const addCat = () => upd({
+    categories: [...monthData.categories, {
+      id: uid(),
+      label: '',
+      amount: '',
+      fixed: false
+    }]
+  });
+  const delCat = id => upd({
+    categories: monthData.categories.filter(c => c.id !== id)
   });
 
-  /* add/copy month helpers */
-  function addMonth(ym, copyFrom) {
-    setBudget(b => {
-      const source = copyFrom && b.months[copyFrom] ? b.months[copyFrom] : DEFAULT_MONTH_BUDGET;
-      const newMonthData = copyFrom ? {
-        ...source,
-        categories: source.categories.map(c => ({
-          ...c,
-          id: budUid()
-        }))
-      } : {
-        ...DEFAULT_MONTH_BUDGET
-      };
-      return {
+  // Maand navigatie
+  const monthNames = Object.keys(months).sort().reverse();
+  if (!monthNames.includes(activeMonth)) monthNames.unshift(activeMonth);
+  function fmtMonth(ym) {
+    try {
+      const [y, m] = ym.split('-');
+      return new Date(+y, +m - 1).toLocaleDateString('nl-NL', {
+        month: 'long',
+        year: 'numeric'
+      });
+    } catch (e) {
+      return ym;
+    }
+  }
+  function goMonth(ym) {
+    if (!months[ym]) {
+      // Nieuwe lege maand
+      setBudget(b => ({
         ...b,
         activeMonth: ym,
         months: {
-          ...b.months,
-          [ym]: newMonthData
+          ...(b.months || {}),
+          [ym]: {
+            salaryGross: '',
+            savingsTarget: '',
+            categories: monthData.categories.map(c => ({
+              ...c,
+              id: uid()
+            }))
+          }
         }
-      };
-    });
-  }
-  function deleteMonth(ym) {
-    setBudget(b => {
-      const newMonths = {
-        ...b.months
-      };
-      delete newMonths[ym];
-      const keys = Object.keys(newMonths).sort();
-      return {
+      }));
+    } else {
+      setBudget(b => ({
         ...b,
-        months: newMonths,
-        activeMonth: keys[keys.length - 1] || today
-      };
-    });
+        activeMonth: ym
+      }));
+    }
   }
-
-  /* month selector options */
-  const existingMonths = Object.keys(budget.months || {}).sort().reverse();
-  if (!existingMonths.includes(activeMonth)) existingMonths.unshift(activeMonth);
-
-  /* generate next/prev month strings */
-  function offsetMonth(ym, delta) {
-    const [y, m] = ym.split("-").map(Number);
-    const d = new Date(y, m - 1 + delta, 1);
+  function prevMonth() {
+    const [y, m] = activeMonth.split('-').map(Number);
+    const d = new Date(y, m - 2, 1);
     return d.toISOString().slice(0, 7);
   }
-  const prevMonth = offsetMonth(activeMonth, -1);
-  const nextMonth = offsetMonth(activeMonth, 1);
-  const monthLabel = ym => {
-    const [y, m] = ym.split("-");
-    return new Date(Number(y), Number(m) - 1).toLocaleDateString("nl-NL", {
-      month: "long",
-      year: "numeric"
+  function nextMonth() {
+    const [y, m] = activeMonth.split('-').map(Number);
+    const d = new Date(y, m, 1);
+    return d.toISOString().slice(0, 7);
+  }
+  function delMonth() {
+    const newMonths = {
+      ...months
+    };
+    delete newMonths[activeMonth];
+    const remaining = Object.keys(newMonths).sort();
+    const newActive = remaining[remaining.length - 1] || today;
+    setBudget({
+      months: newMonths,
+      activeMonth: newActive
     });
-  };
+    setConfirmDel(false);
+  }
+
+  // Berekeningen
   const gross = n(monthData.salaryGross);
-  const nlTax = calcNLTax(gross);
-  const netMth = nlTax.net / 12;
-  const cats = monthData.categories || [];
+  const tax = calcNLTax(gross);
+  const netMth = tax.net / 12;
+  const cats = Array.isArray(monthData.categories) ? monthData.categories : [];
   const totalCosts = cats.reduce((s, c) => s + n(c.amount), 0);
   const fixedCosts = cats.filter(c => c.fixed).reduce((s, c) => s + n(c.amount), 0);
   const varCosts = totalCosts - fixedCosts;
   const savingsTarget = n(monthData.savingsTarget);
   const leftover = netMth - totalCosts;
   const surplus = leftover - savingsTarget;
-  const catColors = ["#6EA8D8", "#C98AC0", "#E2917E", "#9AA0AE", "#B5915A", "#7FB8A0", "#CBA135", "#79C7A0", "#6EA8D8", "#C98AC0"];
+  const catColors = ['#6EA8D8', '#C98AC0', '#E2917E', '#9AA0AE', '#B5915A', '#7FB8A0', '#CBA135', '#79C7A0'];
   const donutData = [...cats.filter(c => n(c.amount) > 0).map((c, i) => ({
     id: c.id,
-    label: c.label || "—",
+    label: c.label || '—',
     value: n(c.amount),
     color: catColors[i % catColors.length]
   })), ...(savingsTarget > 0 ? [{
-    id: "sav",
-    label: "Spaardoel",
+    id: 'sav',
+    label: 'Spaardoel',
     value: savingsTarget,
-    color: "#79C7A0"
+    color: '#79C7A0'
   }] : []), ...(surplus > 0 ? [{
-    id: "sur",
-    label: "Vrij besteedbaar",
+    id: 'sur',
+    label: 'Vrij besteedbaar',
     value: surplus,
-    color: "#CBA135"
+    color: '#CBA135'
   }] : [])];
   const donutTotal = donutData.reduce((s, d) => s + d.value, 0) || 1;
-  const brackets2025 = [{
-    label: "Schijf 1 (t/m €38.441)",
-    rate: "35,82%",
-    rateN: 0.3582,
+  const brackets = [{
+    label: 'Schijf 1 (t/m €38.441)',
+    rate: '35,82%',
+    rN: 0.3582,
     max: 38441
   }, {
-    label: "Schijf 2 (€38.441–€76.817)",
-    rate: "37,48%",
-    rateN: 0.3748,
+    label: 'Schijf 2 (€38.441–€76.817)',
+    rate: '37,48%',
+    rN: 0.3748,
     max: 76817
   }, {
-    label: "Schijf 3 (>€76.817)",
-    rate: "49,5%",
-    rateN: 0.495,
+    label: 'Schijf 3 (>€76.817)',
+    rate: '49,5%',
+    rN: 0.495,
     max: Infinity
   }];
   return /*#__PURE__*/React.createElement("div", {
@@ -2927,73 +2944,79 @@ function BudgetTab({
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn",
     style: {
-      padding: "7px 11px"
+      padding: '7px 11px'
     },
-    onClick: () => {
-      if (!(budget.months || {})[prevMonth]) addMonth(prevMonth, null);else setBudget(b => ({
-        ...b,
-        activeMonth: prevMonth
-      }));
-    }
+    onClick: () => goMonth(prevMonth())
   }, "‹"), /*#__PURE__*/React.createElement("select", {
     className: "auto-int budget-month-sel",
     value: activeMonth,
     onChange: e => {
       const v = e.target.value;
-      if (v === "__new__") {
-        addMonth(nextMonth, null);
-      } else if (v === "__copy__") {
-        addMonth(nextMonth, activeMonth);
-      } else setBudget(b => ({
-        ...b,
-        activeMonth: v
-      }));
+      if (v === '__new__') goMonth(nextMonth());else if (v === '__copy__') {
+        const nm = nextMonth();
+        setBudget(b => ({
+          ...b,
+          activeMonth: nm,
+          months: {
+            ...(b.months || {}),
+            [nm]: {
+              ...monthData,
+              categories: monthData.categories.map(c => ({
+                ...c,
+                id: uid()
+              }))
+            }
+          }
+        }));
+      } else goMonth(v);
     }
-  }, existingMonths.map(m => /*#__PURE__*/React.createElement("option", {
+  }, monthNames.map(m => /*#__PURE__*/React.createElement("option", {
     key: m,
     value: m
-  }, monthLabel(m))), /*#__PURE__*/React.createElement("option", {
+  }, fmtMonth(m))), /*#__PURE__*/React.createElement("option", {
     disabled: true
   }, "──────────"), /*#__PURE__*/React.createElement("option", {
     value: "__new__"
-  }, "+ Nieuwe maand toevoegen"), /*#__PURE__*/React.createElement("option", {
+  }, "+ Nieuwe maand"), /*#__PURE__*/React.createElement("option", {
     value: "__copy__"
   }, "+ Kopieer huidige maand")), /*#__PURE__*/React.createElement("button", {
     className: "btn",
     style: {
-      padding: "7px 11px"
+      padding: '7px 11px'
     },
-    onClick: () => {
-      if (!(budget.months || {})[nextMonth]) addMonth(nextMonth, null);else setBudget(b => ({
-        ...b,
-        activeMonth: nextMonth
-      }));
-    }
-  }, "›"), Object.keys(budget.months || {}).length > 1 && /*#__PURE__*/React.createElement("button", {
+    onClick: () => goMonth(nextMonth())
+  }, "›"), Object.keys(months).length > 1 && (confirmDel ? /*#__PURE__*/React.createElement("span", {
+    className: "del-confirm"
+  }, "Verwijderen?", /*#__PURE__*/React.createElement("button", {
+    className: "ttool danger",
+    onClick: delMonth
+  }, "ja"), /*#__PURE__*/React.createElement("button", {
+    className: "ttool",
+    onClick: () => setConfirmDel(false)
+  }, "nee")) : /*#__PURE__*/React.createElement("button", {
     className: "btn",
     style: {
-      padding: "7px 11px",
-      color: "var(--loss)",
-      fontSize: 12
+      fontSize: 12,
+      padding: '6px 11px',
+      color: 'var(--loss)',
+      borderColor: 'var(--loss)'
     },
-    onClick: () => {
-      if (window.confirm(`Maand ${monthLabel(activeMonth)} verwijderen?`)) deleteMonth(activeMonth);
-    }
-  }, "verwijder")), /*#__PURE__*/React.createElement("div", {
+    onClick: () => setConfirmDel(true)
+  }, "verwijder maand"))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("div", {
     className: "calc-title"
-  }, "Budget — ", monthLabel(activeMonth)), /*#__PURE__*/React.createElement("div", {
+  }, "Budget — ", fmtMonth(activeMonth)), /*#__PURE__*/React.createElement("div", {
     className: "calc-desc"
   }, "Vul je bruto jaarsalaris in. De Nederlandse belastingschijven 2025 worden automatisch toegepast."), /*#__PURE__*/React.createElement("div", {
     className: "budget-income"
   }, /*#__PURE__*/React.createElement("div", {
     className: "fld"
   }, /*#__PURE__*/React.createElement("label", null, "Bruto jaarsalaris (€)"), /*#__PURE__*/React.createElement("input", {
-    value: monthData.salaryGross || "",
+    value: monthData.salaryGross || '',
     placeholder: "bv. 45000",
     inputMode: "decimal",
-    onChange: e => setField("salaryGross", e.target.value)
+    onChange: e => setField('salaryGross', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "budget-net-box"
   }, /*#__PURE__*/React.createElement("div", {
@@ -3005,14 +3028,14 @@ function BudgetTab({
     style: {
       marginTop: 4
     }
-  }, "Effectief tarief ", nlTax.effectiveRate.toFixed(1), "%"))), gross > 0 && /*#__PURE__*/React.createElement("div", {
+  }, "Effectief tarief ", tax.effectiveRate.toFixed(1), "%"))), gross > 0 && /*#__PURE__*/React.createElement("div", {
     className: "tax-breakdown"
   }, /*#__PURE__*/React.createElement("div", {
     className: "tax-title"
   }, "Belastingopbouw 2025"), /*#__PURE__*/React.createElement("div", {
     className: "tax-rows"
-  }, brackets2025.map((b, i) => {
-    const prev = i === 0 ? 0 : brackets2025[i - 1].max;
+  }, brackets.map((b, i) => {
+    const prev = i === 0 ? 0 : brackets[i - 1].max;
     const slice = Math.max(0, Math.min(gross, b.max) - prev);
     if (slice <= 0) return null;
     return /*#__PURE__*/React.createElement("div", {
@@ -3024,7 +3047,7 @@ function BudgetTab({
       className: "tax-base"
     }, eur(slice), " × ", b.rate), /*#__PURE__*/React.createElement("span", {
       className: "tax-amt loss"
-    }, "−", eur(slice * b.rateN)));
+    }, "−", eur(slice * b.rN)));
   }), /*#__PURE__*/React.createElement("div", {
     className: "tax-row korting"
   }, /*#__PURE__*/React.createElement("span", {
@@ -3033,7 +3056,7 @@ function BudgetTab({
     className: "tax-base"
   }, "korting"), /*#__PURE__*/React.createElement("span", {
     className: "tax-amt gain"
-  }, "+", eur(nlTax.ahk))), /*#__PURE__*/React.createElement("div", {
+  }, "+", eur(tax.ahk))), /*#__PURE__*/React.createElement("div", {
     className: "tax-row korting"
   }, /*#__PURE__*/React.createElement("span", {
     className: "tax-label"
@@ -3041,7 +3064,7 @@ function BudgetTab({
     className: "tax-base"
   }, "korting"), /*#__PURE__*/React.createElement("span", {
     className: "tax-amt gain"
-  }, "+", eur(nlTax.ak))), /*#__PURE__*/React.createElement("div", {
+  }, "+", eur(tax.ak))), /*#__PURE__*/React.createElement("div", {
     className: "tax-row total"
   }, /*#__PURE__*/React.createElement("span", {
     className: "tax-label"
@@ -3049,7 +3072,7 @@ function BudgetTab({
     className: "tax-base"
   }), /*#__PURE__*/React.createElement("span", {
     className: "tax-amt loss"
-  }, "−", eur(nlTax.netTax))), /*#__PURE__*/React.createElement("div", {
+  }, "−", eur(tax.netTax))), /*#__PURE__*/React.createElement("div", {
     className: "tax-row total"
   }, /*#__PURE__*/React.createElement("span", {
     className: "tax-label"
@@ -3057,7 +3080,7 @@ function BudgetTab({
     className: "tax-base"
   }), /*#__PURE__*/React.createElement("span", {
     className: "tax-amt"
-  }, eur(nlTax.net)))))), /*#__PURE__*/React.createElement("div", {
+  }, eur(tax.net)))))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("h3", null, "Maandelijkse kosten"), /*#__PURE__*/React.createElement("div", {
     className: "budget-cats"
@@ -3065,7 +3088,7 @@ function BudgetTab({
     className: "budget-cat-h"
   }, /*#__PURE__*/React.createElement("span", null, "Omschrijving"), /*#__PURE__*/React.createElement("span", null, "Bedrag / mnd"), /*#__PURE__*/React.createElement("span", {
     style: {
-      textAlign: "center"
+      textAlign: 'center'
     }
   }, "Vast"), /*#__PURE__*/React.createElement("span", null)), cats.map(c => /*#__PURE__*/React.createElement("div", {
     className: "budget-cat-r",
@@ -3073,62 +3096,62 @@ function BudgetTab({
   }, /*#__PURE__*/React.createElement("input", {
     value: c.label,
     placeholder: "bv. Huur",
-    onChange: e => setCat(c.id, "label", e.target.value),
+    onChange: e => setCat(c.id, 'label', e.target.value),
     style: {
-      background: "var(--bg2)",
-      border: "1px solid var(--line2)",
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
       borderRadius: 7,
-      color: "var(--ink)",
-      padding: "8px 11px",
-      fontFamily: "Inter,sans-serif",
+      color: 'var(--ink)',
+      padding: '8px 11px',
+      fontFamily: 'Inter,sans-serif',
       fontSize: 13,
-      outline: "none",
-      width: "100%"
+      outline: 'none',
+      width: '100%'
     }
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      alignItems: "center",
+      display: 'flex',
+      alignItems: 'center',
       gap: 6
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      color: "var(--faint)",
+      color: 'var(--faint)',
       fontSize: 13
     }
   }, "€"), /*#__PURE__*/React.createElement("input", {
     value: c.amount,
     placeholder: "0",
     inputMode: "decimal",
-    onChange: e => setCat(c.id, "amount", e.target.value),
+    onChange: e => setCat(c.id, 'amount', e.target.value),
     style: {
-      background: "var(--bg2)",
-      border: "1px solid var(--line2)",
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
       borderRadius: 7,
-      color: "var(--ink)",
-      padding: "8px 11px",
+      color: 'var(--ink)',
+      padding: '8px 11px',
       fontFamily: "'IBM Plex Mono',monospace",
       fontSize: 13,
-      outline: "none",
-      width: "100%",
-      textAlign: "right"
+      outline: 'none',
+      width: '100%',
+      textAlign: 'right'
     }
   })), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      justifyContent: "center"
+      display: 'flex',
+      justifyContent: 'center'
     }
   }, /*#__PURE__*/React.createElement("button", {
-    className: "fixed-btn" + (c.fixed ? " on" : ""),
-    onClick: () => setCat(c.id, "fixed", !c.fixed)
-  }, c.fixed ? "vast" : "var")), /*#__PURE__*/React.createElement("button", {
+    className: 'fixed-btn' + (c.fixed ? ' on' : ''),
+    onClick: () => setCat(c.id, 'fixed', !c.fixed)
+  }, c.fixed ? 'vast' : 'var')), /*#__PURE__*/React.createElement("button", {
     className: "xbtn",
     onClick: () => delCat(c.id)
   }, "×"))), /*#__PURE__*/React.createElement("button", {
     className: "btn",
     style: {
       marginTop: 10,
-      alignSelf: "flex-start"
+      alignSelf: 'flex-start'
     },
     onClick: addCat
   }, "+ Kostenpost toevoegen"))), netMth > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
@@ -3152,22 +3175,22 @@ function BudgetTab({
   }, "Variabele kosten"), /*#__PURE__*/React.createElement("div", {
     className: "loan-big",
     style: {
-      color: "var(--loss)"
+      color: 'var(--loss)'
     }
   }, eur(varCosts))), /*#__PURE__*/React.createElement("div", {
     className: "loan-pill"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
   }, "Ruimte na kosten"), /*#__PURE__*/React.createElement("div", {
-    className: "loan-big " + (leftover >= 0 ? "gain" : "loss")
+    className: 'loan-big ' + (leftover >= 0 ? 'gain' : 'loss')
   }, eur(leftover)))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("h3", null, "Spaardoel"), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
+      display: 'flex',
       gap: 16,
-      alignItems: "center",
-      flexWrap: "wrap",
+      alignItems: 'center',
+      flexWrap: 'wrap',
       marginBottom: 16
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -3176,20 +3199,20 @@ function BudgetTab({
       maxWidth: 200
     }
   }, /*#__PURE__*/React.createElement("label", null, "Maandelijks spaardoel (€)"), /*#__PURE__*/React.createElement("input", {
-    value: monthData.savingsTarget || "",
+    value: monthData.savingsTarget || '',
     placeholder: "bv. 500",
     inputMode: "decimal",
-    onChange: e => setField("savingsTarget", e.target.value)
+    onChange: e => setField('savingsTarget', e.target.value)
   })), savingsTarget > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: "'IBM Plex Mono',monospace",
       fontSize: 13,
-      color: surplus >= 0 ? "var(--gain)" : "var(--loss)"
+      color: surplus >= 0 ? 'var(--gain)' : 'var(--loss)'
     }
   }, surplus >= 0 ? `✓ +${eur(surplus)} vrij besteedbaar` : `✗ ${eur(Math.abs(surplus))} tekort`)), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      alignItems: "center",
+      display: 'flex',
+      alignItems: 'center',
       gap: 24
     }
   }, /*#__PURE__*/React.createElement(BudgetDonut, {
@@ -3198,8 +3221,8 @@ function BudgetTab({
     center: eur(netMth)
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      flexDirection: "column",
+      display: 'flex',
+      flexDirection: 'column',
       gap: 8,
       flex: 1,
       minWidth: 0
@@ -3207,8 +3230,8 @@ function BudgetTab({
   }, donutData.map(d => /*#__PURE__*/React.createElement("div", {
     key: d.id,
     style: {
-      display: "flex",
-      alignItems: "center",
+      display: 'flex',
+      alignItems: 'center',
       gap: 9,
       fontSize: 12.5
     }
@@ -3222,26 +3245,84 @@ function BudgetTab({
     }
   }), /*#__PURE__*/React.createElement("span", {
     style: {
-      color: "var(--ink)",
+      color: 'var(--ink)',
       flex: 1,
-      overflow: "hidden",
-      textOverflow: "ellipsis",
-      whiteSpace: "nowrap"
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
     }
   }, d.label), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: "'IBM Plex Mono',monospace",
-      color: "var(--muted)",
+      color: 'var(--muted)',
       flexShrink: 0
     }
   }, eur(d.value)), /*#__PURE__*/React.createElement("span", {
     style: {
       fontFamily: "'IBM Plex Mono',monospace",
-      color: "var(--faint)",
+      color: 'var(--faint)',
       fontSize: 11,
       flexShrink: 0
     }
   }, Math.round(d.value / donutTotal * 100), "%"))))))));
+}
+function BudgetDonut({
+  data,
+  total,
+  center
+}) {
+  const r = 52,
+    sw = 18,
+    circ = 2 * Math.PI * r;
+  let acc = 0;
+  return /*#__PURE__*/React.createElement("svg", {
+    width: "140",
+    height: "140",
+    viewBox: "0 0 140 140",
+    style: {
+      flex: 'none'
+    }
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "70",
+    cy: "70",
+    r: r,
+    fill: "none",
+    stroke: "var(--line)",
+    strokeWidth: sw
+  }), data.map(d => {
+    const len = d.value / total * circ;
+    const seg = /*#__PURE__*/React.createElement("circle", {
+      key: d.id,
+      cx: "70",
+      cy: "70",
+      r: r,
+      fill: "none",
+      stroke: d.color,
+      strokeWidth: sw,
+      strokeDasharray: `${len} ${circ - len}`,
+      strokeDashoffset: -acc,
+      transform: "rotate(-90 70 70)"
+    });
+    acc += len;
+    return seg;
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "70",
+    y: "66",
+    textAnchor: "middle",
+    fill: "var(--ink)",
+    style: {
+      font: "600 11px 'IBM Plex Mono',monospace"
+    }
+  }, center), /*#__PURE__*/React.createElement("text", {
+    x: "70",
+    y: "81",
+    textAnchor: "middle",
+    fill: "var(--faint)",
+    style: {
+      font: '10px Inter,sans-serif',
+      letterSpacing: '.06em'
+    }
+  }, "PER MAAND"));
 }
 
 /* ---- uitgaven tracker ---- */
@@ -3266,10 +3347,166 @@ function TransactionsTab({
   const [editId, setEditId] = React.useState(null);
   const [sortField, setSortField] = React.useState("date");
   const [sortDir, setSortDir] = React.useState("desc");
+  const [showIngImport, setShowIngImport] = React.useState(false);
+  const [ingMsg, setIngMsg] = React.useState("");
+  const [ingLoading, setIngLoading] = React.useState(false);
   const activeMon = budget.activeMonth || new Date().toISOString().slice(0, 7);
   const activeBudget = budget.months && budget.months[activeMon] || DEFAULT_MONTH_BUDGET;
   const budgetCats = activeBudget.categories.map(c => c.label).filter(Boolean);
   const allCats = [...new Set([...budgetCats, ...transactions.map(t => t.category).filter(Boolean)])].sort();
+
+  /* ── ING CSV-categorisatie ── */
+  const ING_CATS = {
+    "albert heijn": "Boodschappen",
+    "jumbo": "Boodschappen",
+    "lidl": "Boodschappen",
+    "aldi": "Boodschappen",
+    "plus": "Boodschappen",
+    "dirk": "Boodschappen",
+    "ns ": "Transport",
+    "ov-chipkaart": "Transport",
+    "connexxion": "Transport",
+    "arriva": "Transport",
+    "ret ": "Transport",
+    "gvb": "Transport",
+    "shell": "Transport",
+    "bp ": "Transport",
+    "tinq": "Transport",
+    "esso": "Transport",
+    "neom": "Transport",
+    "tango": "Transport",
+    "spotify": "Abonnementen",
+    "netflix": "Abonnementen",
+    "youtube": "Abonnementen",
+    "disney": "Abonnementen",
+    "amazon": "Abonnementen",
+    "apple.com/bill": "Abonnementen",
+    "ziggo": "Abonnementen",
+    "kpn": "Abonnementen",
+    "vodafone": "Abonnementen",
+    "t-mobile": "Abonnementen",
+    "tele2": "Abonnementen",
+    "huur": "Huur / hypotheek",
+    "hypotheek": "Huur / hypotheek",
+    "zorgverzekering": "Verzekeringen",
+    "centraal beheer": "Verzekeringen",
+    "nationale nederlanden": "Verzekeringen",
+    "aegon": "Verzekeringen",
+    "restaurant": "Uit eten / vrije tijd",
+    "cafe ": "Uit eten / vrije tijd",
+    "mcdonalds": "Uit eten / vrije tijd",
+    "burger king": "Uit eten / vrije tijd",
+    "thuisbezorgd": "Uit eten / vrije tijd",
+    "uber eats": "Uit eten / vrije tijd",
+    "salaris": "Inkomsten",
+    "loon": "Inkomsten",
+    "uitkering": "Inkomsten"
+  };
+  function guessCat(omschrijving, tegenrekening) {
+    const haystack = (omschrijving + " " + tegenrekening).toLowerCase();
+    // Eerst budgetcategorieën proberen
+    for (const cat of budgetCats) {
+      if (haystack.includes(cat.toLowerCase())) return cat;
+    }
+    // Dan vaste mapping
+    for (const [key, cat] of Object.entries(ING_CATS)) {
+      if (haystack.includes(key)) return cat;
+    }
+    return "";
+  }
+  function parseINGcsv(text) {
+    const lines = text.split('\n').filter(l => l.trim());
+    if (lines.length < 2) return {
+      entries: [],
+      errors: ['Bestand lijkt leeg of ongeldig.']
+    };
+
+    // ING formaat: "Datum";"Naam / Omschrijving";"Rekening";"Tegenrekening";"Code";"Af Bij";"Bedrag (EUR)";"Mutatiesoort";"Mededelingen"
+    const header = lines[0].replace(/"/g, '').split(';').map(h => h.trim().toLowerCase());
+    const datumIdx = header.findIndex(h => h === 'datum');
+    const naamIdx = header.findIndex(h => h.includes('naam') || h.includes('omschrijving'));
+    const tegenIdx = header.findIndex(h => h.includes('tegenrekening'));
+    const afbijIdx = header.findIndex(h => h === 'af bij');
+    const bedragIdx = header.findIndex(h => h.includes('bedrag'));
+    const mededIdx = header.findIndex(h => h.includes('mededeling'));
+    if (datumIdx === -1 || bedragIdx === -1) {
+      return {
+        entries: [],
+        errors: ['Dit lijkt geen ING-exportbestand. Controleer of je het juiste bestand hebt gekozen.']
+      };
+    }
+    const entries = [];
+    const existingKeys = new Set(transactions.map(t => `${t.date}_${t.amount}_${t.note?.slice(0, 20)}`));
+    for (let i = 1; i < lines.length; i++) {
+      const cols = lines[i].split(';').map(c => c.replace(/^"|"$/g, '').trim());
+      if (cols.length < 4) continue;
+
+      // Datum: YYYYMMDD → YYYY-MM-DD
+      const rawDate = cols[datumIdx] || '';
+      const date = rawDate.length === 8 ? `${rawDate.slice(0, 4)}-${rawDate.slice(4, 6)}-${rawDate.slice(6, 8)}` : rawDate;
+      const naam = cols[naamIdx] || '';
+      const tegen = cols[tegenIdx] || '';
+      const afbij = (cols[afbijIdx] || '').toLowerCase();
+      const bedragRaw = (cols[bedragIdx] || '').replace('.', '').replace(',', '.');
+      const bedrag = Math.abs(parseFloat(bedragRaw) || 0);
+      const meded = cols[mededIdx] || '';
+      if (!date || bedrag === 0) continue;
+      const type = afbij === 'bij' ? 'inkomst' : 'uitgave';
+      const note = naam || meded.slice(0, 60);
+      const category = guessCat(naam + ' ' + meded, tegen);
+
+      // Duplicaat check
+      const key = `${date}_${bedrag}_${note.slice(0, 20)}`;
+      if (existingKeys.has(key)) continue;
+      existingKeys.add(key);
+      entries.push({
+        id: tuid(),
+        date,
+        amount: bedrag,
+        type,
+        note,
+        category
+      });
+    }
+    return {
+      entries,
+      errors: []
+    };
+  }
+  function handleIngFile(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setIngLoading(true);
+    setIngMsg('');
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result || '');
+      const {
+        entries,
+        errors
+      } = parseINGcsv(text);
+      if (errors.length) {
+        setIngMsg('⚠ ' + errors[0]);
+        setIngLoading(false);
+        return;
+      }
+      if (entries.length === 0) {
+        setIngMsg('Geen nieuwe transacties gevonden — mogelijk al geïmporteerd.');
+        setIngLoading(false);
+        return;
+      }
+      setTransactions(prev => [...entries, ...prev]);
+      setIngMsg(`✓ ${entries.length} transacties geïmporteerd!`);
+      setShowIngImport(false);
+      setIngLoading(false);
+    };
+    reader.onerror = () => {
+      setIngMsg('Bestand kon niet worden gelezen.');
+      setIngLoading(false);
+    };
+    reader.readAsText(file, 'UTF-8');
+    e.target.value = '';
+  }
   function saveForm() {
     const amt = parseFloat(String(form.amount).replace(",", "."));
     if (isNaN(amt) || amt <= 0) return;
@@ -3373,7 +3610,18 @@ function TransactionsTab({
   }, "Alle categorieën"), allCats.map(c => /*#__PURE__*/React.createElement("option", {
     key: c,
     value: c
-  }, c)))), /*#__PURE__*/React.createElement("button", {
+  }, c)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => {
+      setShowIngImport(s => !s);
+      setIngMsg('');
+    }
+  }, showIngImport ? "Annuleren" : "⬆ ING importeren"), /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
     onClick: () => {
       setEditId(null);
@@ -3386,7 +3634,35 @@ function TransactionsTab({
       });
       setShowForm(s => !s);
     }
-  }, showForm && !editId ? "Annuleren" : "+ Transactie")), showForm && /*#__PURE__*/React.createElement("div", {
+  }, showForm && !editId ? "Annuleren" : "+ Transactie"))), showIngImport && /*#__PURE__*/React.createElement("div", {
+    className: "import",
+    style: {
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("h4", null, "Importeer ING bankafschrift (CSV)"), /*#__PURE__*/React.createElement("ol", null, /*#__PURE__*/React.createElement("li", null, "Log in op ", /*#__PURE__*/React.createElement("b", null, "mijn.ing.nl"), " → Betaalrekening → ", /*#__PURE__*/React.createElement("b", null, "Exporteren")), /*#__PURE__*/React.createElement("li", null, "Kies periode, formaat ", /*#__PURE__*/React.createElement("b", null, "CSV"), " en download het bestand"), /*#__PURE__*/React.createElement("li", null, "Kies het bestand hieronder — transacties worden automatisch gecategoriseerd")), /*#__PURE__*/React.createElement("div", {
+    className: "rt-note"
+  }, "Duplicaten worden automatisch overgeslagen. Categorieën worden geraden op basis van de omschrijving en je bestaande budgetcategorieën."), /*#__PURE__*/React.createElement("div", {
+    className: "import-row",
+    style: {
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    className: "btn primary file-btn"
+  }, ingLoading ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+    className: "spin"
+  }), "Importeren...") : "📂 Kies ING CSV-bestand", /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: ".csv",
+    onChange: handleIngFile,
+    disabled: ingLoading
+  }))), ingMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 12.5,
+      color: ingMsg.startsWith('✓') ? "var(--gain)" : "var(--loss)"
+    }
+  }, ingMsg)), showForm && /*#__PURE__*/React.createElement("div", {
     className: "form",
     style: {
       marginTop: 12
@@ -3856,36 +4132,92 @@ function AccountTab() {
   });
   const [apiMsg, setApiMsg] = useState('');
   const [resetSent, setResetSent] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(() => {
+    try {
+      return localStorage.getItem('fb:avatar') || '';
+    } catch (e) {
+      return '';
+    }
+  });
+  const [avatarUploading, setAvatarUploading] = useState(false);
   useEffect(() => {
     if (!sb) return;
-    sb.auth.getUser().then(({
+    sb.auth.getSession().then(async ({
       data
     }) => {
-      if (data && data.user) {
-        setUser(data.user);
-        setEmail(data.user.email || '');
-        setDisplayName(data.user.user_metadata && data.user.user_metadata.display_name || '');
-      }
+      if (!data || !data.session) return;
+      const u = data.session.user;
+      setUser(u);
+      setEmail(u.email || '');
+
+      // Probeer naam uit user_data tabel (meest actueel)
+      try {
+        const {
+          data: row
+        } = await sb.from('user_data').select('display_name').eq('user_id', u.id).single();
+        if (row && row.display_name) {
+          setDisplayName(row.display_name);
+          localStorage.setItem('fb:display_name', row.display_name);
+          return;
+        }
+      } catch (e) {}
+
+      // Fallback: user_metadata of localStorage
+      const metaName = u.user_metadata && u.user_metadata.display_name;
+      const localName = localStorage.getItem('fb:display_name') || '';
+      setDisplayName(metaName || localName || '');
     });
   }, []);
   async function saveProfile() {
-    if (!sb) return;
+    if (!sb) {
+      setProfileErr('Geen verbinding met Supabase.');
+      return;
+    }
     setSaving(true);
     setProfileMsg('');
     setProfileErr('');
-    const updates = {
-      data: {
-        display_name: displayName.trim()
+    try {
+      // Naam direct opslaan in localStorage (altijd snel)
+      localStorage.setItem('fb:display_name', displayName.trim());
+
+      // Sla naam op in user_data tabel (betrouwbaarder dan auth.updateUser)
+      const {
+        data: {
+          session
+        }
+      } = await sb.auth.getSession();
+      if (!session) {
+        setProfileErr('Sessie verlopen — log opnieuw in.');
+        setSaving(false);
+        return;
       }
-    };
-    if (email.trim() && user && email.trim() !== user.email) updates.email = email.trim();
-    const {
-      error
-    } = await sb.auth.updateUser(updates);
-    if (error) {
-      setProfileErr('Fout: ' + error.message);
-    } else {
+      const {
+        error
+      } = await sb.from('user_data').upsert({
+        user_id: session.user.id,
+        display_name: displayName.trim(),
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id'
+      });
+      if (error) {
+        // Fallback: probeer via auth.updateUser
+        const r = await sb.auth.updateUser({
+          data: {
+            display_name: displayName.trim()
+          }
+        });
+        if (r.error) {
+          setProfileErr('Opgeslagen lokaal, maar cloud sync mislukt: ' + r.error.message);
+          setSaving(false);
+          return;
+        }
+      }
       setProfileMsg('Profiel opgeslagen!');
+      setTimeout(() => setProfileMsg(''), 3000);
+    } catch (e) {
+      // Naam staat al in localStorage, dus lokaal is hij opgeslagen
+      setProfileMsg('Lokaal opgeslagen! Cloud sync mislukt — wordt opnieuw geprobeerd bij de volgende sessie.');
     }
     setSaving(false);
   }
@@ -3894,21 +4226,67 @@ function AccountTab() {
     setPassMsg('');
     setPassErr('');
     setSaving(true);
-    const {
-      error
-    } = await sb.auth.resetPasswordForEmail(user.email, {
-      redirectTo: window.location.href
-    });
-    if (error) {
-      setPassErr('Fout: ' + error.message);
-    } else {
-      setPassMsg('Reset-link verstuurd naar ' + user.email + '. Klik op de link in de e-mail om een nieuw wachtwoord in te stellen.');
-      setResetSent(true);
+    try {
+      const {
+        error
+      } = await sb.auth.resetPasswordForEmail(user.email, {
+        redirectTo: window.location.href
+      });
+      if (error) {
+        setPassErr('Fout: ' + error.message);
+      } else {
+        setPassMsg('Reset-link verstuurd naar ' + user.email + '. Klik op de link in de e-mail om een nieuw wachtwoord in te stellen.');
+        setResetSent(true);
+      }
+    } catch (e) {
+      setPassErr('Verbindingsfout: ' + e.message);
     }
     setSaving(false);
   }
   async function logout() {
-    if (sb) await sb.auth.signOut();
+    if (!sb) return;
+    const KEYS = ['portfolio:meta', 'portfolio:settings', 'portfolio:calc', 'portfolio:budget', 'portfolio:transactions', 'fb:last_seen', 'fb:last_sync', 'fb:display_name', 'fb:avatar'];
+    KEYS.forEach(k => {
+      try {
+        localStorage.removeItem(k);
+      } catch (e) {}
+    });
+    await sb.auth.signOut();
+  }
+  function handleAvatarFile(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      setProfileErr('Afbeelding mag maximaal 2MB zijn.');
+      return;
+    }
+    setAvatarUploading(true);
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      // Sla op als base64 in localStorage (max ~1.5MB na base64 encoding)
+      try {
+        localStorage.setItem('fb:avatar', dataUrl);
+        setAvatarUrl(dataUrl);
+        setProfileMsg('Profielfoto opgeslagen!');
+        setTimeout(() => setProfileMsg(''), 3000);
+      } catch (e) {
+        setProfileErr('Foto te groot om op te slaan — kies een kleinere afbeelding.');
+      }
+      setAvatarUploading(false);
+    };
+    reader.onerror = () => {
+      setProfileErr('Afbeelding kon niet worden gelezen.');
+      setAvatarUploading(false);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  }
+  function removeAvatar() {
+    try {
+      localStorage.removeItem('fb:avatar');
+    } catch (e) {}
+    setAvatarUrl('');
   }
   function saveApiKey() {
     try {
@@ -3922,6 +4300,34 @@ function AccountTab() {
     month: 'long',
     year: 'numeric'
   }) : '—';
+  const lastSeen = (() => {
+    try {
+      const v = localStorage.getItem('fb:last_seen');
+      return v ? new Date(v).toLocaleString('nl-NL', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) : '—';
+    } catch (e) {
+      return '—';
+    }
+  })();
+  const lastSync = (() => {
+    try {
+      const v = localStorage.getItem('fb:last_sync');
+      return v ? new Date(v).toLocaleString('nl-NL', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      }) : '—';
+    } catch (e) {
+      return '—';
+    }
+  })();
   return /*#__PURE__*/React.createElement("div", {
     className: "calc-wrap"
   }, /*#__PURE__*/React.createElement("div", {
@@ -3931,14 +4337,50 @@ function AccountTab() {
   }, "Mijn account"), /*#__PURE__*/React.createElement("div", {
     className: "acc-grid"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "acc-avatar"
-  }, (displayName || email || '?')[0].toUpperCase()), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "acc-avatar",
+    title: "Klik om foto te wijzigen"
+  }, avatarUrl ? /*#__PURE__*/React.createElement("img", {
+    src: avatarUrl,
+    alt: "Profielfoto"
+  }) : /*#__PURE__*/React.createElement("span", null, (displayName || email || '?')[0].toUpperCase()), /*#__PURE__*/React.createElement("div", {
+    className: "acc-avatar-overlay"
+  }, "📷"), /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: "image/jpeg,image/png,image/webp,image/gif",
+    onChange: handleAvatarFile,
+    disabled: avatarUploading,
+    title: "Profielfoto wijzigen"
+  })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "acc-name"
   }, displayName || '(geen naam ingesteld)'), /*#__PURE__*/React.createElement("div", {
     className: "acc-email"
   }, email), /*#__PURE__*/React.createElement("div", {
     className: "acc-joined"
-  }, "Lid sinds ", joined)))), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", null, "Lid sinds ", joined), lastSeen !== '—' && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 3
+    }
+  }, "Laatste login: ", lastSeen), lastSync !== '—' && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 3
+    }
+  }, "Laatste sync: ", lastSync)), avatarUrl && /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      marginTop: 8,
+      fontSize: 11,
+      padding: '4px 10px',
+      color: 'var(--loss)',
+      borderColor: 'var(--loss)'
+    },
+    onClick: removeAvatar
+  }, "Foto verwijderen"), avatarUploading && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)',
+      marginTop: 6
+    }
+  }, "Uploaden...")))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("h3", null, "Profiel bewerken"), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -4000,7 +4442,7 @@ function AccountTab() {
     style: {
       color: 'var(--ink)'
     }
-  }, email), ". Na het klikken op die link kun je een nieuw wachtwoord instellen."), passErr && /*#__PURE__*/React.createElement("div", {
+  }, email), "."), passErr && /*#__PURE__*/React.createElement("div", {
     style: {
       color: 'var(--loss)',
       fontFamily: "'IBM Plex Mono',monospace",
@@ -4147,203 +4589,25 @@ function Donut({
       letterSpacing: ".1em"
     }
   }, "POSITIES"));
-}</script>
-
-  <!-- 5. Auth + sync + mount -->
-  <script>
-
-const SB_TABLE = 'user_data';
-
-async function sbSave(uid, payload) {
-  const sb = getSb(); if (!sb) return;
-  try { await sb.from(SB_TABLE).upsert({ user_id: uid, data: payload, updated_at: new Date().toISOString() }, { onConflict: 'user_id' }); } catch(e) {}
 }
+function getAnthropicKey(){try{return localStorage.getItem('fb:anthropic_key')||'';}catch(e){return '';}}
+function saveAnthropicKey(k){try{localStorage.setItem('fb:anthropic_key',k);}catch(e){}}
+let _sb=null;
+function getSb(){if(_sb)return _sb;var L=(typeof window!=='undefined'&&window.supabase)?window.supabase:null;if(!L)return null;try{_sb=L.createClient('https://ceklzeyrlttfbcbceruk.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNla2x6ZXlybHR0ZmJjYmNlcnVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxOTA3ODUsImV4cCI6MjA5ODc2Njc4NX0.j6UxTcmLAhe9KDCxZa_05Ape6PJrU0II368G9HrDZQc');}catch(e){return null;}return _sb;}
+const SB_TABLE='user_data';
+async function sbSave(uid,payload){var sb=getSb();if(!sb)return;try{await sb.from(SB_TABLE).upsert({user_id:uid,data:payload,updated_at:new Date().toISOString()},{onConflict:'user_id'});}catch(e){}}
+async function sbUpdateLastSeen(uid){var sb=getSb();if(!sb||!uid)return;try{await sb.from(SB_TABLE).upsert({user_id:uid,last_seen:new Date().toISOString()},{onConflict:'user_id'});}catch(e){}}
+async function sbLoad(uid){var sb=getSb();if(!sb)return null;try{var r=await sb.from(SB_TABLE).select('data,last_seen,updated_at').eq('user_id',uid).single();if(!r.data)return null;try{if(r.data.last_seen)localStorage.setItem('fb:last_seen',r.data.last_seen);if(r.data.updated_at)localStorage.setItem('fb:last_sync',r.data.updated_at);}catch(e){}return r.data.data;}catch(e){return null;}}
+function AuthScreen({onLogin}){var [tab,setTab]=React.useState('login');var [email,setEmail]=React.useState('');var [pass,setPass]=React.useState('');var [name,setName]=React.useState('');var [err,setErr]=React.useState('');var [ok,setOk]=React.useState('');var [busy,setBusy]=React.useState(false);var [forgotSent,setForgotSent]=React.useState(false);async function doLogin(){setErr('');setOk('');setBusy(true);var r=await getSb().auth.signInWithPassword({email:email.trim(),password:pass});if(r.error){setErr(r.error.message.includes('Invalid login')?'Onjuist e-mailadres of wachtwoord.':r.error.message.includes('not confirmed')?'E-mail nog niet bevestigd.':'Fout: '+r.error.message);setBusy(false);return;}onLogin(r.data.user);setBusy(false);}async function doRegister(){setErr('');setOk('');setBusy(true);var r=await getSb().auth.signUp({email:email.trim(),password:pass,options:{data:{display_name:name.trim()}}});if(r.error){setErr(r.error.message.includes('already')?'Al geregistreerd, probeer in te loggen.':'Fout: '+r.error.message);setBusy(false);return;}if(r.data.session){onLogin(r.data.user);setBusy(false);return;}setOk('Account aangemaakt! Check je e-mail voor een bevestigingslink.');setBusy(false);}async function doForgot(){if(!email.trim()){setErr('Vul eerst je e-mailadres in.');return;}setErr('');setBusy(true);var r=await getSb().auth.resetPasswordForEmail(email.trim(),{redirectTo:window.location.href});if(r.error){setErr('Fout: '+r.error.message);}else{setOk('Reset-link verstuurd naar '+email.trim());setForgotSent(true);}setBusy(false);}var onKey=function(e){if(e.key==='Enter')tab==='login'?doLogin():doRegister();};return React.createElement('div',{className:'setup-overlay'},React.createElement('div',{className:'setup-box'},React.createElement('div',{className:'setup-logo'},'Finance Bro',React.createElement('span',null,'.')),React.createElement('div',{className:'auth-tabs'},React.createElement('button',{className:'auth-tab'+(tab==='login'?' on':''),onClick:function(){setTab('login');setErr('');setOk('');setForgotSent(false);}},'Inloggen'),React.createElement('button',{className:'auth-tab'+(tab==='register'?' on':''),onClick:function(){setTab('register');setErr('');setOk('');}},'Account aanmaken')),tab==='register'&&React.createElement(React.Fragment,null,React.createElement('label',{className:'setup-label'},'Naam'),React.createElement('input',{className:'setup-input',placeholder:'Jan de Vries',value:name,onChange:function(e){setName(e.target.value);},onKeyDown:onKey})),React.createElement('label',{className:'setup-label'},'E-mailadres'),React.createElement('input',{className:'setup-input',type:'email',placeholder:'jij@voorbeeld.nl',value:email,onChange:function(e){setEmail(e.target.value);},onKeyDown:onKey}),React.createElement('label',{className:'setup-label'},'Wachtwoord'),React.createElement('input',{className:'setup-input',type:'password',placeholder:'••••••••',value:pass,onChange:function(e){setPass(e.target.value);},onKeyDown:onKey}),err&&React.createElement('div',{className:'setup-err'},err),ok&&React.createElement('div',{style:{color:'#79C7A0',fontSize:12,fontFamily:'monospace',marginBottom:8,textAlign:'left',lineHeight:1.5}},ok),React.createElement('button',{className:'setup-btn',onClick:tab==='login'?doLogin:doRegister,disabled:busy},busy?'Even geduld...':(tab==='login'?'Inloggen':'Account aanmaken')),tab==='login'&&React.createElement('span',{className:'forgot-link',onClick:doForgot},forgotSent?'✓ Reset-link verstuurd':'Wachtwoord vergeten?')));}
+var SbUserContext=React.createContext(null);
+function useSbUser(){return React.useContext(SbUserContext);}
+var _OrigPD=PortfolioDashboard;
+PortfolioDashboard=function(props){return React.createElement(SbUserContext.Provider,{value:props.sbUser},React.createElement(_OrigPD,null));};
+function AppRoot(){var [user,setUser]=React.useState(null);var [checking,setChecking]=React.useState(true);var [dataKey,setDataKey]=React.useState(0);React.useEffect(function(){var fn=function(){setDataKey(function(k){return k+1;});};window.addEventListener('fb-data-loaded',fn);return function(){window.removeEventListener('fb-data-loaded',fn);};},[]);React.useEffect(function(){var sb=getSb();if(!sb){setChecking(false);return;}var t=setTimeout(function(){setChecking(false);},6000);sb.auth.getSession().then(function(r){clearTimeout(t);if(r.data&&r.data.session)setUser(r.data.session.user);setChecking(false);}).catch(function(){clearTimeout(t);setChecking(false);});var sub=sb.auth.onAuthStateChange(function(_e,session){setUser(session?session.user:null);});return function(){sub.data.subscription.unsubscribe();};},[]);if(checking)return React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'#5C6472',fontFamily:'monospace',fontSize:14,flexDirection:'column',gap:12}},React.createElement('div',null,'Finance Bro laden...'),React.createElement('div',{style:{fontSize:11,color:'#2A3140'}},'Verbinding maken...'));if(!user)return React.createElement(AuthScreen,{onLogin:setUser});return React.createElement(PortfolioDashboard,{sbUser:user,key:dataKey});}
+(function(){var _orig=localStorage.setItem.bind(localStorage);var KEYS=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions'];var _t=null;localStorage.setItem=function(k,v){_orig(k,v);if(KEYS.indexOf(k)!==-1){clearTimeout(_t);_t=setTimeout(async function(){var sb=getSb();if(!sb)return;try{var r=await sb.auth.getSession();if(!r.data||!r.data.session)return;var p={};KEYS.forEach(function(k2){try{p[k2]=JSON.parse(localStorage.getItem(k2));}catch(e){}});await sbSave(r.data.session.user.id,p);}catch(e){}},1500);}};})();
+(function(){var sb=getSb();if(!sb)return;var _loaded=false;sb.auth.onAuthStateChange(async function(event,session){if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session&&!_loaded){_loaded=true;sbUpdateLastSeen(session.user.id);var saved=await sbLoad(session.user.id);if(saved){var KEYS=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions'];var changed=false;KEYS.forEach(function(k){if(saved[k]!==undefined){try{var cur=localStorage.getItem(k),nv=JSON.stringify(saved[k]);if(cur!==nv){localStorage.setItem(k,nv);changed=true;}}catch(e){}}});if(changed)window.dispatchEvent(new CustomEvent('fb-data-loaded'));}}if(event==='SIGNED_OUT'){_loaded=false;var KEYS2=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions','fb:last_seen','fb:last_sync','fb:display_name'];KEYS2.forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});}});})();
 
-async function sbUpdateLastSeen(uid) {
-  const sb = getSb(); if (!sb || !uid) return;
-  try { await sb.from(SB_TABLE).upsert({ user_id: uid, last_seen: new Date().toISOString() }, { onConflict: 'user_id' }); } catch(e) {}
-}
-
-async function sbLoad(uid) {
-  const sb = getSb(); if (!sb) return null;
-  try {
-    const { data } = await sb.from(SB_TABLE).select('data, last_seen, updated_at').eq('user_id', uid).single();
-    if (!data) return null;
-    try { if (data.last_seen) localStorage.setItem('fb:last_seen', data.last_seen); if (data.updated_at) localStorage.setItem('fb:last_sync', data.updated_at); } catch(e) {}
-    return data.data;
-  } catch(e) { return null; }
-}
-
-function AuthScreen({ onLogin }) {
-  const [tab, setTab] = React.useState('login');
-  const [email, setEmail] = React.useState('');
-  const [pass, setPass] = React.useState('');
-  const [name, setName] = React.useState('');
-  const [err, setErr] = React.useState('');
-  const [ok, setOk] = React.useState('');
-  const [busy, setBusy] = React.useState(false);
-  const [forgotSent, setForgotSent] = React.useState(false);
-
-  async function doLogin() {
-    setErr(''); setOk(''); setBusy(true);
-    const { data, error } = await getSb().auth.signInWithPassword({ email: email.trim(), password: pass });
-    if (error) { setErr(error.message.includes('Invalid login') ? 'Onjuist e-mailadres of wachtwoord.' : error.message.includes('not confirmed') ? 'E-mail nog niet bevestigd.' : 'Fout: ' + error.message); setBusy(false); return; }
-    onLogin(data.user); setBusy(false);
-  }
-  async function doRegister() {
-    setErr(''); setOk(''); setBusy(true);
-    const { data, error } = await getSb().auth.signUp({ email: email.trim(), password: pass, options: { data: { display_name: name.trim() } } });
-    if (error) { setErr(error.message.includes('already') ? 'Al geregistreerd, probeer in te loggen.' : 'Fout: ' + error.message); setBusy(false); return; }
-    if (data.session) { onLogin(data.user); setBusy(false); return; }
-    setOk('Account aangemaakt! Check je e-mail voor een bevestigingslink.'); setBusy(false);
-  }
-  async function doForgot() {
-    if (!email.trim()) { setErr('Vul eerst je e-mailadres in.'); return; }
-    setErr(''); setBusy(true);
-    const { error } = await getSb().auth.resetPasswordForEmail(email.trim(), { redirectTo: window.location.href });
-    if (error) { setErr('Fout: ' + error.message); } else { setOk('Reset-link verstuurd naar ' + email.trim()); setForgotSent(true); }
-    setBusy(false);
-  }
-  const onKey = (e) => { if (e.key === 'Enter') tab === 'login' ? doLogin() : doRegister(); };
-
-  return React.createElement('div', { className: 'setup-overlay' },
-    React.createElement('div', { className: 'setup-box' },
-      React.createElement('div', { className: 'setup-logo' }, 'Finance Bro', React.createElement('span', null, '.')),
-      React.createElement('div', { className: 'auth-tabs' },
-        React.createElement('button', { className: 'auth-tab' + (tab==='login'?' on':''), onClick:()=>{setTab('login');setErr('');setOk('');setForgotSent(false);} }, 'Inloggen'),
-        React.createElement('button', { className: 'auth-tab' + (tab==='register'?' on':''), onClick:()=>{setTab('register');setErr('');setOk('');} }, 'Account aanmaken')
-      ),
-      tab==='register' && React.createElement(React.Fragment, null,
-        React.createElement('label', {className:'setup-label'}, 'Naam'),
-        React.createElement('input', {className:'setup-input', placeholder:'Jan de Vries', value:name, onChange:e=>setName(e.target.value), onKeyDown:onKey})
-      ),
-      React.createElement('label', {className:'setup-label'}, 'E-mailadres'),
-      React.createElement('input', {className:'setup-input', type:'email', placeholder:'jij@voorbeeld.nl', value:email, onChange:e=>setEmail(e.target.value), onKeyDown:onKey}),
-      React.createElement('label', {className:'setup-label'}, 'Wachtwoord'),
-      React.createElement('input', {className:'setup-input', type:'password', placeholder:'••••••••', value:pass, onChange:e=>setPass(e.target.value), onKeyDown:onKey}),
-      err && React.createElement('div', {className:'setup-err'}, err),
-      ok  && React.createElement('div', {style:{color:'#79C7A0',fontSize:12,fontFamily:'monospace',marginBottom:8,textAlign:'left',lineHeight:1.5}}, ok),
-      React.createElement('button', {className:'setup-btn', onClick:tab==='login'?doLogin:doRegister, disabled:busy}, busy?'Even geduld...':(tab==='login'?'Inloggen':'Account aanmaken')),
-      tab==='login' && React.createElement('span', {className:'forgot-link', onClick:doForgot}, forgotSent?'✓ Reset-link verstuurd':'Wachtwoord vergeten?')
-    )
-  );
-}
-
-const SbUserContext = React.createContext(null);
-function useSbUser() { return React.useContext(SbUserContext); }
-
-function UserBadge() {
-  const u = useSbUser();
-  if (!u) return null;
-  const name = u.user_metadata && u.user_metadata.display_name;
-  return React.createElement('div', {className:'user-badge'},
-    React.createElement('b', {title:u.email}, name || u.email),
-    React.createElement('button', {className:'logout-btn', onClick:async()=>{ const sb=getSb(); if(sb) await sb.auth.signOut(); }}, 'Uitloggen')
-  );
-}
-
-const _Orig = PortfolioDashboard;
-PortfolioDashboard = function({sbUser}) {
-  return React.createElement(SbUserContext.Provider, {value:sbUser}, React.createElement(_Orig, null));
-};
-
-function AppRoot() {
-  const [user, setUser] = React.useState(null);
-  const [checking, setChecking] = React.useState(true);
-  const [dataKey, setDataKey] = React.useState(0);
-
-  React.useEffect(() => {
-    const onLoaded = () => setDataKey(k => k + 1);
-    window.addEventListener('fb-data-loaded', onLoaded);
-    return () => window.removeEventListener('fb-data-loaded', onLoaded);
-  }, []);
-
-  React.useEffect(() => {
-    const sb = getSb();
-    if (!sb) { setChecking(false); return; }
-    const t = setTimeout(() => setChecking(false), 6000);
-    sb.auth.getSession().then(({ data }) => {
-      clearTimeout(t);
-      if (data && data.session) setUser(data.session.user);
-      setChecking(false);
-    }).catch(() => { clearTimeout(t); setChecking(false); });
-    const { data: { subscription } } = sb.auth.onAuthStateChange((_e, session) => {
-      setUser(session ? session.user : null);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-
-  if (checking) return React.createElement('div', {style:{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'#5C6472',fontFamily:'monospace',fontSize:14,flexDirection:'column',gap:12}},
-    React.createElement('div', null, 'Finance Bro laden...'),
-    React.createElement('div', {style:{fontSize:11,color:'#2A3140'}}, 'Verbinding maken...')
-  );
-  if (!user) return React.createElement(AuthScreen, {onLogin:setUser});
-  return React.createElement(PortfolioDashboard, {sbUser:user, key:dataKey});
-}
-
-// Cloud sync: intercept localStorage writes
-(function() {
-  const _orig = localStorage.setItem.bind(localStorage);
-  const KEYS = ['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions'];
-  let _t = null;
-  localStorage.setItem = function(k, v) {
-    _orig(k, v);
-    if (KEYS.includes(k)) {
-      clearTimeout(_t);
-      _t = setTimeout(async () => {
-        const sb = getSb(); if (!sb) return;
-        try {
-          const { data: { session } } = await sb.auth.getSession();
-          if (!session) return;
-          const p = {};
-          KEYS.forEach(k2 => { try { p[k2] = JSON.parse(localStorage.getItem(k2)); } catch(e) {} });
-          await sbSave(session.user.id, p);
-        } catch(e) {}
-      }, 1500);
-    }
-  };
-})();
-
-// On sign-in: load data from cloud
-(function() {
-  const sb = getSb(); if (!sb) return;
-  let _loaded = false;
-  sb.auth.onAuthStateChange(async (event, session) => {
-    if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && !_loaded) {
-      _loaded = true;
-      sbUpdateLastSeen(session.user.id);
-      const saved = await sbLoad(session.user.id);
-      if (saved) {
-        const KEYS = ['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions'];
-        let changed = false;
-        KEYS.forEach(k => {
-          if (saved[k] !== undefined) {
-            try { const cur = localStorage.getItem(k), nv = JSON.stringify(saved[k]); if (cur !== nv) { localStorage.setItem(k, nv); changed = true; } } catch(e) {}
-          }
-        });
-        if (changed) window.dispatchEvent(new CustomEvent('fb-data-loaded'));
-      }
-    }
-    if (event === 'SIGNED_OUT') _loaded = false;
-  });
-})();
-
-
-function _fbMount(n) {
-  n = n || 0;
-  if (!window.React || !window.ReactDOM) { if (n < 200) setTimeout(function(){ _fbMount(n+1); }, 25); else console.error('React not loaded'); return; }
-  var L = window.supabase || null;
-  if (!L) { if (n < 200) { setTimeout(function(){ _fbMount(n+1); }, 25); return; } }
-  if (L && !_sb) try { _sb = L.createClient('https://ceklzeyrlttfbcbceruk.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNla2x6ZXlybHR0ZmJjYmNlcnVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxOTA3ODUsImV4cCI6MjA5ODc2Njc4NX0.j6UxTcmLAhe9KDCxZa_05Ape6PJrU0II368G9HrDZQc'); } catch(e) {}
-  ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(AppRoot));
-}
-
-// Start mounting after DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', function(){ _fbMount(); });
-} else {
-  _fbMount();
-}
+(function mount(n){n=n||0;if(!window.React||!window.ReactDOM){if(n<200){setTimeout(function(){mount(n+1);},25);}return;}var L=window.supabase||null;if(!L&&n<120){setTimeout(function(){mount(n+1);},25);return;}if(L&&!_sb){try{_sb=L.createClient('https://ceklzeyrlttfbcbceruk.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNla2x6ZXlybHR0ZmJjYmNlcnVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxOTA3ODUsImV4cCI6MjA5ODc2Njc4NX0.j6UxTcmLAhe9KDCxZa_05Ape6PJrU0II368G9HrDZQc');}catch(e){}}ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(AppRoot));})();
   </script>
 </body>
 </html>
