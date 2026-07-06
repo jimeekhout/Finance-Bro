@@ -6,20 +6,47 @@
   <title>Finance Bro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.cdnfonts.com/css/geist-sans" rel="stylesheet">
   <style>
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { background: #11141B; color: #ECEAE3; }
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+/* ── layout met sidebar ── */
+.app-shell{ display:flex; min-height:100vh; }
+.sidebar{ width:220px; min-height:100vh; background:#0E1118; border-right:1px solid var(--line); display:flex; flex-direction:column; padding:0; flex:none; position:fixed; left:0; top:0; bottom:0; z-index:100; }
+.sidebar-brand{ padding:24px 20px 20px; border-bottom:1px solid var(--line); }
+.sidebar-brand .pf-brand{ font-size:22px; }
+.sidebar-nav{ flex:1; padding:12px 10px; display:flex; flex-direction:column; gap:4px; overflow-y:auto; }
+.nav-item{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:9px; color:var(--muted); font-size:13.5px; font-family:'Inter',sans-serif; cursor:pointer; transition:.14s; border:none; background:none; width:100%; text-align:left; }
+.nav-item:hover{ color:var(--ink); background:var(--surface); }
+.nav-item.on{ color:var(--ink); background:var(--surface2); border-left:2px solid var(--brass); padding-left:10px; }
+.nav-item .nav-icon{ font-size:16px; width:22px; text-align:center; flex:none; }
+.nav-section{ font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--faint); padding:14px 12px 6px; }
+.nav-logout{ color:var(--muted); }
+.nav-logout:hover{ color:var(--loss) !important; background:rgba(226,145,126,.08) !important; }
+.sidebar-bottom{ padding:12px 10px; border-top:1px solid var(--line); }
+.main-content{ margin-left:220px; flex:1; min-width:0; }
+.pf-wrap{ max-width:1080px; margin:0 auto; padding:28px 28px 64px; }
+@media(max-width:768px){
+  .sidebar{ width:60px; }
+  .sidebar-brand{ padding:16px 10px; }
+  .sidebar-brand .pf-sub, .sidebar-brand .pf-asof-wrap{ display:none; }
+  .nav-item span:not(.nav-icon){ display:none; }
+  .nav-section{ display:none; }
+  .main-content{ margin-left:60px; }
+  .sidebar-bottom .user-badge b, .sidebar-bottom .logout-btn span{ display:none; }
+}
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.cdnfonts.com/css/geist-sans');
 
 .pf-root{
   --bg:#11141B; --bg2:#0C0F15; --surface:#1A1F2A; --surface2:#232938;
   --line:#2A3140; --line2:#3A4357;
   --ink:#ECEAE3; --muted:#8B92A2; --faint:#5C6472;
   --gain:#79C7A0; --loss:#E2917E; --brass:#CBA135; --brass-dim:#8C7126;
-  font-family:'Inter',system-ui,sans-serif;
+  font-family:'Geist Sans','Inter',system-ui,sans-serif;
   background:
     radial-gradient(1200px 600px at 80% -10%, rgba(203,161,53,.06), transparent 60%),
     var(--bg);
@@ -27,7 +54,24 @@ body { background: #11141B; color: #ECEAE3; }
   min-height:100vh; width:100%;
   -webkit-font-smoothing:antialiased;
 }
-.pf-wrap{ max-width:1080px; margin:0 auto; padding:28px 22px 64px; }
+
+.pf-root.light-mode{
+  --bg:#F5F5F0; --bg2:#ECEAE3; --surface:#FFFFFF; --surface2:#F0EEE8;
+  --line:#E0DDD5; --line2:#CCCAB8;
+  --ink:#1A1A18; --muted:#6B6B60; --faint:#9A9A8E;
+  --gain:#2A8A5A; --loss:#C0503A; --brass:#9A7810; --brass-dim:#C8A020;
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(203,161,53,.04), transparent 60%),
+    var(--bg);
+}
+.pf-root.light-mode .sidebar{ background:#FFFFFF; border-right:1px solid var(--line); }
+.pf-root.light-mode .tape{ background:var(--surface2); }
+.pf-root.light-mode .calc-section{ background:linear-gradient(180deg,var(--surface),var(--bg2)); }
+
+/* theme toggle */
+.theme-toggle{ background:none; border:1px solid var(--line2); border-radius:8px; color:var(--muted); padding:7px 10px; cursor:pointer; font-size:15px; line-height:1; transition:.14s; }
+.theme-toggle:hover{ color:var(--ink); border-color:var(--line); }
+.pf-wrap{ max-width:1080px; margin:0 auto; padding:28px 28px 64px; }
 
 /* header + ticker tape */
 .pf-top{ display:flex; align-items:baseline; justify-content:space-between; gap:18px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:16px; }
@@ -90,7 +134,11 @@ body { background: #11141B; color: #ECEAE3; }
 
 /* account tab */
 .acc-grid{ display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
-.acc-avatar{ width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,var(--brass),var(--brass-dim)); display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-size:28px; font-weight:600; color:#1A1206; flex:none; }
+.acc-avatar{ width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,var(--brass),var(--brass-dim)); display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-size:28px; font-weight:600; color:#1A1206; flex:none; position:relative; cursor:pointer; overflow:hidden; }
+.acc-avatar img{ width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.acc-avatar-overlay{ position:absolute; inset:0; background:rgba(0,0,0,.45); border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:0; transition:.15s; font-size:18px; }
+.acc-avatar:hover .acc-avatar-overlay{ opacity:1; }
+.acc-avatar input[type=file]{ position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
 .acc-name{ font-size:18px; font-weight:600; color:var(--ink); margin-bottom:4px; }
 .acc-email{ font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--muted); margin-bottom:4px; }
 .acc-joined{ font-size:12px; color:var(--faint); }
@@ -317,19 +365,19 @@ body { background: #11141B; color: #ECEAE3; }
 .foot{ margin-top:22px; font-size:11px; color:var(--faint); line-height:1.6; }
 
 
-.setup-overlay{position:fixed;inset:0;background:#0C0F15;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:'Inter',system-ui,sans-serif;overflow-y:auto;}
+.setup-overlay{position:fixed;inset:0;background:#0C0F15;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:'Geist Sans','Inter',system-ui,sans-serif;overflow-y:auto;}
 .setup-box{background:#1A1F2A;border:1px solid #2A3140;border-radius:16px;padding:36px 32px;max-width:440px;width:90%;text-align:center;margin:auto;}
 .setup-logo{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:600;color:#ECEAE3;margin-bottom:5px;letter-spacing:.04em;}
 .setup-logo span{color:#CBA135;}
 .setup-label{display:block;text-align:left;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#5C6472;margin-bottom:7px;}
 .setup-input{width:100%;background:#0C0F15;border:1px solid #3A4357;border-radius:9px;color:#ECEAE3;padding:12px 13px;font-family:'IBM Plex Mono',monospace;font-size:13.5px;outline:none;margin-bottom:14px;}
 .setup-input:focus{border-color:#8C7126;}
-.setup-btn{width:100%;background:#CBA135;color:#1A1206;border:none;border-radius:9px;padding:13px;font-size:14.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:8px;}
+.setup-btn{width:100%;background:#CBA135;color:#1A1206;border:none;border-radius:9px;padding:13px;font-size:14.5px;font-weight:600;cursor:pointer;font-family:'Geist Sans','Inter',sans-serif;margin-bottom:8px;}
 .setup-btn:hover{filter:brightness(1.08);}
 .setup-btn:disabled{opacity:.6;cursor:default;}
 .setup-err{color:#E2917E;font-size:12px;font-family:'IBM Plex Mono',monospace;margin:4px 0 10px;min-height:16px;text-align:left;}
 .auth-tabs{display:flex;gap:0;margin-bottom:22px;border:1px solid #2A3140;border-radius:9px;overflow:hidden;}
-.auth-tab{flex:1;padding:10px;font-size:13.5px;cursor:pointer;background:#0C0F15;color:#8B92A2;border:none;font-family:'Inter',sans-serif;transition:.14s;}
+.auth-tab{flex:1;padding:10px;font-size:13.5px;cursor:pointer;background:#0C0F15;color:#8B92A2;border:none;font-family:'Geist Sans','Inter',sans-serif;transition:.14s;}
 .auth-tab.on{background:#1A1F2A;color:#ECEAE3;font-weight:600;}
 .forgot-link{font-size:12px;color:#CBA135;cursor:pointer;text-decoration:underline;margin-top:6px;text-align:right;display:block;}
 .user-badge{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted,#8B92A2);font-family:'IBM Plex Mono',monospace;}
@@ -337,7 +385,6 @@ body { background: #11141B; color: #ECEAE3; }
 .logout-btn{background:none;border:1px solid var(--line2,#3A4357);color:var(--faint,#5C6472);border-radius:7px;padding:5px 10px;font-size:11.5px;cursor:pointer;font-family:'IBM Plex Mono',monospace;}
 .logout-btn:hover{color:var(--loss,#E2917E);border-color:var(--loss,#E2917E);}
 
-  
   </style>
 </head>
 <body>
@@ -622,6 +669,22 @@ function PortfolioDashboard() {
   const [auto, setAuto] = useState(false);
   const [intervalMin, setIntervalMin] = useState(15);
   const [apiKey, setApiKey] = useState("");
+  const [lightMode, setLightMode] = useState(() => {
+    try {
+      return localStorage.getItem('fb:theme') === 'light';
+    } catch (e) {
+      return false;
+    }
+  });
+  function toggleTheme() {
+    setLightMode(m => {
+      const next = !m;
+      try {
+        localStorage.setItem('fb:theme', next ? 'light' : 'dark');
+      } catch (e) {}
+      return next;
+    });
+  }
   const [showRt, setShowRt] = useState(false);
   const [activeTab, setActiveTab] = useState("portfolio"); // "portfolio" | "calc"
   const [loan, setLoan] = useState({
@@ -1598,70 +1661,132 @@ function PortfolioDashboard() {
     className: "ed-val"
   }, display));
   return /*#__PURE__*/React.createElement("div", {
-    className: "pf-root"
+    className: "pf-root" + (lightMode ? " light-mode" : "")
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "app-shell"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sidebar"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sidebar-brand"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pf-brand"
+  }, "Finance Bro", /*#__PURE__*/React.createElement("span", {
+    className: "dot"
+  }, ".")), /*#__PURE__*/React.createElement("div", {
+    className: "pf-sub",
+    style: {
+      marginTop: 4
+    }
+  }, "Persoonlijk dashboard")), /*#__PURE__*/React.createElement("nav", {
+    className: "sidebar-nav"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "nav-section"
+  }, "Overzicht"), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "portfolio" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("portfolio");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "📈"), /*#__PURE__*/React.createElement("span", null, "Aandelenportefeuille")), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "networth" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("networth");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "💎"), /*#__PURE__*/React.createElement("span", null, "Netto Vermogen")), /*#__PURE__*/React.createElement("div", {
+    className: "nav-section"
+  }, "Financiën"), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "budget" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("budget");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "💶"), /*#__PURE__*/React.createElement("span", null, "Budget")), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "trans" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("trans");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "📋"), /*#__PURE__*/React.createElement("span", null, "Uitgaven")), /*#__PURE__*/React.createElement("div", {
+    className: "nav-section"
+  }, "Tools"), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "calc" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("calc");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "📊"), /*#__PURE__*/React.createElement("span", null, "Rekenmachine"))), /*#__PURE__*/React.createElement("div", {
+    className: "sidebar-bottom"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "account" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("account");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "👤"), /*#__PURE__*/React.createElement("span", null, "Account")), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "settings" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("settings");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "⚙️"), /*#__PURE__*/React.createElement("span", null, "Instellingen")), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item nav-logout",
+    onClick: async () => {
+      const sb = typeof getSb === 'function' ? getSb() : null;
+      if (!sb) return;
+      const KEYS = ['portfolio:meta', 'portfolio:settings', 'portfolio:calc', 'portfolio:budget', 'portfolio:transactions', 'fb:last_seen', 'fb:last_sync', 'fb:display_name'];
+      KEYS.forEach(k => {
+        try {
+          localStorage.removeItem(k);
+        } catch (e) {}
+      });
+      await sb.auth.signOut();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "🚪"), /*#__PURE__*/React.createElement("span", null, "Uitloggen")), /*#__PURE__*/React.createElement("button", {
+    className: "theme-toggle",
+    onClick: toggleTheme,
+    title: lightMode ? 'Donkere modus' : 'Lichte modus',
+    style: {
+      margin: '8px 10px 4px',
+      width: 'calc(100% - 20px)'
+    }
+  }, lightMode ? '🌙 Donkere modus' : '☀️ Lichte modus'))), /*#__PURE__*/React.createElement("div", {
+    className: "main-content"
   }, /*#__PURE__*/React.createElement("div", {
     className: "pf-wrap"
   }, /*#__PURE__*/React.createElement("div", {
     className: "pf-top"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "pf-brand"
-  }, "Finance Bro", /*#__PURE__*/React.createElement("span", {
-    className: "dot"
-  }, ".")), /*#__PURE__*/React.createElement("div", {
-    className: "pf-sub"
-  }, "Aandelen · ETF's · Dividend")), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 12,
-      flexWrap: "wrap"
+      fontSize: 20,
+      fontWeight: 600,
+      color: 'var(--ink)',
+      fontFamily: "'Fraunces',serif"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, activeTab === "portfolio" ? "Aandelenportefeuille" : activeTab === "networth" ? "Netto Vermogen" : activeTab === "budget" ? "Budget" : activeTab === "trans" ? "Uitgaven" : activeTab === "calc" ? "Rekenmachine" : activeTab === "account" ? "Account" : "Finance Bro")), /*#__PURE__*/React.createElement("div", {
     className: "pf-asof"
   }, asOf ? "Bijgewerkt " + asOf.toLocaleTimeString("nl-NL", {
     hour: "2-digit",
     minute: "2-digit"
-  }) : "Nog niet bijgewerkt", apiKey && holdings.some(h => h.live) && /*#__PURE__*/React.createElement("span", {
+  }) : "", apiKey && holdings.some(h => h.live) && /*#__PURE__*/React.createElement("span", {
     className: "live-dot"
-  }, "● realtime (US)")), /*#__PURE__*/React.createElement("button", {
-    className: "btn" + (activeTab === "account" ? " primary" : ""),
-    style: {
-      fontSize: 12,
-      padding: "7px 13px"
-    },
-    onClick: () => {
-      setActiveTab("account");
-      resetTransient();
-    }
-  }, "👤 Account"))), /*#__PURE__*/React.createElement("div", {
-    className: "tabs"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "tabs-list"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "tab calc-tab" + (activeTab === "portfolio" ? " on" : ""),
-    onClick: () => {
-      setActiveTab("portfolio");
-      resetTransient();
-    }
-  }, "📈 Aandelenportefeuille"), /*#__PURE__*/React.createElement("button", {
-    className: "tab calc-tab" + (activeTab === "calc" ? " on" : ""),
-    onClick: () => {
-      setActiveTab("calc");
-      resetTransient();
-    }
-  }, "📊 Rekenmachine"), /*#__PURE__*/React.createElement("button", {
-    className: "tab calc-tab" + (activeTab === "budget" ? " on" : ""),
-    onClick: () => {
-      setActiveTab("budget");
-      resetTransient();
-    }
-  }, "💶 Budget"), /*#__PURE__*/React.createElement("button", {
-    className: "tab calc-tab" + (activeTab === "trans" ? " on" : ""),
-    onClick: () => {
-      setActiveTab("trans");
-      resetTransient();
-    }
-  }, "📋 Uitgaven"))), activeTab === "calc" && /*#__PURE__*/React.createElement(CalcTab, {
+  }, "● realtime (US)"))), activeTab === "calc" && /*#__PURE__*/React.createElement(CalcTab, {
     loan: loan,
     setLoan: setLoan,
     loanCalc: loanCalc,
@@ -1675,7 +1800,23 @@ function PortfolioDashboard() {
     transactions: transactions,
     setTransactions: setTransactions,
     budget: budget
-  }), activeTab === "account" && /*#__PURE__*/React.createElement(AccountTab, null), activeTab === "portfolio" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }), activeTab === "networth" && /*#__PURE__*/React.createElement(NetWorthTab, {
+    portfolioValue: t.mvTotal,
+    loan: loan
+  }), activeTab === "account" && /*#__PURE__*/React.createElement(AccountTab, null), activeTab === "settings" && /*#__PURE__*/React.createElement(SettingsTab, {
+    apiKey: apiKey,
+    setApiKey: setApiKey,
+    auto: auto,
+    toggleAuto: toggleAuto,
+    intervalMin: intervalMin,
+    setIntervalMin: setIntervalMin,
+    portfolios: portfolios,
+    loan: loan,
+    portRate: portRate,
+    budget: budget,
+    transactions: transactions,
+    handleImport: handleImport
+  }), activeTab === "portfolio" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "tabs",
     style: {
       marginTop: 12
@@ -2202,7 +2343,7 @@ function PortfolioDashboard() {
     className: "err"
   }, error), /*#__PURE__*/React.createElement("div", {
     className: "foot"
-  }, "Koersen en dividendrendement worden live opgehaald via webzoekresultaten; koers en GAK staan in de eigen valuta van het product (bv. USD voor Amerikaanse aandelen) en worden voor de portefeuilletotalen omgerekend naar euro tegen de actuele wisselkoers. Omdat ook je inleg tegen de huidige koers wordt omgerekend, is het euro-resultaat een benadering die de wisselkoersbeweging sinds aankoop niet meeneemt. Waarden kunnen enkele minuten vertraagd zijn. Met een eigen (gratis) Finnhub-key worden Amerikaanse aandelen realtime opgehaald; Europese noteringen blijven op de zoekkoers. Ontvangen dividend (handmatig ingevuld, of geschat uit aankoopdatum × rendement) wordt bij \"waarde nu\" opgeteld, dus winst/verlies toont het totaalrendement inclusief dividend. De dividendkalender verdeelt het jaarbedrag gelijk over de uitkeringsmaanden — een schatting. Geen beleggingsadvies."))));
+  }, "Koersen en dividendrendement worden live opgehaald via webzoekresultaten; koers en GAK staan in de eigen valuta van het product (bv. USD voor Amerikaanse aandelen) en worden voor de portefeuilletotalen omgerekend naar euro tegen de actuele wisselkoers. Omdat ook je inleg tegen de huidige koers wordt omgerekend, is het euro-resultaat een benadering die de wisselkoersbeweging sinds aankoop niet meeneemt. Waarden kunnen enkele minuten vertraagd zijn. Met een eigen (gratis) Finnhub-key worden Amerikaanse aandelen realtime opgehaald; Europese noteringen blijven op de zoekkoers. Ontvangen dividend (handmatig ingevuld, of geschat uit aankoopdatum × rendement) wordt bij \"waarde nu\" opgeteld, dus winst/verlies toont het totaalrendement inclusief dividend. De dividendkalender verdeelt het jaarbedrag gelijk over de uitkeringsmaanden — een schatting. Geen beleggingsadvies."))))));
 }
 
 /* ---- Rekenmachine tab ---- */
@@ -4110,6 +4251,714 @@ function ExportButton({
     className: "btn primary",
     onClick: () => setShowPanel(false)
   }, "Sluiten"))));
+}
+
+/* ---- netto vermogen tab ---- */
+function NetWorthTab({
+  portfolioValue,
+  loan
+}) {
+  const nw_uid = () => Math.random().toString(36).slice(2, 9);
+  const n = v => parseFloat(String(v || '').replace(',', '.')) || 0;
+  const DEFAULT_NW = {
+    assets: [{
+      id: 'a1',
+      label: 'Spaarrekening',
+      amount: '',
+      category: 'cash'
+    }, {
+      id: 'a2',
+      label: 'Eigen woning (WOZ-waarde)',
+      amount: '',
+      category: 'vastgoed'
+    }, {
+      id: 'a3',
+      label: 'Auto',
+      amount: '',
+      category: 'overig'
+    }],
+    liabilities: [{
+      id: 'l1',
+      label: 'Hypotheek',
+      amount: '',
+      category: 'hypotheek'
+    }, {
+      id: 'l2',
+      label: 'Creditcard schuld',
+      amount: '',
+      category: 'overig'
+    }]
+  };
+  const [nwData, setNwData] = useState(() => {
+    try {
+      const v = localStorage.getItem('fb:networth');
+      return v ? JSON.parse(v) : DEFAULT_NW;
+    } catch (e) {
+      return DEFAULT_NW;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem('fb:networth', JSON.stringify(nwData));
+    } catch (e) {}
+  }, [nwData]);
+  const setAsset = (id, k, v) => setNwData(d => ({
+    ...d,
+    assets: d.assets.map(a => a.id === id ? {
+      ...a,
+      [k]: v
+    } : a)
+  }));
+  const setLiab = (id, k, v) => setNwData(d => ({
+    ...d,
+    liabilities: d.liabilities.map(l => l.id === id ? {
+      ...l,
+      [k]: v
+    } : l)
+  }));
+  const addAsset = () => setNwData(d => ({
+    ...d,
+    assets: [...d.assets, {
+      id: nw_uid(),
+      label: '',
+      amount: '',
+      category: 'overig'
+    }]
+  }));
+  const addLiab = () => setNwData(d => ({
+    ...d,
+    liabilities: [...d.liabilities, {
+      id: nw_uid(),
+      label: '',
+      amount: '',
+      category: 'overig'
+    }]
+  }));
+  const delAsset = id => setNwData(d => ({
+    ...d,
+    assets: d.assets.filter(a => a.id !== id)
+  }));
+  const delLiab = id => setNwData(d => ({
+    ...d,
+    liabilities: d.liabilities.filter(l => l.id !== id)
+  }));
+
+  // Bereken totalen
+  const manualAssets = nwData.assets.reduce((s, a) => s + n(a.amount), 0);
+  const totalAssets = manualAssets + (portfolioValue || 0);
+  const totalLiabs = nwData.liabilities.reduce((s, l) => s + n(l.amount), 0) + n(loan?.balance);
+  const netWorth = totalAssets - totalLiabs;
+  const ASSET_CATS = ['cash', 'vastgoed', 'voertuig', 'overig'];
+  const LIAB_CATS = ['hypotheek', 'studieschuld', 'persoonlijke lening', 'creditcard', 'overig'];
+  const catColors = {
+    cash: '#6EA8D8',
+    vastgoed: '#CBA135',
+    voertuig: '#7FB8A0',
+    overig: '#9AA0AE',
+    aandelen: '#C98AC0',
+    hypotheek: '#E2917E',
+    studieschuld: '#B5915A',
+    'persoonlijke lening': '#C98AC0',
+    creditcard: '#E57373'
+  };
+
+  // Donut data
+  const assetDonut = [...(portfolioValue > 0 ? [{
+    label: 'Aandelenportefeuille',
+    value: portfolioValue,
+    color: '#C98AC0'
+  }] : []), ...nwData.assets.filter(a => n(a.amount) > 0).map(a => ({
+    label: a.label || '—',
+    value: n(a.amount),
+    color: catColors[a.category] || '#9AA0AE'
+  }))];
+  const liabDonut = [...(n(loan?.balance) > 0 ? [{
+    label: 'Studieschuld',
+    value: n(loan?.balance),
+    color: catColors.studieschuld
+  }] : []), ...nwData.liabilities.filter(l => n(l.amount) > 0).map(l => ({
+    label: l.label || '—',
+    value: n(l.amount),
+    color: catColors[l.category] || '#9AA0AE'
+  }))];
+  const adTotal = assetDonut.reduce((s, d) => s + d.value, 0) || 1;
+  const ldTotal = liabDonut.reduce((s, d) => s + d.value, 0) || 1;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "calc-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-title"
+  }, "Netto Vermogen"), /*#__PURE__*/React.createElement("div", {
+    className: "calc-desc"
+  }, "Jouw totale bezittingen minus alle schulden. De aandelenportefeuille en studieschuld worden automatisch meegenomen."), /*#__PURE__*/React.createElement("div", {
+    className: "loan-pillars",
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Totale bezittingen"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big gain"
+  }, eur(totalAssets))), /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Totale schulden"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big loss"
+  }, eur(totalLiabs))), /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill",
+    style: {
+      border: '1px solid ' + (netWorth >= 0 ? 'var(--gain)' : 'var(--loss)'),
+      background: netWorth >= 0 ? 'rgba(121,199,160,.07)' : 'rgba(226,145,126,.07)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Netto vermogen"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big " + (netWorth >= 0 ? 'gain' : 'loss'),
+    style: {
+      fontSize: 28
+    }
+  }, eur(netWorth)))), (totalAssets > 0 || totalLiabs > 0) && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 32,
+      marginTop: 28,
+      flexWrap: 'wrap'
+    }
+  }, totalAssets > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 200
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      letterSpacing: '.15em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 12
+    }
+  }, "Bezittingen"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement(NWDonut, {
+    data: assetDonut,
+    total: adTotal,
+    center: eur(totalAssets)
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 6
+    }
+  }, assetDonut.map((d, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      fontSize: 12
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 8,
+      height: 8,
+      borderRadius: 2,
+      background: d.color,
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: 'var(--ink)',
+      flex: 1
+    }
+  }, d.label), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: 'var(--muted)'
+    }
+  }, eur(d.value))))))), totalLiabs > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 200
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      letterSpacing: '.15em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 12
+    }
+  }, "Schulden"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement(NWDonut, {
+    data: liabDonut,
+    total: ldTotal,
+    center: eur(totalLiabs),
+    color: "loss"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 6
+    }
+  }, liabDonut.map((d, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      fontSize: 12
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 8,
+      height: 8,
+      borderRadius: 2,
+      background: d.color,
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: 'var(--ink)',
+      flex: 1
+    }
+  }, d.label), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: 'var(--muted)'
+    }
+  }, eur(d.value))))))))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Bezittingen"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)',
+      marginBottom: 14,
+      lineHeight: 1.5
+    }
+  }, "Je aandelenportefeuille (", eur(portfolioValue || 0), ") wordt automatisch meegenomen vanuit de Aandelenportefeuille-tab."), /*#__PURE__*/React.createElement("div", {
+    className: "budget-cats"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "budget-cat-h"
+  }, /*#__PURE__*/React.createElement("span", null, "Omschrijving"), /*#__PURE__*/React.createElement("span", null, "Waarde (€)"), /*#__PURE__*/React.createElement("span", null, "Categorie"), /*#__PURE__*/React.createElement("span", null)), nwData.assets.map(a => /*#__PURE__*/React.createElement("div", {
+    className: "budget-cat-r",
+    key: a.id,
+    style: {
+      gridTemplateColumns: '1fr 130px 130px 28px'
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: a.label,
+    placeholder: "bv. Spaarrekening",
+    onChange: e => setAsset(a.id, 'label', e.target.value),
+    style: {
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
+      borderRadius: 7,
+      color: 'var(--ink)',
+      padding: '8px 11px',
+      fontFamily: 'Inter,sans-serif',
+      fontSize: 13,
+      outline: 'none',
+      width: '100%'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: 'var(--faint)',
+      fontSize: 13
+    }
+  }, "€"), /*#__PURE__*/React.createElement("input", {
+    value: a.amount,
+    placeholder: "0",
+    inputMode: "decimal",
+    onChange: e => setAsset(a.id, 'amount', e.target.value),
+    style: {
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
+      borderRadius: 7,
+      color: 'var(--ink)',
+      padding: '8px 11px',
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 13,
+      outline: 'none',
+      width: '100%',
+      textAlign: 'right'
+    }
+  })), /*#__PURE__*/React.createElement("select", {
+    value: a.category,
+    onChange: e => setAsset(a.id, 'category', e.target.value),
+    style: {
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
+      borderRadius: 7,
+      color: 'var(--ink)',
+      padding: '8px 11px',
+      fontSize: 12,
+      outline: 'none',
+      width: '100%'
+    }
+  }, ASSET_CATS.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c,
+    value: c
+  }, c))), /*#__PURE__*/React.createElement("button", {
+    className: "xbtn",
+    onClick: () => delAsset(a.id)
+  }, "×"))), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      marginTop: 10,
+      alignSelf: 'flex-start'
+    },
+    onClick: addAsset
+  }, "+ Bezitting toevoegen"))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Schulden"), n(loan?.balance) > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)',
+      marginBottom: 14,
+      lineHeight: 1.5
+    }
+  }, "Je studieschuld (", eur(n(loan?.balance)), ") wordt automatisch meegenomen vanuit de Rekenmachine-tab."), /*#__PURE__*/React.createElement("div", {
+    className: "budget-cats"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "budget-cat-h"
+  }, /*#__PURE__*/React.createElement("span", null, "Omschrijving"), /*#__PURE__*/React.createElement("span", null, "Bedrag (€)"), /*#__PURE__*/React.createElement("span", null, "Categorie"), /*#__PURE__*/React.createElement("span", null)), nwData.liabilities.map(l => /*#__PURE__*/React.createElement("div", {
+    className: "budget-cat-r",
+    key: l.id,
+    style: {
+      gridTemplateColumns: '1fr 130px 130px 28px'
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: l.label,
+    placeholder: "bv. Hypotheek",
+    onChange: e => setLiab(l.id, 'label', e.target.value),
+    style: {
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
+      borderRadius: 7,
+      color: 'var(--ink)',
+      padding: '8px 11px',
+      fontFamily: 'Inter,sans-serif',
+      fontSize: 13,
+      outline: 'none',
+      width: '100%'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: 'var(--faint)',
+      fontSize: 13
+    }
+  }, "€"), /*#__PURE__*/React.createElement("input", {
+    value: l.amount,
+    placeholder: "0",
+    inputMode: "decimal",
+    onChange: e => setLiab(l.id, 'amount', e.target.value),
+    style: {
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
+      borderRadius: 7,
+      color: 'var(--ink)',
+      padding: '8px 11px',
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 13,
+      outline: 'none',
+      width: '100%',
+      textAlign: 'right'
+    }
+  })), /*#__PURE__*/React.createElement("select", {
+    value: l.category,
+    onChange: e => setLiab(l.id, 'category', e.target.value),
+    style: {
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
+      borderRadius: 7,
+      color: 'var(--ink)',
+      padding: '8px 11px',
+      fontSize: 12,
+      outline: 'none',
+      width: '100%'
+    }
+  }, LIAB_CATS.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c,
+    value: c
+  }, c))), /*#__PURE__*/React.createElement("button", {
+    className: "xbtn",
+    onClick: () => delLiab(l.id)
+  }, "×"))), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      marginTop: 10,
+      alignSelf: 'flex-start'
+    },
+    onClick: addLiab
+  }, "+ Schuld toevoegen"))));
+}
+function NWDonut({
+  data,
+  total,
+  center
+}) {
+  const r = 48,
+    sw = 16,
+    circ = 2 * Math.PI * r;
+  let acc = 0;
+  return /*#__PURE__*/React.createElement("svg", {
+    width: "120",
+    height: "120",
+    viewBox: "0 0 120 120",
+    style: {
+      flex: 'none'
+    }
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "60",
+    cy: "60",
+    r: r,
+    fill: "none",
+    stroke: "var(--line)",
+    strokeWidth: sw
+  }), data.map((d, i) => {
+    const len = d.value / total * circ;
+    const seg = /*#__PURE__*/React.createElement("circle", {
+      key: i,
+      cx: "60",
+      cy: "60",
+      r: r,
+      fill: "none",
+      stroke: d.color,
+      strokeWidth: sw,
+      strokeDasharray: `${len} ${circ - len}`,
+      strokeDashoffset: -acc,
+      transform: "rotate(-90 60 60)"
+    });
+    acc += len;
+    return seg;
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "60",
+    y: "57",
+    textAnchor: "middle",
+    fill: "var(--ink)",
+    style: {
+      font: "600 10px 'IBM Plex Mono',monospace"
+    }
+  }, center), /*#__PURE__*/React.createElement("text", {
+    x: "60",
+    y: "70",
+    textAnchor: "middle",
+    fill: "var(--faint)",
+    style: {
+      font: '9px Inter,sans-serif'
+    }
+  }, "TOTAAL"));
+}
+
+/* ---- instellingen tab ---- */
+function SettingsTab({
+  apiKey,
+  setApiKey,
+  auto,
+  toggleAuto,
+  intervalMin,
+  setIntervalMin,
+  portfolios,
+  loan,
+  portRate,
+  budget,
+  transactions,
+  handleImport
+}) {
+  const [key, setKey] = useState(apiKey || '');
+  const [keyMsg, setKeyMsg] = useState('');
+  const [keyErr, setKeyErr] = useState('');
+  const [testing, setTesting] = useState(false);
+  async function testAndSave() {
+    const k = key.trim();
+    if (!k) {
+      setKeyErr('Vul je API-key in.');
+      return;
+    }
+    setTesting(true);
+    setKeyErr('');
+    setKeyMsg('');
+    try {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': k,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 10,
+          messages: [{
+            role: 'user',
+            content: 'Hi'
+          }]
+        })
+      });
+      if (r.status === 401 || r.status === 403) {
+        setKeyErr('Ongeldige key — controleer hem op console.anthropic.com.');
+        setTesting(false);
+        return;
+      }
+      if (!r.ok) {
+        setKeyErr('Fout ' + r.status);
+        setTesting(false);
+        return;
+      }
+      try {
+        localStorage.setItem('fb:anthropic_key', k);
+      } catch (e) {}
+      setApiKey(k);
+      setKeyMsg('Key opgeslagen en getest!');
+      setTimeout(() => setKeyMsg(''), 3000);
+    } catch (e) {
+      setKeyErr('Verbindingsfout.');
+    }
+    setTesting(false);
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "calc-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-title"
+  }, "Instellingen"), /*#__PURE__*/React.createElement("h3", null, "Anthropic API-key"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 14,
+      maxWidth: 480,
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-desc",
+    style: {
+      marginBottom: 0
+    }
+  }, "Nodig voor live koersen, zoeken op bedrijfsnaam en de DeGiro-import. Haal gratis een key op via", ' ', /*#__PURE__*/React.createElement("a", {
+    href: "https://console.anthropic.com",
+    target: "_blank",
+    rel: "noopener",
+    style: {
+      color: 'var(--brass)'
+    }
+  }, "console.anthropic.com"), "."), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "API-key"), /*#__PURE__*/React.createElement("input", {
+    type: "password",
+    value: key,
+    placeholder: "sk-ant-...",
+    onChange: e => setKey(e.target.value),
+    onKeyDown: e => e.key === 'Enter' && testAndSave()
+  })), keyErr && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'var(--loss)',
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 12
+    }
+  }, keyErr), keyMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'var(--gain)',
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 12
+    }
+  }, "✓ ", keyMsg), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    style: {
+      alignSelf: 'flex-start'
+    },
+    onClick: testAndSave,
+    disabled: testing
+  }, testing ? 'Testen...' : 'Opslaan & testen'))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Automatisch verversen"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 14,
+      maxWidth: 480,
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn" + (auto ? " primary" : ""),
+    onClick: toggleAuto
+  }, auto ? '⏸ Pauzeren' : '▶ Inschakelen'), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: 'var(--muted)'
+    }
+  }, auto ? `Actief — elke ${intervalMin} min` : 'Uitgeschakeld')), auto && /*#__PURE__*/React.createElement("div", {
+    className: "fld",
+    style: {
+      maxWidth: 200
+    }
+  }, /*#__PURE__*/React.createElement("label", null, "Interval (minuten)"), /*#__PURE__*/React.createElement("select", {
+    className: "auto-int",
+    value: intervalMin,
+    onChange: e => setIntervalMin(Number(e.target.value))
+  }, [1, 5, 15, 30, 60].map(m => /*#__PURE__*/React.createElement("option", {
+    key: m,
+    value: m
+  }, m, " min")))))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Data importeren / exporteren"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 12,
+      flexWrap: 'wrap',
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement(ImportPanel, {
+    onImport: handleImport
+  }), /*#__PURE__*/React.createElement(ExportButton, {
+    portfolios: portfolios,
+    loan: loan,
+    portRate: portRate,
+    budget: budget,
+    transactions: transactions,
+    apiKey: key,
+    auto: auto,
+    intervalMin: intervalMin
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)',
+      marginTop: 10,
+      lineHeight: 1.6
+    }
+  }, "Exporteer je data als JSON om een backup te maken of over te zetten naar een ander apparaat. Importeer een eerder geëxporteerd bestand om je data te herstellen.")));
 }
 
 /* ---- account tab ---- */
