@@ -4132,14 +4132,37 @@ function AccountTab() {
   });
   const [apiMsg, setApiMsg] = useState('');
   const [resetSent, setResetSent] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState(() => {
-    try {
-      return localStorage.getItem('fb:avatar') || '';
-    } catch (e) {
-      return '';
-    }
-  });
+  const [avatarUrl, setAvatarUrl] = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
+
+  // Laad avatar URL uit user_data bij mount
+  useEffect(() => {
+    if (!sb) return;
+    sb.auth.getSession().then(async ({
+      data
+    }) => {
+      if (!data || !data.session) return;
+      const u = data.session.user;
+      setUser(u);
+      setEmail(u.email || '');
+      const metaName = u.user_metadata && u.user_metadata.display_name;
+      const localName = localStorage.getItem('fb:display_name') || '';
+      setDisplayName(metaName || localName || '');
+      // Laad avatar URL uit user_data tabel
+      try {
+        const {
+          data: row
+        } = await sb.from('user_data').select('display_name, avatar_url').eq('user_id', u.id).single();
+        if (row) {
+          if (row.display_name) {
+            setDisplayName(row.display_name);
+            localStorage.setItem('fb:display_name', row.display_name);
+          }
+          if (row.avatar_url) setAvatarUrl(row.avatar_url);
+        }
+      } catch (e) {}
+    });
+  }, []);
   useEffect(() => {
     if (!sb) return;
     sb.auth.getSession().then(async ({
@@ -4243,50 +4266,76 @@ function AccountTab() {
     }
     setSaving(false);
   }
+  async function handleAvatarFile(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    if (file.size > 3 * 1024 * 1024) {
+      setProfileErr('Afbeelding mag maximaal 3MB zijn.');
+      return;
+    }
+    if (!sb || !user) {
+      setProfileErr('Niet ingelogd.');
+      return;
+    }
+    setAvatarUploading(true);
+    setProfileErr('');
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `${user.id}/avatar.${ext}`;
+      // Upload naar Supabase Storage
+      const {
+        error: upErr
+      } = await sb.storage.from('avatars').upload(path, file, {
+        upsert: true
+      });
+      if (upErr) throw new Error(upErr.message);
+      // Haal publieke URL op
+      const {
+        data: urlData
+      } = sb.storage.from('avatars').getPublicUrl(path);
+      const publicUrl = urlData.publicUrl + '?t=' + Date.now(); // cache-busting
+      // Sla URL op in user_data tabel
+      await sb.from('user_data').upsert({
+        user_id: user.id,
+        avatar_url: publicUrl
+      }, {
+        onConflict: 'user_id'
+      });
+      setAvatarUrl(publicUrl);
+      setProfileMsg('Profielfoto opgeslagen!');
+      setTimeout(() => setProfileMsg(''), 3000);
+    } catch (err) {
+      setProfileErr('Upload mislukt: ' + err.message);
+    }
+    setAvatarUploading(false);
+    e.target.value = '';
+  }
+  async function removeAvatar() {
+    if (!sb || !user) return;
+    try {
+      // Verwijder uit storage (probeer beide extensies)
+      for (const ext of ['jpg', 'jpeg', 'png', 'webp', 'gif']) {
+        await sb.storage.from('avatars').remove([`${user.id}/avatar.${ext}`]);
+      }
+      // Wis URL uit user_data
+      await sb.from('user_data').upsert({
+        user_id: user.id,
+        avatar_url: null
+      }, {
+        onConflict: 'user_id'
+      });
+      setAvatarUrl('');
+    } catch (e) {}
+  }
   async function logout() {
     if (!sb) return;
-    const KEYS = ['portfolio:meta', 'portfolio:settings', 'portfolio:calc', 'portfolio:budget', 'portfolio:transactions', 'fb:last_seen', 'fb:last_sync', 'fb:display_name', 'fb:avatar'];
+    const KEYS = ['portfolio:meta', 'portfolio:settings', 'portfolio:calc', 'portfolio:budget', 'portfolio:transactions', 'fb:last_seen', 'fb:last_sync', 'fb:display_name'];
     KEYS.forEach(k => {
       try {
         localStorage.removeItem(k);
       } catch (e) {}
     });
     await sb.auth.signOut();
-  }
-  function handleAvatarFile(e) {
-    const file = e.target.files && e.target.files[0];
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      setProfileErr('Afbeelding mag maximaal 2MB zijn.');
-      return;
-    }
-    setAvatarUploading(true);
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result;
-      // Sla op als base64 in localStorage (max ~1.5MB na base64 encoding)
-      try {
-        localStorage.setItem('fb:avatar', dataUrl);
-        setAvatarUrl(dataUrl);
-        setProfileMsg('Profielfoto opgeslagen!');
-        setTimeout(() => setProfileMsg(''), 3000);
-      } catch (e) {
-        setProfileErr('Foto te groot om op te slaan — kies een kleinere afbeelding.');
-      }
-      setAvatarUploading(false);
-    };
-    reader.onerror = () => {
-      setProfileErr('Afbeelding kon niet worden gelezen.');
-      setAvatarUploading(false);
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-  }
-  function removeAvatar() {
-    try {
-      localStorage.removeItem('fb:avatar');
-    } catch (e) {}
-    setAvatarUrl('');
   }
   function saveApiKey() {
     try {
