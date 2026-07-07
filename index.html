@@ -170,7 +170,7 @@ body { background: #F5F5F0; color: #1A1A18; }
 .tax-rows{ display:flex; flex-direction:column; }
 .tax-row{ display:grid; grid-template-columns:1fr auto auto; gap:10px; padding:9px 14px; border-bottom:1px solid var(--line); font-size:12.5px; align-items:center; }
 .tax-row:last-child{ border-bottom:none; }
-.tax-row.t('korting','credit'){ background:rgba(121,199,160,.04); }
+.tax-row.korting{ background:rgba(121,199,160,.04); }
 .tax-row.total{ background:var(--bg2); font-weight:600; font-size:13px; }
 .tax-label{ color:var(--muted); }
 .tax-base{ font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--faint); text-align:right; }
@@ -393,17 +393,8 @@ const {
   useState,
   useEffect,
   useMemo,
-  useRef,
-  createContext,
-  useContext
+  useRef
 } = React;
-
-// Globale vertaalfunctie — wordt gezet door PortfolioDashboard
-let _lang = 'nl';
-function t(nl, en) {
-  return _lang === 'en' ? en : nl;
-}
-const tr = t; // alias for components
 
 /* ============================================================
    PORTEFEUILLE — Investment portfolio dashboard
@@ -691,25 +682,6 @@ function PortfolioDashboard() {
       return next;
     });
   }
-  const [lang, setLang] = useState(() => {
-    try {
-      return localStorage.getItem('fb:lang') || 'nl';
-    } catch (e) {
-      return 'nl';
-    }
-  });
-  function toggleLang() {
-    setLang(l => {
-      const next = l === 'nl' ? 'en' : 'nl';
-      try {
-        localStorage.setItem('fb:lang', next);
-      } catch (e) {}
-      _lang = next;
-      return next;
-    });
-  }
-  _lang = lang; // sync globaal bij elke render
-  const tr = (nl, en) => lang === 'en' ? en : nl;
   const [showRt, setShowRt] = useState(false);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [loan, setLoan] = useState({
@@ -761,7 +733,7 @@ function PortfolioDashboard() {
       if (meta && Array.isArray(meta.portfolios) && meta.portfolios.length) {
         const ps = meta.portfolios.map(p => ({
           id: p.id || uid(),
-          name: p.name || t('Portefeuille', 'Portfolio'),
+          name: p.name || "Portefeuille",
           holdings: normHoldings(p.holdings)
         }));
         setPortfolios(ps);
@@ -1096,7 +1068,7 @@ function PortfolioDashboard() {
       const text = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("\n");
       const s = text.indexOf("["),
         e = text.lastIndexOf("]");
-      if (s === -1 || e === -1) throw new Error("No price data found in the response.");
+      if (s === -1 || e === -1) throw new Error("Geen koersdata gevonden in het antwoord.");
       const quotes = JSON.parse(text.slice(s, e + 1));
       const byT = {};
       quotes.forEach(q => {
@@ -1118,7 +1090,7 @@ function PortfolioDashboard() {
       setAsOf(new Date());
       if (apiKey) await refreshLive(list);
     } catch (err) {
-      setError("Price retrieval failed — probeer het zo nog eens. (" + (err.message || err) + ")");
+      setError("Koersen ophalen lukte niet — probeer het zo nog eens. (" + (err.message || err) + ")");
     } finally {
       setRefreshing(false);
     }
@@ -1184,7 +1156,7 @@ function PortfolioDashboard() {
       }
       const d = await r.json();
       if (typeof d.c === "number" && d.c > 0) {
-        setRtMsg("Werkt — realtime koersen actief voor je Amerikaanse tr('posities','positions').");
+        setRtMsg("Werkt — realtime koersen actief voor je Amerikaanse posities.");
         refreshLive();
       } else {
         setRtMsg("Verbinding werkt, maar er kwam geen koers terug. Controleer het symbool of probeer later opnieuw.");
@@ -1224,7 +1196,7 @@ function PortfolioDashboard() {
       };
     }
     if (!pick) {
-      setError("Please select a stock or ETF from the search results.");
+      setError("Kies eerst een aandeel of ETF uit de zoekresultaten.");
       return;
     }
     if (!(shares > 0) || !(avgCost >= 0)) {
@@ -1322,7 +1294,7 @@ function PortfolioDashboard() {
     if (data.portfolios && Array.isArray(data.portfolios) && data.portfolios.length) {
       const ps = data.portfolios.map(p => ({
         id: p.id || uid(),
-        name: p.name || t("Portefeuille", "Portfolio"),
+        name: p.name || "Portefeuille",
         holdings: normHoldings(p.holdings || [])
       }));
       setPortfolios(ps);
@@ -1452,7 +1424,7 @@ function PortfolioDashboard() {
     }
     setImporting(true);
     setImportMsg("Export inlezen…");
-    const prompt = `Hieronder staat een export uit DeGiro (transactieoverzicht of portefeuille, meestal Nederlandstalig CSV).\n` + `Leid hieruit de HUIDIGE posities af. Als het tr('transacties','transactions') zijn: tel per product de gekochte minus verkochte ` + `stuks op, laat posities met netto 0 weg, en bereken de gewogen gemiddelde aankoopkoers per stuk in EUR.\n` + `Geef per positie: ticker (beurssymbool zoals ASML of TSLA — zoek dit op via ISIN of productnaam), ` + `name (productnaam), isin indien bekend, currency (ISO-valutacode van het product, bv EUR of USD), ` + `shares (number, netto aantal), avgCost (number, gewogen gemiddelde aankoopkoers per stuk in DE EIGEN ` + `valuta van het product, niet omgerekend).\n` + `Antwoord UITSLUITEND met een geldige JSON-array zonder uitleg of markdown. Voorbeeld:\n` + `[{"ticker":"TSLA","name":"Tesla Inc","isin":"US88160R1014","currency":"USD","shares":5,"avgCost":210.4}]\n\n` + `EXPORT:\n` + text.slice(0, 40000);
+    const prompt = `Hieronder staat een export uit DeGiro (transactieoverzicht of portefeuille, meestal Nederlandstalig CSV).\n` + `Leid hieruit de HUIDIGE posities af. Als het transacties zijn: tel per product de gekochte minus verkochte ` + `stuks op, laat posities met netto 0 weg, en bereken de gewogen gemiddelde aankoopkoers per stuk in EUR.\n` + `Geef per positie: ticker (beurssymbool zoals ASML of TSLA — zoek dit op via ISIN of productnaam), ` + `name (productnaam), isin indien bekend, currency (ISO-valutacode van het product, bv EUR of USD), ` + `shares (number, netto aantal), avgCost (number, gewogen gemiddelde aankoopkoers per stuk in DE EIGEN ` + `valuta van het product, niet omgerekend).\n` + `Antwoord UITSLUITEND met een geldige JSON-array zonder uitleg of markdown. Voorbeeld:\n` + `[{"ticker":"TSLA","name":"Tesla Inc","isin":"US88160R1014","currency":"USD","shares":5,"avgCost":210.4}]\n\n` + `EXPORT:\n` + text.slice(0, 40000);
     try {
       const res = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
@@ -1516,7 +1488,7 @@ function PortfolioDashboard() {
       setImportMsg("");
       await refresh(merged);
     } catch (err) {
-      setImportMsg("Import failed (" + (err.message || err) + "). Probeer het transactieoverzicht (Account.csv) of plak je posities.");
+      setImportMsg("Importeren lukte niet (" + (err.message || err) + "). Probeer het transactieoverzicht (Account.csv) of plak je posities.");
     } finally {
       setImporting(false);
     }
@@ -1702,11 +1674,11 @@ function PortfolioDashboard() {
     style: {
       marginTop: 4
     }
-  }, tr('Jouw persoonlijke financiële dashboard.', 'Your personal financial dashboard.'))), /*#__PURE__*/React.createElement("nav", {
+  }, "Jouw persoonlijke financiële dashboard.")), /*#__PURE__*/React.createElement("nav", {
     className: "sidebar-nav"
   }, /*#__PURE__*/React.createElement("div", {
     className: "nav-section"
-  }, tr('Overzicht', 'Overview')), /*#__PURE__*/React.createElement("button", {
+  }, "Overzicht"), /*#__PURE__*/React.createElement("button", {
     className: "nav-item" + (activeTab === "dashboard" ? " on" : ""),
     onClick: () => {
       setActiveTab("dashboard");
@@ -1714,7 +1686,7 @@ function PortfolioDashboard() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "nav-icon"
-  }, "🏠"), /*#__PURE__*/React.createElement("span", null, tr('Dashboard', 'Dashboard'))), /*#__PURE__*/React.createElement("button", {
+  }, "🏠"), /*#__PURE__*/React.createElement("span", null, "Dashboard")), /*#__PURE__*/React.createElement("button", {
     className: "nav-item" + (activeTab === "portfolio" ? " on" : ""),
     onClick: () => {
       setActiveTab("portfolio");
@@ -1722,7 +1694,7 @@ function PortfolioDashboard() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "nav-icon"
-  }, "📈"), /*#__PURE__*/React.createElement("span", null, tr('Aandelenportefeuille', 'Stock portfolio'))), /*#__PURE__*/React.createElement("button", {
+  }, "📈"), /*#__PURE__*/React.createElement("span", null, "Aandelenportefeuille")), /*#__PURE__*/React.createElement("button", {
     className: "nav-item" + (activeTab === "networth" ? " on" : ""),
     onClick: () => {
       setActiveTab("networth");
@@ -1730,9 +1702,9 @@ function PortfolioDashboard() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "nav-icon"
-  }, "💎"), /*#__PURE__*/React.createElement("span", null, tr('Netto Vermogen', 'Net Worth'))), /*#__PURE__*/React.createElement("div", {
+  }, "💎"), /*#__PURE__*/React.createElement("span", null, "Netto Vermogen")), /*#__PURE__*/React.createElement("div", {
     className: "nav-section"
-  }, tr('Financiën', 'Finance')), /*#__PURE__*/React.createElement("button", {
+  }, "Financiën"), /*#__PURE__*/React.createElement("button", {
     className: "nav-item" + (activeTab === "accounts" ? " on" : ""),
     onClick: () => {
       setActiveTab("accounts");
@@ -1740,7 +1712,7 @@ function PortfolioDashboard() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "nav-icon"
-  }, "🏦"), /*#__PURE__*/React.createElement("span", null, tr('Rekeningen', 'Accounts'))), /*#__PURE__*/React.createElement("button", {
+  }, "🏦"), /*#__PURE__*/React.createElement("span", null, "Rekeningen")), /*#__PURE__*/React.createElement("button", {
     className: "nav-item" + (activeTab === "alltrans" ? " on" : ""),
     onClick: () => {
       setActiveTab("alltrans");
@@ -1748,7 +1720,7 @@ function PortfolioDashboard() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "nav-icon"
-  }, "💸"), /*#__PURE__*/React.createElement("span", null, tr('Transacties', 'Transactions'))), /*#__PURE__*/React.createElement("button", {
+  }, "💸"), /*#__PURE__*/React.createElement("span", null, "Transacties")), /*#__PURE__*/React.createElement("button", {
     className: "nav-item" + (activeTab === "budget" ? " on" : ""),
     onClick: () => {
       setActiveTab("budget");
@@ -1756,7 +1728,7 @@ function PortfolioDashboard() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "nav-icon"
-  }, "💶"), /*#__PURE__*/React.createElement("span", null, tr('Budget', 'Budget'))), /*#__PURE__*/React.createElement("button", {
+  }, "💶"), /*#__PURE__*/React.createElement("span", null, "Budget")), /*#__PURE__*/React.createElement("button", {
     className: "nav-item" + (activeTab === "trans" ? " on" : ""),
     onClick: () => {
       setActiveTab("trans");
@@ -1764,9 +1736,9 @@ function PortfolioDashboard() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "nav-icon"
-  }, "📋"), /*#__PURE__*/React.createElement("span", null, tr('Uitgaven', 'Expenses'))), /*#__PURE__*/React.createElement("div", {
+  }, "📋"), /*#__PURE__*/React.createElement("span", null, "Uitgaven")), /*#__PURE__*/React.createElement("div", {
     className: "nav-section"
-  }, tr('Tools', 'Tools')), /*#__PURE__*/React.createElement("button", {
+  }, "Tools"), /*#__PURE__*/React.createElement("button", {
     className: "nav-item" + (activeTab === "calc" ? " on" : ""),
     onClick: () => {
       setActiveTab("calc");
@@ -1774,7 +1746,7 @@ function PortfolioDashboard() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "nav-icon"
-  }, "📊"), /*#__PURE__*/React.createElement("span", null, tr('Rekenmachine', 'Calculator'))), /*#__PURE__*/React.createElement("button", {
+  }, "📊"), /*#__PURE__*/React.createElement("span", null, "Rekenmachine")), /*#__PURE__*/React.createElement("button", {
     className: "nav-item" + (activeTab === "mortgage" ? " on" : ""),
     onClick: () => {
       setActiveTab("mortgage");
@@ -1782,9 +1754,17 @@ function PortfolioDashboard() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "nav-icon"
-  }, "🏠"), /*#__PURE__*/React.createElement("span", null, tr('Hypotheek', 'Mortgage')))), /*#__PURE__*/React.createElement("div", {
+  }, "🏠"), /*#__PURE__*/React.createElement("span", null, "Hypotheek"))), /*#__PURE__*/React.createElement("div", {
     className: "sidebar-bottom"
   }, /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "account" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("account");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "👤"), /*#__PURE__*/React.createElement("span", null, "Account")), /*#__PURE__*/React.createElement("button", {
     className: "nav-item" + (activeTab === "settings" ? " on" : ""),
     onClick: () => {
       setActiveTab("settings");
@@ -1792,7 +1772,7 @@ function PortfolioDashboard() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "nav-icon"
-  }, "⚙️"), /*#__PURE__*/React.createElement("span", null, tr('Instellingen', 'Settings'))), /*#__PURE__*/React.createElement("button", {
+  }, "⚙️"), /*#__PURE__*/React.createElement("span", null, "Instellingen")), /*#__PURE__*/React.createElement("button", {
     className: "nav-item nav-logout",
     onClick: () => {
       const KEYS = ['portfolio:meta', 'portfolio:settings', 'portfolio:calc', 'portfolio:budget', 'portfolio:transactions', 'fb:networth', 'fb:last_seen', 'fb:last_sync', 'fb:display_name', 'fb:theme', 'fb:anthropic_key', 'fb:avatar'];
@@ -1811,7 +1791,15 @@ function PortfolioDashboard() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "nav-icon"
-  }, "🚪"), /*#__PURE__*/React.createElement("span", null, tr('Uitloggen', 'Log out'))))), /*#__PURE__*/React.createElement("div", {
+  }, "🚪"), /*#__PURE__*/React.createElement("span", null, "Uitloggen")), /*#__PURE__*/React.createElement("button", {
+    className: "theme-toggle",
+    onClick: toggleTheme,
+    title: lightMode ? 'Donkere modus' : 'Lichte modus',
+    style: {
+      margin: '8px 10px 4px',
+      width: 'calc(100% - 20px)'
+    }
+  }, lightMode ? '🌙 Donkere modus' : '☀️ Lichte modus'))), /*#__PURE__*/React.createElement("div", {
     className: "main-content"
   }, /*#__PURE__*/React.createElement("div", {
     className: "pf-wrap"
@@ -1824,9 +1812,9 @@ function PortfolioDashboard() {
       color: 'var(--ink)',
       fontFamily: "'Fraunces',serif"
     }
-  }, activeTab === "dashboard" ? tr('Dashboard', 'Dashboard') : activeTab === "accounts" ? tr('Rekeningen', 'Accounts') : activeTab === "alltrans" ? tr('Transacties', 'Transactions') : activeTab === "portfolio" ? tr('Aandelenportefeuille', 'Portfolio') : activeTab === "networth" ? tr('Netto Vermogen', 'Net Worth') : activeTab === "budget" ? tr('Budget', 'Budget') : activeTab === "trans" ? tr('Uitgaven', 'Expenses') : activeTab === "calc" ? tr('Rekenmachine', 'Calculator') : activeTab === "mortgage" ? tr('Hypotheekcalculator', 'Mortgage Calculator') : activeTab === "settings" ? tr('Instellingen', 'Settings') : "Finance Bro")), /*#__PURE__*/React.createElement("div", {
+  }, activeTab === "dashboard" ? "Dashboard" : activeTab === "accounts" ? "Rekeningen" : activeTab === "alltrans" ? "Transacties" : activeTab === "portfolio" ? "Aandelenportefeuille" : activeTab === "networth" ? "Netto Vermogen" : activeTab === "budget" ? "Budget" : activeTab === "trans" ? "Uitgaven" : activeTab === "calc" ? "Rekenmachine" : activeTab === "mortgage" ? "Hypotheekcalculator" : activeTab === "account" ? "Account" : "Finance Bro")), /*#__PURE__*/React.createElement("div", {
     className: "pf-asof"
-  }, asOf ? tr('Bijgewerkt', 'Updated') + " " + asOf.toLocaleTimeString("nl-NL", {
+  }, asOf ? "Bijgewerkt " + asOf.toLocaleTimeString("nl-NL", {
     hour: "2-digit",
     minute: "2-digit"
   }) : "", apiKey && holdings.some(h => h.live) && /*#__PURE__*/React.createElement("span", {
@@ -1858,7 +1846,7 @@ function PortfolioDashboard() {
   }), activeTab === "networth" && /*#__PURE__*/React.createElement(NetWorthTab, {
     portfolioValue: t.mvTotal,
     loan: loan
-  }), activeTab === "settings" && /*#__PURE__*/React.createElement(SettingsTab, {
+  }), activeTab === "account" && /*#__PURE__*/React.createElement(AccountTab, null), activeTab === "settings" && /*#__PURE__*/React.createElement(SettingsTab, {
     apiKey: apiKey,
     setApiKey: setApiKey,
     auto: auto,
@@ -1870,11 +1858,7 @@ function PortfolioDashboard() {
     portRate: portRate,
     budget: budget,
     transactions: transactions,
-    handleImport: handleImport,
-    lightMode: lightMode,
-    toggleTheme: toggleTheme,
-    lang: lang,
-    toggleLang: toggleLang
+    handleImport: handleImport
   }), activeTab === "portfolio" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "tabs",
     style: {
@@ -1920,8 +1904,8 @@ function PortfolioDashboard() {
   }, "nee")) : /*#__PURE__*/React.createElement("button", {
     className: "ttool del",
     onClick: () => setConfirmDel(true),
-    title: t("Verwijderen", "Delete")
-  }, "delete"))), /*#__PURE__*/React.createElement(ImportPanel, {
+    title: "Verwijderen"
+  }, "verwijder"))), /*#__PURE__*/React.createElement(ImportPanel, {
     onImport: handleImport
   }), /*#__PURE__*/React.createElement(ExportButton, {
     portfolios: portfolios,
@@ -1953,7 +1937,7 @@ function PortfolioDashboard() {
     className: "pillar"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
-  }, t('Totale waarde', 'Total value')), /*#__PURE__*/React.createElement("div", {
+  }, "Totale waarde"), /*#__PURE__*/React.createElement("div", {
     className: "big"
   }, eur(t.value)), /*#__PURE__*/React.createElement("div", {
     className: "meta"
@@ -1973,11 +1957,11 @@ function PortfolioDashboard() {
     className: "pillar income"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
-  }, t('Jaarlijks dividend', 'Annual dividend')), /*#__PURE__*/React.createElement("div", {
+  }, "Jaarlijks dividend"), /*#__PURE__*/React.createElement("div", {
     className: "big"
   }, eur(t.income)), /*#__PURE__*/React.createElement("div", {
     className: "meta"
-  }, t.yld != null ? /*#__PURE__*/React.createElement(React.Fragment, null, t('op inleg', 'on cost'), " ", /*#__PURE__*/React.createElement("span", {
+  }, t.yld != null ? /*#__PURE__*/React.createElement(React.Fragment, null, "op inleg ", /*#__PURE__*/React.createElement("span", {
     style: {
       color: "var(--brass)"
     }
@@ -1988,7 +1972,7 @@ function PortfolioDashboard() {
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "empty"
-  }, /*#__PURE__*/React.createElement("p", null, t("Nog geen posities — zoek hieronder een aandeel of ETF om te beginnen.", "No positions yet — search below for a stock or ETF to get started.")), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("p", null, "Nog geen posities — zoek hieronder een aandeel of ETF om te beginnen."), /*#__PURE__*/React.createElement("div", {
     className: "quick"
   }, /*#__PURE__*/React.createElement("button", {
     className: "chip imp",
@@ -1996,7 +1980,7 @@ function PortfolioDashboard() {
       setShowImport(true);
       setShowForm(false);
     }
-  }, t('⇪ importeer uit DeGiro', '⇪ import from DeGiro')), SEEDS.map(s => /*#__PURE__*/React.createElement("button", {
+  }, "⇪ importeer uit DeGiro"), SEEDS.map(s => /*#__PURE__*/React.createElement("button", {
     key: s.ticker,
     className: "chip",
     onClick: () => addHolding(s)
@@ -2004,7 +1988,7 @@ function PortfolioDashboard() {
     className: "mid"
   }, /*#__PURE__*/React.createElement("div", {
     className: "card"
-  }, /*#__PURE__*/React.createElement("h3", null, t('Allocatie', 'Allocation')), allocation.length ? /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Allocatie"), allocation.length ? /*#__PURE__*/React.createElement("div", {
     className: "donut-row"
   }, /*#__PURE__*/React.createElement(Donut, {
     data: allocation
@@ -2027,21 +2011,21 @@ function PortfolioDashboard() {
       color: "var(--muted)",
       fontSize: 13
     }
-  }, t('Ververs de koersen om de verdeling te zien.', 'Refresh prices to see the allocation.'))), /*#__PURE__*/React.createElement("div", {
+  }, "Ververs de koersen om de verdeling te zien.")), /*#__PURE__*/React.createElement("div", {
     className: "card"
-  }, /*#__PURE__*/React.createElement("h3", null, t('Rendement', 'Return')), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Rendement"), /*#__PURE__*/React.createElement("div", {
     className: "statgrid"
   }, /*#__PURE__*/React.createElement("div", {
     className: "stat"
   }, /*#__PURE__*/React.createElement("div", {
     className: "k"
-  }, t('Inleg', 'Cost basis')), /*#__PURE__*/React.createElement("div", {
+  }, "Inleg"), /*#__PURE__*/React.createElement("div", {
     className: "v"
   }, eur(t.cost))), /*#__PURE__*/React.createElement("div", {
     className: "stat"
   }, /*#__PURE__*/React.createElement("div", {
     className: "k"
-  }, t('Waarde nu', 'Current value')), /*#__PURE__*/React.createElement("div", {
+  }, "Waarde nu"), /*#__PURE__*/React.createElement("div", {
     className: "v"
   }, eur(t.value))), /*#__PURE__*/React.createElement("div", {
     className: "stat"
@@ -2068,7 +2052,7 @@ function PortfolioDashboard() {
     className: "stat"
   }, /*#__PURE__*/React.createElement("div", {
     className: "k"
-  }, t('Rend. op inleg', 'Return on cost')), /*#__PURE__*/React.createElement("div", {
+  }, "Rend. op inleg"), /*#__PURE__*/React.createElement("div", {
     className: "v",
     style: {
       color: "var(--brass)"
@@ -2077,7 +2061,7 @@ function PortfolioDashboard() {
     className: "stat"
   }, /*#__PURE__*/React.createElement("div", {
     className: "k"
-  }, t('Ontvangen dividend', 'Dividend received')), /*#__PURE__*/React.createElement("div", {
+  }, "Ontvangen dividend"), /*#__PURE__*/React.createElement("div", {
     className: "v",
     style: {
       color: "var(--brass)"
@@ -2086,11 +2070,11 @@ function PortfolioDashboard() {
     className: "stat"
   }, /*#__PURE__*/React.createElement("div", {
     className: "k"
-  }, t('Marktwaarde', 'Market value')), /*#__PURE__*/React.createElement("div", {
+  }, "Marktwaarde"), /*#__PURE__*/React.createElement("div", {
     className: "v"
   }, eur(t.mvTotal)))))), t.income > 0 && /*#__PURE__*/React.createElement("div", {
     className: "card cal-card"
-  }, /*#__PURE__*/React.createElement("h3", null, t('Dividendkalender · indicatief per maand', 'Dividend calendar · indicative per month')), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Dividendkalender · indicatief per maand"), /*#__PURE__*/React.createElement("div", {
     className: "cal-bars"
   }, cal.months.map((m, i) => {
     const hRatio = m.amt / cal.max * 100;
@@ -2114,13 +2098,13 @@ function PortfolioDashboard() {
     }, MONTHS[i]));
   })), /*#__PURE__*/React.createElement("div", {
     className: "cal-detail"
-  }, hoverMonth != null && cal.months[hoverMonth].amt > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("b", null, MONTHS[hoverMonth]), " · ", eur(cal.months[hoverMonth].amt), " · ", cal.months[hoverMonth].tickers.join(", ")) : /*#__PURE__*/React.createElement(React.Fragment, null, t('Beste maand', 'Best month'), " ", /*#__PURE__*/React.createElement("b", null, MONTHS[cal.best]), " (", eur(cal.months[cal.best].amt), ") · uitkering in ", cal.active, " van 12 maanden", cal.unscheduled > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, " · ", eur(cal.unscheduled), " schema onbekend") : null))), /*#__PURE__*/React.createElement("div", {
+  }, hoverMonth != null && cal.months[hoverMonth].amt > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("b", null, MONTHS[hoverMonth]), " · ", eur(cal.months[hoverMonth].amt), " · ", cal.months[hoverMonth].tickers.join(", ")) : /*#__PURE__*/React.createElement(React.Fragment, null, "Beste maand ", /*#__PURE__*/React.createElement("b", null, MONTHS[cal.best]), " (", eur(cal.months[cal.best].amt), ") · uitkering in ", cal.active, " van 12 maanden", cal.unscheduled > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, " · ", eur(cal.unscheduled), " schema onbekend") : null))), /*#__PURE__*/React.createElement("div", {
     className: "holds"
   }, /*#__PURE__*/React.createElement("div", {
     className: "holds-h"
   }, /*#__PURE__*/React.createElement("div", null, "Positie"), /*#__PURE__*/React.createElement("div", {
     className: "num"
-  }, t('Aantal', 'Shares')), /*#__PURE__*/React.createElement("div", {
+  }, "Aantal"), /*#__PURE__*/React.createElement("div", {
     className: "num"
   }, "GAK"), /*#__PURE__*/React.createElement("div", {
     className: "num"
@@ -2132,7 +2116,7 @@ function PortfolioDashboard() {
     className: "num"
   }, "W / V"), /*#__PURE__*/React.createElement("div", {
     className: "num"
-  }, t('Div %', 'Div %')), /*#__PURE__*/React.createElement("div", null)), t.priced.map(h => {
+  }, "Div %"), /*#__PURE__*/React.createElement("div", null)), t.priced.map(h => {
     const wv = h.value != null ? h.value - h.cost : null;
     const wvp = h.cost > 0 && h.value != null ? wv / h.cost * 100 : null;
     return /*#__PURE__*/React.createElement("div", {
@@ -2143,12 +2127,12 @@ function PortfolioDashboard() {
     }, /*#__PURE__*/React.createElement("b", null, h.ticker), /*#__PURE__*/React.createElement("span", null, h.buyDate ? "sinds " + new Date(h.buyDate).toLocaleDateString("nl-NL", {
       month: "short",
       year: "numeric"
-    }) : h.name || "—")), editCell(h, "shares", t("Aantal", "Shares"), h.shares), editCell(h, "avgCost", "GAK", fmtCur(h.avgCost, h.currency)), editCell(h, "priceNative", t("Koers", "Price"), fmtCur(h.priceNative, h.currency)), /*#__PURE__*/React.createElement("div", {
+    }) : h.name || "—")), editCell(h, "shares", "Aantal", h.shares), editCell(h, "avgCost", "GAK", fmtCur(h.avgCost, h.currency)), editCell(h, "priceNative", "Koers", fmtCur(h.priceNative, h.currency)), /*#__PURE__*/React.createElement("div", {
       className: "num",
-      "data-l": t("Inleg", "Cost basis")
+      "data-l": "Inleg"
     }, eur(h.cost)), /*#__PURE__*/React.createElement("div", {
       className: "num",
-      "data-l": t("Waarde", "Value")
+      "data-l": "Waarde"
     }, eur(h.value), h.recDiv > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 11,
@@ -2172,11 +2156,11 @@ function PortfolioDashboard() {
     }, /*#__PURE__*/React.createElement("button", {
       className: "xbtn ebtn",
       onClick: () => beginEditHolding(h),
-      title: t("Bewerken", "Edit")
+      title: "Bewerken"
     }, "✎"), /*#__PURE__*/React.createElement("button", {
       className: "xbtn",
       onClick: () => remove(h.id),
-      title: t("Verwijderen", "Delete")
+      title: "Verwijderen"
     }, "×")));
   })), /*#__PURE__*/React.createElement("div", {
     className: "actions"
@@ -2189,10 +2173,10 @@ function PortfolioDashboard() {
   }), refreshing ? "Koersen ophalen…" : "⟳ Ververs koersen"), /*#__PURE__*/React.createElement("button", {
     className: "btn",
     onClick: toggleForm
-  }, showForm ? "tr('Annuleren','Cancel')" : "+ Positie toevoegen"), /*#__PURE__*/React.createElement("button", {
+  }, showForm ? "Annuleren" : "+ Positie toevoegen"), /*#__PURE__*/React.createElement("button", {
     className: "btn",
     onClick: () => setShowImport(s => !s)
-  }, showImport ? t("Annuleren", "Cancel") : "⇪ t('Importeer uit DeGiro','Import from DeGiro')"), /*#__PURE__*/React.createElement("button", {
+  }, showImport ? "Annuleren" : "⇪ Importeer uit DeGiro"), /*#__PURE__*/React.createElement("button", {
     className: "btn" + (apiKey ? " primary" : ""),
     onClick: () => setShowRt(s => !s)
   }, apiKey ? "⚡ Realtime ✓" : "⚡ Realtime"), /*#__PURE__*/React.createElement("div", {
@@ -2202,7 +2186,7 @@ function PortfolioDashboard() {
     onClick: toggleAuto,
     role: "switch",
     "aria-checked": auto,
-    title: "tr('Automatisch verversen','Auto-refresh') aan/uit"
+    title: "Automatisch verversen aan/uit"
   }, /*#__PURE__*/React.createElement("span", {
     className: "knob"
   })), /*#__PURE__*/React.createElement("span", {
@@ -2234,9 +2218,9 @@ function PortfolioDashboard() {
     className: "form-head"
   }, editingId ? "Positie bewerken" : "Nieuwe positie"), /*#__PURE__*/React.createElement("div", {
     className: "fld search-wrap"
-  }, /*#__PURE__*/React.createElement("label", null, t('Zoek aandeel of ETF', 'Search stock or ETF')), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, "Zoek aandeel of ETF"), /*#__PURE__*/React.createElement("input", {
     value: searchQuery,
-    placeholder: t("bv. Vanguard All-World, ASML, Shell…", "e.g. Vanguard All-World, ASML, Shell…"),
+    placeholder: "bv. Vanguard All-World, ASML, Shell…",
     autoFocus: true,
     onChange: e => {
       setSelected(null);
@@ -2255,7 +2239,7 @@ function PortfolioDashboard() {
     className: "results-state"
   }, /*#__PURE__*/React.createElement("span", {
     className: "spin"
-  }), t("Zoeken…", "Searching…")), !searching && searchResults.map((r, i) => /*#__PURE__*/React.createElement("div", {
+  }), "Zoeken…"), !searching && searchResults.map((r, i) => /*#__PURE__*/React.createElement("div", {
     className: "result",
     key: r.ticker + i,
     onClick: () => pickResult(r)
@@ -2269,12 +2253,12 @@ function PortfolioDashboard() {
     className: "r-tk"
   }, r.ticker))), !searching && noResults && /*#__PURE__*/React.createElement("div", {
     className: "results-state"
-  }, t("Geen resultaten — probeer een andere term.", "No results — try a different search term."))), selected && /*#__PURE__*/React.createElement("div", {
+  }, "Geen resultaten — probeer een andere term.")), selected && /*#__PURE__*/React.createElement("div", {
     className: "picked"
   }, "gekozen: ", /*#__PURE__*/React.createElement("b", null, selected.ticker), " · ", selected.name || "—", /*#__PURE__*/React.createElement("span", {
     className: "x",
     onClick: clearPick,
-    title: t('Wissen', 'Clear')
+    title: "Wissen"
   }, "×"))), /*#__PURE__*/React.createElement("div", {
     className: "form-row"
   }, /*#__PURE__*/React.createElement("div", {
@@ -2302,7 +2286,7 @@ function PortfolioDashboard() {
   })), /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
     onClick: submitForm
-  }, editingId ? "tr('Opslaan','Save')" : "tr('Toevoegen','Add')")), /*#__PURE__*/React.createElement("div", {
+  }, editingId ? "Opslaan" : "Toevoegen")), /*#__PURE__*/React.createElement("div", {
     className: "form-row"
   }, /*#__PURE__*/React.createElement("div", {
     className: "fld"
@@ -2335,15 +2319,15 @@ function PortfolioDashboard() {
       color: "var(--faint)",
       lineHeight: 1.5
     }
-  }, t("Telt mee in \"waarde nu\". Leeg laten = schatting.", "Counts toward \"current value\". Leave empty = estimate from date × return."))))), showImport && /*#__PURE__*/React.createElement("div", {
+  }, "Telt mee in \"waarde nu\". Leeg laten = schatting uit datum × rendement.")))), showImport && /*#__PURE__*/React.createElement("div", {
     className: "import"
-  }, /*#__PURE__*/React.createElement("h4", null, "Importeer uit DeGiro"), /*#__PURE__*/React.createElement("ol", null, /*#__PURE__*/React.createElement("li", null, t("Log in to DeGiro → Inbox → Account statement", "Log in to DeGiro → Inbox → Account statement"), "."), /*#__PURE__*/React.createElement("li", null, t("Kies een begindatum vóór je eerste aankoop en klik op Export → CSV.", "Choose a start date before your first purchase and click Export → CSV.")), /*#__PURE__*/React.createElement("li", null, "Sleep het bestand hieronder, of plak de inhoud. Ik reken posities en gemiddelde aankoopkoers uit.")), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h4", null, "Importeer uit DeGiro"), /*#__PURE__*/React.createElement("ol", null, /*#__PURE__*/React.createElement("li", null, "Log in op DeGiro → ", /*#__PURE__*/React.createElement("b", null, "Inbox → Rekeningoverzicht"), "."), /*#__PURE__*/React.createElement("li", null, "Kies een begindatum vóór je eerste aankoop en klik op ", /*#__PURE__*/React.createElement("b", null, "Export → CSV"), "."), /*#__PURE__*/React.createElement("li", null, "Sleep het bestand hieronder, of plak de inhoud. Ik reken posities en gemiddelde aankoopkoers uit.")), /*#__PURE__*/React.createElement("div", {
     className: "import-row"
   }, /*#__PURE__*/React.createElement("label", {
     className: "btn primary file-btn"
   }, importing ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
     className: "spin"
-  }), t("Bezig…", "Loading…")) : t("Kies CSV-bestand", "Choose CSV file"), /*#__PURE__*/React.createElement("input", {
+  }), "Bezig…") : "Kies CSV-bestand", /*#__PURE__*/React.createElement("input", {
     type: "file",
     accept: ".csv,.txt",
     onChange: handleFile,
@@ -2374,7 +2358,7 @@ function PortfolioDashboard() {
     className: "import-msg"
   }, importMsg)), showRt && /*#__PURE__*/React.createElement("div", {
     className: "import"
-  }, /*#__PURE__*/React.createElement("h4", null, "Realtime koersen (Finnhub)"), /*#__PURE__*/React.createElement("ol", null, /*#__PURE__*/React.createElement("li", null, t('Maak gratis een account op', 'Create a free account at'), " ", /*#__PURE__*/React.createElement("b", null, "finnhub.io"), " en kopieer je API-key (geen creditcard nodig)."), /*#__PURE__*/React.createElement("li", null, "Plak 'm hieronder. Amerikaanse aandelen zoals Tesla krijgen dan realtime koersen; Europese noteringen blijven op de zoekkoers."), /*#__PURE__*/React.createElement("li", null, "Zet eventueel \"Auto-verversen\" op 1 min voor een live gevoel.")), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h4", null, "Realtime koersen (Finnhub)"), /*#__PURE__*/React.createElement("ol", null, /*#__PURE__*/React.createElement("li", null, "Maak gratis een account op ", /*#__PURE__*/React.createElement("b", null, "finnhub.io"), " en kopieer je API-key (geen creditcard nodig)."), /*#__PURE__*/React.createElement("li", null, "Plak 'm hieronder. Amerikaanse aandelen zoals Tesla krijgen dan realtime koersen; Europese noteringen blijven op de zoekkoers."), /*#__PURE__*/React.createElement("li", null, "Zet eventueel \"Auto-verversen\" op 1 min voor een live gevoel.")), /*#__PURE__*/React.createElement("div", {
     className: "rt-note"
   }, "Let op: binnen de Claude-chat worden verzoeken naar finnhub.io geblokkeerd door de omgeving — realtime werkt hier dus niet. Draai je dit dashboard in je eigen omgeving (een gehost of lokaal React-project), dan werkt je key wél, inclusief realtime. In de chat blijft de zoekgebaseerde koers actief."), /*#__PURE__*/React.createElement("div", {
     className: "import-row"
@@ -2390,7 +2374,7 @@ function PortfolioDashboard() {
   }), /*#__PURE__*/React.createElement("button", {
     className: "btn",
     onClick: testKey
-  }, t('Testen', 'Test')), apiKey && /*#__PURE__*/React.createElement("button", {
+  }, "Testen"), apiKey && /*#__PURE__*/React.createElement("button", {
     className: "btn",
     onClick: () => {
       setApiKey("");
@@ -2548,15 +2532,15 @@ function MortgageTab() {
     }
   }, /*#__PURE__*/React.createElement(TabBtn, {
     id: "leen",
-    label: t('💰 Leencapaciteit', '💰 Borrowing capacity')
+    label: "💰 Leencapaciteit"
   }), /*#__PURE__*/React.createElement(TabBtn, {
     id: "calc",
-    label: t('📊 Maandlasten', '📊 Monthly payments')
+    label: "📊 Maandlasten"
   })), tab === 'leen' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("div", {
     className: "calc-title"
-  }, t('Hoeveel kan ik lenen?', 'How much can I borrow?')), /*#__PURE__*/React.createElement("div", {
+  }, "Hoeveel kan ik lenen?"), /*#__PURE__*/React.createElement("div", {
     className: "calc-desc"
   }, "Gebaseerd op de Nederlandse LTI-normen 2025. Dit is een indicatie — je hypotheekadviseur bepaalt het definitieve bedrag."), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2567,35 +2551,35 @@ function MortgageTab() {
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "fld"
-  }, /*#__PURE__*/React.createElement("label", null, t('Bruto jaarsalaris (€)', 'Gross annual salary (€)')), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, "Bruto jaarsalaris (€)"), /*#__PURE__*/React.createElement("input", {
     value: f.bruto || '',
     placeholder: "bv. 55000",
     inputMode: "decimal",
     onChange: e => sf('bruto', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "fld"
-  }, /*#__PURE__*/React.createElement("label", null, t('Partner bruto jaarsalaris (€)', 'Partner gross annual salary (€)')), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, "Partner bruto jaarsalaris (€)"), /*#__PURE__*/React.createElement("input", {
     value: f.partner || '',
     placeholder: "0 als geen partner",
     inputMode: "decimal",
     onChange: e => sf('partner', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "fld"
-  }, /*#__PURE__*/React.createElement("label", null, t('Studieschuld (€)', 'Student debt (€)')), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, "Studieschuld (€)"), /*#__PURE__*/React.createElement("input", {
     value: f.stud || '',
     placeholder: "0",
     inputMode: "decimal",
     onChange: e => sf('stud', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "fld"
-  }, /*#__PURE__*/React.createElement("label", null, t('Rente (%)', 'Interest (%)')), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, "Rente (%)"), /*#__PURE__*/React.createElement("input", {
     value: f.rente || '4.0',
     placeholder: "4.0",
     inputMode: "decimal",
     onChange: e => sf('rente', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "fld"
-  }, /*#__PURE__*/React.createElement("label", null, t('Looptijd (jaren)', 'Term (years)')), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, "Looptijd (jaren)"), /*#__PURE__*/React.createElement("input", {
     value: f.looptijd || '30',
     placeholder: "30",
     inputMode: "decimal",
@@ -2603,23 +2587,23 @@ function MortgageTab() {
   })))), totInk > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "loan-pillars"
   }, /*#__PURE__*/React.createElement(Pill, {
-    label: t('Totaal inkomen', 'Total income'),
+    label: "Totaal inkomen",
     val: eur(totInk),
-    sub: partner > 0 ? t('partner telt voor 90%', 'partner counts for 90%') : null
+    sub: partner > 0 ? 'partner telt voor 90%' : null
   }), /*#__PURE__*/React.createElement(Pill, {
-    label: t('Max. hypotheek', 'Max. mortgage'),
+    label: "Max. hypotheek",
     val: eur(maxLeen),
     color: "var(--brass)"
   }), /*#__PURE__*/React.createElement(Pill, {
-    label: t('Max. maandlast', 'Max. monthly payment'),
+    label: "Max. maandlast",
     val: eur(maxMaandlast)
   }), /*#__PURE__*/React.createElement(Pill, {
-    label: t('Woonquote', 'Housing ratio'),
+    label: "Woonquote",
     val: woonquote.toFixed(1) + '%',
     color: woonquote > 35 ? 'var(--loss)' : 'var(--gain)'
   })), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, t('Toelichting', 'Notes')), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Toelichting"), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 12
     }
@@ -2667,7 +2651,7 @@ function MortgageTab() {
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("div", {
     className: "calc-title"
-  }, t('Maandlasten berekenen', 'Calculate monthly payments')), /*#__PURE__*/React.createElement("div", {
+  }, "Maandlasten berekenen"), /*#__PURE__*/React.createElement("div", {
     className: "calc-desc"
   }, "Bereken je maandlasten, totale rentekosten en het verloop van je hypotheek op basis van Nederlandse normen 2025."), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -2678,45 +2662,45 @@ function MortgageTab() {
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "fld"
-  }, /*#__PURE__*/React.createElement("label", null, t('Woningwaarde (€)', 'Property value (€)')), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, "Woningwaarde (€)"), /*#__PURE__*/React.createElement("input", {
     value: f.woning || '',
     placeholder: "bv. 350000",
     inputMode: "decimal",
     onChange: e => sf('woning', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "fld"
-  }, /*#__PURE__*/React.createElement("label", null, t('Eigen inleg (€)', 'Own contribution (€)')), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, "Eigen inleg (€)"), /*#__PURE__*/React.createElement("input", {
     value: f.inleg || '',
     placeholder: "bv. 50000",
     inputMode: "decimal",
     onChange: e => sf('inleg', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "fld"
-  }, /*#__PURE__*/React.createElement("label", null, t('Rente (%)', 'Interest (%)'), ")"), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, "Rente (%)"), /*#__PURE__*/React.createElement("input", {
     value: f.rente || '4.0',
     placeholder: "4.0",
     inputMode: "decimal",
     onChange: e => sf('rente', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "fld"
-  }, /*#__PURE__*/React.createElement("label", null, t('Looptijd (jaren)', 'Term (years)')), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, "Looptijd (jaren)"), /*#__PURE__*/React.createElement("input", {
     value: f.looptijd || '30',
     placeholder: "30",
     inputMode: "decimal",
     onChange: e => sf('looptijd', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "fld"
-  }, /*#__PURE__*/React.createElement("label", null, t('Hypotheekvorm', 'Mortgage type')), /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement("label", null, "Hypotheekvorm"), /*#__PURE__*/React.createElement("select", {
     className: "auto-int",
     value: vorm,
     onChange: e => sf('vorm', e.target.value)
   }, /*#__PURE__*/React.createElement("option", {
     value: "annuiteit"
-  }, t('Annuïteit (meest gekozen)', 'Annuity (most common)')), /*#__PURE__*/React.createElement("option", {
+  }, "Annuïteit (meest gekozen)"), /*#__PURE__*/React.createElement("option", {
     value: "lineair"
-  }, t('Lineair', 'Linear')), /*#__PURE__*/React.createElement("option", {
+  }, "Lineair"), /*#__PURE__*/React.createElement("option", {
     value: "aflossingsvrij"
-  }, t('Aflossingsvrij', 'Interest only')))), /*#__PURE__*/React.createElement("div", {
+  }, "Aflossingsvrij"))), /*#__PURE__*/React.createElement("div", {
     className: "fld",
     style: {
       display: 'flex',
@@ -2736,7 +2720,7 @@ function MortgageTab() {
     type: "checkbox",
     checked: f.box1 !== false,
     onChange: e => sf('box1', e.target.checked)
-  }), "Mortgage interest deduction (box 1)"), /*#__PURE__*/React.createElement("label", {
+  }), "Hypotheekrenteaftrek (box 1)"), /*#__PURE__*/React.createElement("label", {
     style: {
       display: 'flex',
       alignItems: 'center',
@@ -2757,23 +2741,23 @@ function MortgageTab() {
   }, "(woningwaarde te hoog)"))))), hyp > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "loan-pillars"
   }, /*#__PURE__*/React.createElement(Pill, {
-    label: t('Hypotheekbedrag', 'Mortgage amount'),
+    label: "Hypotheekbedrag",
     val: eur(hyp)
   }), /*#__PURE__*/React.createElement(Pill, {
     label: "Maandlast",
     val: eur(ml),
     color: "var(--brass)",
-    sub: vorm === 'lineair' ? t('eerste maand', 'first month') : null
+    sub: vorm === 'lineair' ? 'eerste maand' : null
   }), /*#__PURE__*/React.createElement(Pill, {
-    label: t('Totale rente', 'Total interest'),
+    label: "Totale rente",
     val: eur(totRente),
     color: "var(--loss)"
   }), /*#__PURE__*/React.createElement(Pill, {
-    label: t('Totaal betaald', 'Total paid'),
+    label: "Totaal betaald",
     val: eur(hyp + totRente)
   })), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, t('Financieel overzicht', 'Financial overview')), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Financieel overzicht"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'grid',
       gridTemplateColumns: '1fr 1fr',
@@ -2836,15 +2820,15 @@ function MortgageTab() {
       color: 'var(--faint)',
       marginBottom: 8
     }
-  }, t('Eenmalige kosten', 'One-time costs')), /*#__PURE__*/React.createElement(Row, {
-    label: t('Overdrachtsbelasting', 'Transfer tax'),
+  }, "Eenmalige kosten"), /*#__PURE__*/React.createElement(Row, {
+    label: "Overdrachtsbelasting",
     val: overdracht === 0 ? '€0 (starter)' : eur(overdracht),
     color: overdracht === 0 ? 'var(--gain)' : null
   }), /*#__PURE__*/React.createElement(Row, {
-    label: t('Notariskosten', 'Notary costs'),
+    label: "Notariskosten",
     val: eur(1500)
   }), /*#__PURE__*/React.createElement(Row, {
-    label: t('Taxatiekosten', 'Valuation costs'),
+    label: "Taxatiekosten",
     val: eur(700)
   }), f.nhg && woning <= nhgGrns && /*#__PURE__*/React.createElement(Row, {
     label: "NHG premie (0,6%)",
@@ -2877,7 +2861,7 @@ function MortgageTab() {
       color: 'var(--muted)',
       marginTop: 4
     }
-  }, t("Totaal voordeel over", "Total benefit over"), " ", looptijd, " ", t("jaar (tarief 36,97%)", "years (rate 36.97%)")), /*#__PURE__*/React.createElement("div", {
+  }, "Totaal voordeel over ", looptijd, " jaar (tarief 36,97%)"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: 'var(--gain)',
@@ -2910,7 +2894,7 @@ function MortgageTab() {
     }
   }, "NHG geeft ~0,5% rentevoordeel")))), graf.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, t('Restschuld over tijd', 'Remaining debt over time')), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Restschuld over tijd"), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 16,
       overflowX: 'auto'
@@ -3038,7 +3022,7 @@ function CalcTab({
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("div", {
     className: "calc-title"
-  }, t('Studieschuld calculator', 'Student debt calculator')), /*#__PURE__*/React.createElement("div", {
+  }, "Studieschuld calculator"), /*#__PURE__*/React.createElement("div", {
     className: "calc-desc"
   }, "Voer per fase de hoofdsom en het rentepercentage in. De grafiek toont hoe je totale studieschuld zich ontwikkelt over de looptijd, zonder aflossing."), /*#__PURE__*/React.createElement("div", {
     className: "loan-phases"
@@ -3054,14 +3038,14 @@ function CalcTab({
     className: "fld"
   }, /*#__PURE__*/React.createElement("label", null, p.label, " — Hoofdsom (€)"), /*#__PURE__*/React.createElement("input", {
     value: p.principal,
-    placeholder: t("bv. 15000", "e.g. 15000"),
+    placeholder: "bv. 15000",
     inputMode: "decimal",
     onChange: e => setPhase(i, "principal", e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "fld"
   }, /*#__PURE__*/React.createElement("label", null, "Rente (%)"), /*#__PURE__*/React.createElement("input", {
     value: p.rate,
-    placeholder: t("bv. 2.56", "e.g. 2.56"),
+    placeholder: "bv. 2.56",
     inputMode: "decimal",
     onChange: e => setPhase(i, "rate", e.target.value)
   })))), /*#__PURE__*/React.createElement("div", {
@@ -3089,19 +3073,19 @@ function CalcTab({
     className: "loan-pill"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
-  }, t('Totale schuld nu', 'Total debt now')), /*#__PURE__*/React.createElement("div", {
+  }, "Totale schuld nu"), /*#__PURE__*/React.createElement("div", {
     className: "loan-big"
   }, eur(loanCalc.total0))), /*#__PURE__*/React.createElement("div", {
     className: "loan-pill"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
-  }, t("Schuld na", "Debt after"), " ", loanCalc.years, " ", t("jaar", "years")), /*#__PURE__*/React.createElement("div", {
+  }, "Schuld na ", loanCalc.years, " jaar"), /*#__PURE__*/React.createElement("div", {
     className: "loan-big loss"
   }, eur(loanCalc.finalTotal))), /*#__PURE__*/React.createElement("div", {
     className: "loan-pill"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
-  }, t('Opgebouwde rente', 'Accrued interest')), /*#__PURE__*/React.createElement("div", {
+  }, "Opgebouwde rente"), /*#__PURE__*/React.createElement("div", {
     className: "loan-big",
     style: {
       color: "var(--loss)"
@@ -3110,22 +3094,22 @@ function CalcTab({
     className: "loan-pill"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
-  }, t('Gem. rentepercentage', 'Avg. interest rate')), /*#__PURE__*/React.createElement("div", {
+  }, "Gem. rentepercentage"), /*#__PURE__*/React.createElement("div", {
     className: "loan-big"
   }, loanCalc.wavg.toFixed(2), "%"))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, t('Portefeuille vs. studieschuld', 'Portfolio vs. student debt')), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Portefeuille vs. studieschuld"), /*#__PURE__*/React.createElement("div", {
     className: "port-rate-row"
   }, /*#__PURE__*/React.createElement("span", {
     className: "port-rate-lbl"
-  }, t('Verwacht rendement aandelen', 'Expected stock return')), /*#__PURE__*/React.createElement("div", {
+  }, "Verwacht rendement aandelen"), /*#__PURE__*/React.createElement("div", {
     className: "fld",
     style: {
       maxWidth: 130
     }
   }, /*#__PURE__*/React.createElement("input", {
     value: portRate,
-    placeholder: t("bv. 7", "e.g. 7"),
+    placeholder: "bv. 7",
     inputMode: "decimal",
     onChange: e => setPortRate(e.target.value)
   })), /*#__PURE__*/React.createElement("span", {
@@ -3134,7 +3118,7 @@ function CalcTab({
     className: "port-rate-cur"
   }, "Huidig: ", eur(portV0)), portV0 === 0 && /*#__PURE__*/React.createElement("span", {
     className: "port-rate-tip"
-  }, t('Voeg posities toe aan je portefeuille om de vergelijking te zien.', 'Add positions to your portfolio to see the comparison.'))), combined && portV0 > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, combined.crossover != null ? /*#__PURE__*/React.createElement("div", {
+  }, "Voeg posities toe aan je portefeuille om de vergelijking te zien.")), combined && portV0 > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, combined.crossover != null ? /*#__PURE__*/React.createElement("div", {
     className: "cross-banner"
   }, "🎯 Je portefeuille overtreft je studieschuld rond ", /*#__PURE__*/React.createElement("b", null, new Date().getFullYear() + Math.round(combined.crossover), " (jaar ", Math.round(combined.crossover), ")"), combined.crossover === 0 && " — je portefeuille is al groter dan je schuld!") : /*#__PURE__*/React.createElement("div", {
     className: "cross-banner warn"
@@ -3143,7 +3127,7 @@ function CalcTab({
     years: loanCalc.years
   }))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, t("Schuldontwikkeling over", "Debt development over"), " ", loanCalc.years, " ", t("jaar", "years")), /*#__PURE__*/React.createElement(LoanChart, {
+  }, /*#__PURE__*/React.createElement("h3", null, "Schuldontwikkeling over ", loanCalc.years, " jaar"), /*#__PURE__*/React.createElement(LoanChart, {
     calc: loanCalc,
     colors: phaseColors,
     phases: loan.phases
@@ -3158,9 +3142,9 @@ function CalcTab({
     className: "num"
   }, p.label)), /*#__PURE__*/React.createElement("div", {
     className: "num"
-  }, t('Totaal', 'Total')), /*#__PURE__*/React.createElement("div", {
+  }, "Totaal"), /*#__PURE__*/React.createElement("div", {
     className: "num"
-  }, t('+Rente', '+Interest'))), loanCalc.points.map((row, idx) => /*#__PURE__*/React.createElement("div", {
+  }, "+Rente")), loanCalc.points.map((row, idx) => /*#__PURE__*/React.createElement("div", {
     className: "loan-tr",
     key: idx
   }, /*#__PURE__*/React.createElement("div", {
@@ -3288,7 +3272,7 @@ function LoanChart({
     style: {
       font: "11px Inter,sans-serif"
     }
-  }, t("Totaal", "Total")), phases.map((p, i) => parseFloat(p.principal) > 0 && /*#__PURE__*/React.createElement("g", {
+  }, "Totaal"), phases.map((p, i) => parseFloat(p.principal) > 0 && /*#__PURE__*/React.createElement("g", {
     key: i,
     transform: `translate(${80 + i * 90}, 0)`
   }, /*#__PURE__*/React.createElement("line", {
@@ -3469,7 +3453,7 @@ function CombinedChart({
     style: {
       font: "11px Inter,sans-serif"
     }
-  }, t('Kruispunt', 'Crossover')))));
+  }, "Kruispunt"))));
 }
 
 /* ---- Budget tab ---- */
@@ -3501,10 +3485,10 @@ function calcNLTax(gross) {
   const ahk_afb_start = 23303;
   const ahk = gross <= ahk_afb_start ? ahk_max : Math.max(0, ahk_max - (gross - ahk_afb_start) * 0.0663);
 
-  // t('Arbeidskorting','Employment credit') 2025: max €5.599, opbouw t/m €43.071 dan afbouw 6.51% t/m €124.935
+  // Arbeidskorting 2025: max €5.599, opbouw t/m €43.071 dan afbouw 6.51% t/m €124.935
   let ak = 0;
   if (gross <= 11491) ak = gross * 0.08231;else if (gross <= 24821) ak = 945 + (gross - 11491) * 0.29861;else if (gross <= 43071) ak = 4926 + (gross - 24821) * 0.03085;else if (gross <= 124935) ak = Math.max(0, 5599 - (gross - 43071) * 0.0651);else ak = 0;
-  const totalkortingen = Math.min(tax, ahk + ak);
+  const totalKortingen = Math.min(tax, ahk + ak);
   const netTax = Math.max(0, tax - totalKortingen);
   const net = gross - netTax;
   const effectiveRate = gross > 0 ? netTax / gross * 100 : 0;
@@ -3699,7 +3683,7 @@ function BudgetTab({
     color: catColors[i % catColors.length]
   })), ...(savingsTarget > 0 ? [{
     id: 'sav',
-    label: t('Spaardoel', 'Savings goal'),
+    label: 'Spaardoel',
     value: savingsTarget,
     color: '#79C7A0'
   }] : []), ...(surplus > 0 ? [{
@@ -3790,7 +3774,7 @@ function BudgetTab({
       borderColor: 'var(--loss)'
     },
     onClick: () => setConfirmDel(true)
-  }, t('verwijder maand', 'delete month')))), /*#__PURE__*/React.createElement("div", {
+  }, "verwijder maand"))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("div", {
     className: "calc-title"
@@ -3802,14 +3786,14 @@ function BudgetTab({
     className: "fld"
   }, /*#__PURE__*/React.createElement("label", null, "Bruto jaarsalaris (€)"), /*#__PURE__*/React.createElement("input", {
     value: monthData.salaryGross || '',
-    placeholder: t("bv. 45000", "e.g. 45000"),
+    placeholder: "bv. 45000",
     inputMode: "decimal",
     onChange: e => setField('salaryGross', e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "budget-net-box"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
-  }, t('Netto per maand', 'Net per month')), /*#__PURE__*/React.createElement("div", {
+  }, "Netto per maand"), /*#__PURE__*/React.createElement("div", {
     className: "budget-net-big"
   }, eur(netMth)), /*#__PURE__*/React.createElement("div", {
     className: "lbl",
@@ -3840,7 +3824,7 @@ function BudgetTab({
     className: "tax-row korting"
   }, /*#__PURE__*/React.createElement("span", {
     className: "tax-label"
-  }, t('Alg. heffingskorting', 'General tax credit')), /*#__PURE__*/React.createElement("span", {
+  }, "Alg. heffingskorting"), /*#__PURE__*/React.createElement("span", {
     className: "tax-base"
   }, "korting"), /*#__PURE__*/React.createElement("span", {
     className: "tax-amt gain"
@@ -3856,7 +3840,7 @@ function BudgetTab({
     className: "tax-row total"
   }, /*#__PURE__*/React.createElement("span", {
     className: "tax-label"
-  }, t('Totale belasting', 'Total tax')), /*#__PURE__*/React.createElement("span", {
+  }, "Totale belasting"), /*#__PURE__*/React.createElement("span", {
     className: "tax-base"
   }), /*#__PURE__*/React.createElement("span", {
     className: "tax-amt loss"
@@ -3864,17 +3848,17 @@ function BudgetTab({
     className: "tax-row total"
   }, /*#__PURE__*/React.createElement("span", {
     className: "tax-label"
-  }, t('Netto jaarsalaris', 'Net annual salary')), /*#__PURE__*/React.createElement("span", {
+  }, "Netto jaarsalaris"), /*#__PURE__*/React.createElement("span", {
     className: "tax-base"
   }), /*#__PURE__*/React.createElement("span", {
     className: "tax-amt"
   }, eur(tax.net)))))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, t("Maandelijkse kosten", "Monthly expenses")), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Maandelijkse kosten"), /*#__PURE__*/React.createElement("div", {
     className: "budget-cats"
   }, /*#__PURE__*/React.createElement("div", {
     className: "budget-cat-h"
-  }, /*#__PURE__*/React.createElement("span", null, t('Omschrijving', 'Description')), /*#__PURE__*/React.createElement("span", null, t('Bedrag', 'Amount'), " / mnd"), /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement("span", null, "Omschrijving"), /*#__PURE__*/React.createElement("span", null, "Bedrag / mnd"), /*#__PURE__*/React.createElement("span", {
     style: {
       textAlign: 'center'
     }
@@ -3883,7 +3867,7 @@ function BudgetTab({
     key: c.id
   }, /*#__PURE__*/React.createElement("input", {
     value: c.label,
-    placeholder: t("bv. Huur", "e.g. Rent"),
+    placeholder: "bv. Huur",
     onChange: e => setCat(c.id, 'label', e.target.value),
     style: {
       background: 'var(--bg2)',
@@ -3954,13 +3938,13 @@ function BudgetTab({
     className: "loan-pill"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
-  }, t('Vaste kosten', 'Fixed costs')), /*#__PURE__*/React.createElement("div", {
+  }, "Vaste kosten"), /*#__PURE__*/React.createElement("div", {
     className: "loan-big loss"
   }, eur(fixedCosts))), /*#__PURE__*/React.createElement("div", {
     className: "loan-pill"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
-  }, t('Variabele kosten', 'Variable costs')), /*#__PURE__*/React.createElement("div", {
+  }, "Variabele kosten"), /*#__PURE__*/React.createElement("div", {
     className: "loan-big",
     style: {
       color: 'var(--loss)'
@@ -3969,7 +3953,7 @@ function BudgetTab({
     className: "loan-pill"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
-  }, t('Ruimte na kosten', 'Remaining after costs')), /*#__PURE__*/React.createElement("div", {
+  }, "Ruimte na kosten"), /*#__PURE__*/React.createElement("div", {
     className: 'loan-big ' + (leftover >= 0 ? 'gain' : 'loss')
   }, eur(leftover)))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
@@ -3986,9 +3970,9 @@ function BudgetTab({
     style: {
       maxWidth: 200
     }
-  }, /*#__PURE__*/React.createElement("label", null, t("Maandelijks spaardoel (€)", "Monthly savings goal (€)")), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, "Maandelijks spaardoel (€)"), /*#__PURE__*/React.createElement("input", {
     value: monthData.savingsTarget || '',
-    placeholder: t("bv. 500", "e.g. 500"),
+    placeholder: "bv. 500",
     inputMode: "decimal",
     onChange: e => setField('savingsTarget', e.target.value)
   })), savingsTarget > 0 && /*#__PURE__*/React.createElement("div", {
@@ -4110,7 +4094,7 @@ function BudgetDonut({
       font: '10px Inter,sans-serif',
       letterSpacing: '.06em'
     }
-  }, t('PER MAAND', 'PER MONTH')));
+  }, "PER MAAND"));
 }
 
 /* ---- uitgaven tracker ---- */
@@ -4186,7 +4170,7 @@ function TransactionsTab({
     "burger king": "Uit eten / vrije tijd",
     "thuisbezorgd": "Uit eten / vrije tijd",
     "uber eats": "Uit eten / vrije tijd",
-    "salaris": t('Inkomsten', 'Income'),
+    "salaris": "Inkomsten",
     "loon": "Inkomsten",
     "uitkering": "Inkomsten"
   };
@@ -4209,7 +4193,7 @@ function TransactionsTab({
       errors: ['Bestand lijkt leeg of ongeldig.']
     };
 
-    // ING formaat: t('Datum','Date');"Naam / Omschrijving";"Rekening";"Tegenrekening";"Code";"Af Bij";"Bedrag (EUR)";"Mutatiesoort";"Mededelingen"
+    // ING formaat: "Datum";"Naam / Omschrijving";"Rekening";"Tegenrekening";"Code";"Af Bij";"Bedrag (EUR)";"Mutatiesoort";"Mededelingen"
     const header = lines[0].replace(/"/g, '').split(';').map(h => h.trim().toLowerCase());
     const datumIdx = header.findIndex(h => h === 'datum');
     const naamIdx = header.findIndex(h => h.includes('naam') || h.includes('omschrijving'));
@@ -4279,7 +4263,7 @@ function TransactionsTab({
         return;
       }
       if (entries.length === 0) {
-        setIngMsg(t('Geen nieuwe transacties gevonden — mogelijk al geïmporteerd.', 'No new transactions found — possibly already imported.'));
+        setIngMsg('Geen nieuwe transacties gevonden — mogelijk al geïmporteerd.');
         setIngLoading(false);
         return;
       }
@@ -4395,7 +4379,7 @@ function TransactionsTab({
     onChange: e => setFilterCat(e.target.value)
   }, /*#__PURE__*/React.createElement("option", {
     value: "alle"
-  }, t('Alle categorieën', 'All categories')), allCats.map(c => /*#__PURE__*/React.createElement("option", {
+  }, "Alle categorieën"), allCats.map(c => /*#__PURE__*/React.createElement("option", {
     key: c,
     value: c
   }, c)))), /*#__PURE__*/React.createElement("div", {
@@ -4409,7 +4393,7 @@ function TransactionsTab({
       setShowIngImport(s => !s);
       setIngMsg('');
     }
-  }, showIngImport ? "Annuleren" : "t('⬆ ING import','⬆ ING import')eren"), /*#__PURE__*/React.createElement("button", {
+  }, showIngImport ? "Annuleren" : "⬆ ING importeren"), /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
     onClick: () => {
       setEditId(null);
@@ -4422,14 +4406,14 @@ function TransactionsTab({
       });
       setShowForm(s => !s);
     }
-  }, showForm && !editId ? t("Annuleren", "Cancel") : t("+ Transactie", "+ Transaction")))), showIngImport && /*#__PURE__*/React.createElement("div", {
+  }, showForm && !editId ? "Annuleren" : "+ Transactie"))), showIngImport && /*#__PURE__*/React.createElement("div", {
     className: "import",
     style: {
       marginTop: 12
     }
-  }, /*#__PURE__*/React.createElement("h4", null, t('Importeer ING bankafschrift (CSV)', 'Import ING bank statement (CSV)')), /*#__PURE__*/React.createElement("ol", null, /*#__PURE__*/React.createElement("li", null, "Log in op ", /*#__PURE__*/React.createElement("b", null, "mijn.ing.nl"), " t('→ Betaalrekening →','→ Current account →') ", /*#__PURE__*/React.createElement("b", null, t('Exporteren', 'Export'))), /*#__PURE__*/React.createElement("li", null, t('Kies periode, formaat', 'Choose period, format'), " ", /*#__PURE__*/React.createElement("b", null, "CSV"), " t('en download het bestand','and download the file')"), /*#__PURE__*/React.createElement("li", null, "Kies het bestand hieronder — transacties worden automatisch gecategoriseerd")), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h4", null, "Importeer ING bankafschrift (CSV)"), /*#__PURE__*/React.createElement("ol", null, /*#__PURE__*/React.createElement("li", null, "Log in op ", /*#__PURE__*/React.createElement("b", null, "mijn.ing.nl"), " → Betaalrekening → ", /*#__PURE__*/React.createElement("b", null, "Exporteren")), /*#__PURE__*/React.createElement("li", null, "Kies periode, formaat ", /*#__PURE__*/React.createElement("b", null, "CSV"), " en download het bestand"), /*#__PURE__*/React.createElement("li", null, "Kies het bestand hieronder — transacties worden automatisch gecategoriseerd")), /*#__PURE__*/React.createElement("div", {
     className: "rt-note"
-  }, "Duplicaten worden automatisch overgeslagen. t('Categorie','Category')ën worden geraden op basis van de omschrijving en je bestaande budgetcategorieën."), /*#__PURE__*/React.createElement("div", {
+  }, "Duplicaten worden automatisch overgeslagen. Categorieën worden geraden op basis van de omschrijving en je bestaande budgetcategorieën."), /*#__PURE__*/React.createElement("div", {
     className: "import-row",
     style: {
       marginTop: 12
@@ -4438,7 +4422,7 @@ function TransactionsTab({
     className: "btn primary file-btn"
   }, ingLoading ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
     className: "spin"
-  }), t('Importeren...', 'Importing...')) : "📂 Kies ING CSV-bestand", /*#__PURE__*/React.createElement("input", {
+  }), "Importeren...") : "📂 Kies ING CSV-bestand", /*#__PURE__*/React.createElement("input", {
     type: "file",
     accept: ".csv",
     onChange: handleIngFile,
@@ -4555,7 +4539,7 @@ function TransactionsTab({
     className: "loan-pill"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
-  }, t('Saldo', 'Balance')), /*#__PURE__*/React.createElement("div", {
+  }, "Saldo"), /*#__PURE__*/React.createElement("div", {
     className: "loan-big " + (totalIn - totalOut >= 0 ? "gain" : "loss")
   }, eur(totalIn - totalOut)))), Object.keys(budgetMap).length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
@@ -4745,7 +4729,7 @@ function ImportPanel({
     style: {
       color: "var(--ink)"
     }
-  }, "t(\"⬇ Exporteer data\",\"⬇ Export data\")"), " rechtsboven, kopieer de JSON en plak hem hieronder."), /*#__PURE__*/React.createElement("textarea", {
+  }, "\"⬇ Exporteer data\""), " rechtsboven, kopieer de JSON en plak hem hieronder."), /*#__PURE__*/React.createElement("textarea", {
     value: json,
     onChange: e => {
       setJson(e.target.value);
@@ -4776,7 +4760,7 @@ function ImportPanel({
       fontFamily: "'IBM Plex Mono',monospace",
       fontSize: 12
     }
-  }, t('✓ Data succesvol geïmporteerd!', '✓ Data imported successfully!')), /*#__PURE__*/React.createElement("div", {
+  }, "✓ Data succesvol geïmporteerd!"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 10
@@ -4865,7 +4849,7 @@ function ExportButton({
       fontSize: 13,
       color: "var(--muted)"
     }
-  }, "Kopieer de onderstaande JSON en plak hem in een ander apparaat via t(\"Importeer data\",\"Import data\")."), /*#__PURE__*/React.createElement("textarea", {
+  }, "Kopieer de onderstaande JSON en plak hem in een ander apparaat via \"Importeer data\"."), /*#__PURE__*/React.createElement("textarea", {
     readOnly: true,
     value: JSON.stringify({
       version: 1,
@@ -4897,7 +4881,7 @@ function ExportButton({
   }), /*#__PURE__*/React.createElement("button", {
     className: "btn primary",
     onClick: () => setShowPanel(false)
-  }, t('Sluiten', 'Close')))));
+  }, "Sluiten"))));
 }
 
 /* ---- rekeningen tab ---- */
@@ -4989,14 +4973,14 @@ function AccountsTab() {
         }
       });
       if (!profileRes.ok) {
-        setWiseMsg(t('Ongeldige Wise API-key. Controleer hem in je Wise instellingen.', 'Invalid Wise API key. Check it in your Wise settings.'));
+        setWiseMsg('Ongeldige Wise API-key. Controleer hem in je Wise instellingen.');
         setWiseLoading(false);
         return;
       }
       const profiles = await profileRes.json();
       const profile = profiles.find(p => p.type === 'personal') || profiles[0];
       if (!profile) {
-        setWiseMsg(t('Geen Wise profiel gevonden.', 'No Wise profile found.'));
+        setWiseMsg('Geen Wise profiel gevonden.');
         setWiseLoading(false);
         return;
       }
@@ -5008,7 +4992,7 @@ function AccountsTab() {
         }
       });
       if (!balRes.ok) {
-        setWiseMsg(t('Fout bij ophalen balansen.', 'Error fetching balances.'));
+        setWiseMsg('Fout bij ophalen balansen.');
         setWiseLoading(false);
         return;
       }
@@ -5033,10 +5017,10 @@ function AccountsTab() {
         if (existing >= 0) newAccounts[existing] = accData;else newAccounts.push(accData);
       });
       setAccounts(newAccounts);
-      setWiseMsg(`✓ ${balances.length} ${t("Wise rekening(en) gesynchroniseerd!", "Wise account(s) synced!")}`);
+      setWiseMsg(`✓ ${balances.length} Wise rekening(en) gesynchroniseerd!`);
       setTimeout(() => setWiseMsg(''), 4000);
     } catch (e) {
-      setWiseMsg(t('Verbindingsfout: ', 'Connection error: ') + e.message);
+      setWiseMsg('Verbindingsfout: ' + e.message);
     }
     setWiseLoading(false);
   }
@@ -5078,7 +5062,7 @@ function AccountsTab() {
         iban: ''
       });
     }
-  }, "+ Add account"), /*#__PURE__*/React.createElement("button", {
+  }, "+ Rekening toevoegen"), /*#__PURE__*/React.createElement("button", {
     className: "btn",
     onClick: fetchWiseBalances,
     disabled: wiseLoading,
@@ -5087,13 +5071,13 @@ function AccountsTab() {
       alignItems: 'center',
       gap: 6
     }
-  }, wiseLoading ? t('⏳ Laden...', '⏳ Loading...') : t('🔄 Synchroniseer Wise', '🔄 Sync Wise')), /*#__PURE__*/React.createElement("button", {
+  }, wiseLoading ? '⏳ Laden...' : '🔄 Synchroniseer Wise'), /*#__PURE__*/React.createElement("button", {
     className: "btn",
     onClick: () => setShowWiseSetup(s => !s),
     style: {
       fontSize: 12
     }
-  }, "⚙️ Wise API key"), wiseMsg && /*#__PURE__*/React.createElement("span", {
+  }, "⚙️ Wise API-key"), wiseMsg && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 12,
       color: wiseMsg.startsWith('✓') ? 'var(--gain)' : 'var(--loss)',
@@ -5104,7 +5088,7 @@ function AccountsTab() {
     style: {
       marginBottom: 16
     }
-  }, /*#__PURE__*/React.createElement("h3", null, t('Wise API-key instellen', 'Set up Wise API key')), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Wise API-key instellen"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
       color: 'var(--muted)',
@@ -5147,12 +5131,12 @@ function AccountsTab() {
       setShowWiseSetup(false);
       fetchWiseBalances();
     }
-  }, "Save & sync"))), showForm && /*#__PURE__*/React.createElement("div", {
+  }, "Opslaan & synchroniseren"))), showForm && /*#__PURE__*/React.createElement("div", {
     className: "calc-section",
     style: {
       marginBottom: 16
     }
-  }, /*#__PURE__*/React.createElement("h3", null, editId ? t('Rekening bewerken', 'Edit account') : 'Rekening toevoegen'), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, editId ? 'Rekening bewerken' : 'Rekening toevoegen'), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'grid',
       gridTemplateColumns: '1fr 1fr',
@@ -5163,7 +5147,7 @@ function AccountsTab() {
     className: "fld"
   }, /*#__PURE__*/React.createElement("label", null, "Naam"), /*#__PURE__*/React.createElement("input", {
     value: form.name,
-    placeholder: t('bv. ING Betaalrekening', 'e.g. Current account'),
+    placeholder: "bv. ING Betaalrekening",
     onChange: e => setForm(f => ({
       ...f,
       name: e.target.value
@@ -5179,7 +5163,7 @@ function AccountsTab() {
     }))
   }, /*#__PURE__*/React.createElement("option", {
     value: ""
-  }, t('Kies bank...', 'Select bank...')), BANKS.map(b => /*#__PURE__*/React.createElement("option", {
+  }, "Kies bank..."), BANKS.map(b => /*#__PURE__*/React.createElement("option", {
     key: b,
     value: b
   }, b)))), /*#__PURE__*/React.createElement("div", {
@@ -5292,11 +5276,11 @@ function AccountsTab() {
       fontSize: 15,
       marginBottom: 8
     }
-  }, t('Nog geen rekeningen toegevoegd', 'No accounts added yet')), /*#__PURE__*/React.createElement("div", {
+  }, "Nog geen rekeningen toegevoegd"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13
     }
-  }, t('Voeg een rekening handmatig toe of synchroniseer je Wise account.', 'Add an account manually or sync your Wise account.'))) : /*#__PURE__*/React.createElement("div", {
+  }, "Voeg een rekening handmatig toe of synchroniseer je Wise account.")) : /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexDirection: 'column',
@@ -5348,7 +5332,7 @@ function AccountsTab() {
       color: 'var(--faint)',
       marginTop: 2
     }
-  }, t('Gesync:', 'Synced:'), " ", new Date(acc.lastSync).toLocaleString('nl-NL', {
+  }, "Gesync: ", new Date(acc.lastSync).toLocaleString('nl-NL', {
     day: 'numeric',
     month: 'short',
     hour: '2-digit',
@@ -5426,7 +5410,7 @@ function AllTransactionsTab({
   async function fetchWiseTransactions() {
     const wiseKey = localStorage.getItem('fb:wise_key') || '';
     if (!wiseKey) {
-      setWiseMsg(t('⚠ Stel eerst je Wise API-key in via de Rekeningen-tab.', '⚠ Please set your Wise API key in the Accounts tab first.'));
+      setWiseMsg('⚠ Stel eerst je Wise API-key in via de Rekeningen-tab.');
       return;
     }
     setWiseLoading(true);
@@ -5458,7 +5442,7 @@ function AllTransactionsTab({
         }
       });
       if (!accRes.ok) {
-        setWiseMsg(t('✗ Kon Wise rekeningen niet ophalen.', '✗ Could not fetch Wise accounts.'));
+        setWiseMsg('✗ Kon Wise rekeningen niet ophalen.');
         setWiseLoading(false);
         return;
       }
@@ -5512,7 +5496,7 @@ function AllTransactionsTab({
       }
       setTimeout(() => setWiseMsg(''), 5000);
     } catch (e) {
-      setWiseMsg(t('✗ Verbindingsfout: ', '✗ Connection error: ') + e.message);
+      setWiseMsg('✗ Verbindingsfout: ' + e.message);
     }
     setWiseLoading(false);
   }
@@ -5548,7 +5532,7 @@ function AllTransactionsTab({
       const text = String(reader.result || '');
       const lines = text.split('\n').filter(l => l.trim());
       if (lines.length < 2) {
-        setIngMsg(t('Leeg of ongeldig bestand.', 'Empty or invalid file.'));
+        setIngMsg('Leeg of ongeldig bestand.');
         return;
       }
       const header = lines[0].replace(/"/g, '').split(';').map(h => h.trim().toLowerCase());
@@ -5558,7 +5542,7 @@ function AllTransactionsTab({
       const bedragIdx = header.findIndex(h => h.includes('bedrag'));
       const mededIdx = header.findIndex(h => h.includes('mededeling'));
       if (datumIdx === -1 || bedragIdx === -1) {
-        setIngMsg(t('Geen geldig ING CSV-bestand.', 'Not a valid ING CSV file.'));
+        setIngMsg('Geen geldig ING CSV-bestand.');
         return;
       }
       const existingKeys = new Set((transactions || []).map(t => `${t.date}_${t.amount}_${(t.note || '').slice(0, 20)}`));
@@ -5589,7 +5573,7 @@ function AllTransactionsTab({
         });
       }
       if (entries.length === 0) {
-        setIngMsg(t('Geen nieuwe transacties gevonden.', 'No new transactions found.'));
+        setIngMsg('Geen nieuwe transacties gevonden.');
         return;
       }
       setTransactions(prev => [...entries, ...(prev || [])]);
@@ -5636,7 +5620,7 @@ function AllTransactionsTab({
     onChange: e => setFilterType(e.target.value)
   }, /*#__PURE__*/React.createElement("option", {
     value: "alle"
-  }, t('Alle types', 'All types')), /*#__PURE__*/React.createElement("option", {
+  }, "Alle types"), /*#__PURE__*/React.createElement("option", {
     value: "uitgave"
   }, "Uitgaven"), /*#__PURE__*/React.createElement("option", {
     value: "inkomst"
@@ -5646,7 +5630,7 @@ function AllTransactionsTab({
     onChange: e => setFilterMonth(e.target.value)
   }, /*#__PURE__*/React.createElement("option", {
     value: "alle"
-  }, t('Alle maanden', 'All months')), months.map(m => /*#__PURE__*/React.createElement("option", {
+  }, "Alle maanden"), months.map(m => /*#__PURE__*/React.createElement("option", {
     key: m,
     value: m
   }, m))), /*#__PURE__*/React.createElement("button", {
@@ -5661,7 +5645,7 @@ function AllTransactionsTab({
       alignItems: 'center',
       gap: 6
     }
-  }, wiseLoading ? '⏳ Laden...' : t('🌍 Wise sync', '🌍 Wise sync')), wiseMsg && /*#__PURE__*/React.createElement("span", {
+  }, wiseLoading ? '⏳ Laden...' : '🌍 Wise sync'), wiseMsg && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 12,
       fontFamily: "'IBM Plex Mono',monospace",
@@ -5832,7 +5816,7 @@ function AllTransactionsTab({
       padding: '40px 20px',
       fontSize: 14
     }
-  }, (transactions || []).length === 0 ? t('Nog geen transacties. Importeer een ING CSV-bestand om te beginnen.', 'No transactions yet. Import an ING CSV file to get started.') : t('Geen transacties gevonden met deze filters.', 'No transactions found with these filters.')) : /*#__PURE__*/React.createElement("div", {
+  }, (transactions || []).length === 0 ? 'Nog geen transacties. Importeer een ING CSV-bestand om te beginnen.' : 'Geen transacties gevonden met deze filters.') : /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexDirection: 'column'
@@ -5916,14 +5900,14 @@ function DashboardTab({
   const totalBudget = (activeBudget.categories || []).reduce((s, c) => s + n(c.amount), 0);
   const savingsTarget = n(activeBudget.savingsTarget);
 
-  // t('Uitgaven deze maand','Expenses this month')
+  // Uitgaven deze maand
   const thisMonthTrans = (transactions || []).filter(t => t.date && t.date.startsWith(activeMon));
   const totalSpent = thisMonthTrans.filter(t => t.type === 'uitgave').reduce((s, t) => s + n(t.amount), 0);
   const totalIncome = thisMonthTrans.filter(t => t.type === 'inkomst').reduce((s, t) => s + n(t.amount), 0);
   const budgetLeft = totalBudget - totalSpent;
   const budgetPct = totalBudget > 0 ? Math.min(100, Math.round(totalSpent / totalBudget * 100)) : 0;
 
-  // t('Netto vermogen','Net worth')
+  // Netto vermogen
   const nwData = (() => {
     try {
       return JSON.parse(localStorage.getItem('fb:networth') || '{}');
@@ -6034,22 +6018,22 @@ function DashboardTab({
   }, /*#__PURE__*/React.createElement(Card, {
     label: "Netto vermogen",
     value: eur(netWorth),
-    sub: `${eur(totalAssets)} t('bezittingen','in assets')`,
+    sub: `${eur(totalAssets)} bezittingen`,
     color: netWorth >= 0 ? 'var(--gain)' : 'var(--loss)'
   }), /*#__PURE__*/React.createElement(Card, {
     label: "Aandelenportefeuille",
     value: eur(portfolioValue || 0),
-    sub: `${portfolios.reduce((s, p) => s + p.holdings.length, 0)} ${t("posities", "positions")}`,
+    sub: `${portfolios.reduce((s, p) => s + p.holdings.length, 0)} posities`,
     color: "var(--brass)"
   }), /*#__PURE__*/React.createElement(Card, {
-    label: t('Budget restant', 'Budget remaining'),
+    label: "Budget restant",
     value: eur(budgetLeft),
-    sub: `${budgetPct}% t('van budget gebruikt','of budget used')`,
+    sub: `${budgetPct}% van budget gebruikt`,
     color: budgetLeft >= 0 ? 'var(--gain)' : 'var(--loss)'
   }), /*#__PURE__*/React.createElement(Card, {
     label: "Uitgaven deze maand",
     value: eur(totalSpent),
-    sub: `${thisMonthTrans.filter(t => t.type === 'uitgave').length} ${t("transacties", "transactions")}`
+    sub: `${thisMonthTrans.filter(t => t.type === 'uitgave').length} transacties`
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'grid',
@@ -6080,7 +6064,7 @@ function DashboardTab({
       color: 'var(--muted)',
       marginBottom: 6
     }
-  }, /*#__PURE__*/React.createElement("span", null, t('Uitgegeven', 'Spent')), /*#__PURE__*/React.createElement("span", null, budgetPct, "%")), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null, "Uitgegeven"), /*#__PURE__*/React.createElement("span", null, budgetPct, "%")), /*#__PURE__*/React.createElement("div", {
     style: {
       height: 8,
       background: 'var(--bg2)',
@@ -6139,7 +6123,7 @@ function DashboardTab({
       fontSize: 13,
       color: 'var(--faint)'
     }
-  }, t('Nog geen uitgaven deze maand.', 'No expenses this month.'))), /*#__PURE__*/React.createElement("div", {
+  }, "Nog geen uitgaven deze maand.")), /*#__PURE__*/React.createElement("div", {
     style: {
       background: 'var(--surface)',
       border: '1px solid var(--line)',
@@ -6227,7 +6211,7 @@ function DashboardTab({
       color: 'var(--faint)',
       marginBottom: 14
     }
-  }, t('Spaardoel deze maand', 'Savings goal this month')), savingsTarget > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, "Spaardoel deze maand"), savingsTarget > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       justifyContent: 'space-between',
@@ -6246,7 +6230,7 @@ function DashboardTab({
       fontSize: 12,
       color: 'var(--muted)'
     }
-  }, t('doel per maand', 'goal per month'))), /*#__PURE__*/React.createElement("div", {
+  }, "doel per maand")), /*#__PURE__*/React.createElement("div", {
     style: {
       height: 8,
       background: 'var(--bg2)',
@@ -6272,7 +6256,7 @@ function DashboardTab({
       fontSize: 13,
       color: 'var(--faint)'
     }
-  }, t('Stel een spaardoel in via de Budget-tab.', 'Set a savings goal in the Budget tab.'))), /*#__PURE__*/React.createElement("div", {
+  }, "Stel een spaardoel in via de Budget-tab.")), /*#__PURE__*/React.createElement("div", {
     style: {
       background: 'var(--surface)',
       border: '1px solid var(--line)',
@@ -6287,7 +6271,7 @@ function DashboardTab({
       color: 'var(--faint)',
       marginBottom: 14
     }
-  }, t('Dividend volgende maand', 'Dividend next month')), dividendNext.length > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }, "Dividend volgende maand"), dividendNext.length > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 22,
       fontWeight: 600,
@@ -6317,7 +6301,7 @@ function DashboardTab({
       fontSize: 13,
       color: 'var(--faint)'
     }
-  }, holdings.length === 0 ? t('Voeg posities toe in de Aandelenportefeuille-tab.', 'Add positions in the Portfolio tab.') : t('Geen dividend verwacht volgende maand.', 'No dividend expected next month.')))));
+  }, holdings.length === 0 ? 'Voeg posities toe in de Aandelenportefeuille-tab.' : 'Geen dividend verwacht volgende maand.'))));
 }
 
 /* ---- netto vermogen tab ---- */
@@ -6458,7 +6442,7 @@ function NetWorthTab({
     className: "calc-title"
   }, "Netto Vermogen"), /*#__PURE__*/React.createElement("div", {
     className: "calc-desc"
-  }, t('Jouw totale bezittingen minus alle schulden.', 'Your total assets minus all liabilities.'), " ", t("De aandelenportefeuille en studieschuld worden automatisch meegenomen.", "Your stock portfolio and student debt are included automatically.")), /*#__PURE__*/React.createElement("div", {
+  }, "Jouw totale bezittingen minus alle schulden. De aandelenportefeuille en studieschuld worden automatisch meegenomen."), /*#__PURE__*/React.createElement("div", {
     className: "loan-pillars",
     style: {
       marginTop: 20
@@ -6467,13 +6451,13 @@ function NetWorthTab({
     className: "loan-pill"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
-  }, t('Totale bezittingen', 'Total assets')), /*#__PURE__*/React.createElement("div", {
+  }, "Totale bezittingen"), /*#__PURE__*/React.createElement("div", {
     className: "loan-big gain"
   }, eur(totalAssets))), /*#__PURE__*/React.createElement("div", {
     className: "loan-pill"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
-  }, t('Totale schulden', 'Total liabilities')), /*#__PURE__*/React.createElement("div", {
+  }, "Totale schulden"), /*#__PURE__*/React.createElement("div", {
     className: "loan-big loss"
   }, eur(totalLiabs))), /*#__PURE__*/React.createElement("div", {
     className: "loan-pill",
@@ -6508,7 +6492,7 @@ function NetWorthTab({
       color: 'var(--faint)',
       marginBottom: 12
     }
-  }, t('Bezittingen', 'Assets')), /*#__PURE__*/React.createElement("div", {
+  }, "Bezittingen"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
@@ -6563,7 +6547,7 @@ function NetWorthTab({
       color: 'var(--faint)',
       marginBottom: 12
     }
-  }, t('Schulden', 'Liabilities')), /*#__PURE__*/React.createElement("div", {
+  }, "Schulden"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
@@ -6615,7 +6599,7 @@ function NetWorthTab({
       marginBottom: 14,
       lineHeight: 1.5
     }
-  }, "Je aandelenportefeuille (", eur(portfolioValue || 0), ") ", t("wordt automatisch meegenomen vanuit de Aandelenportefeuille-tab.", "is automatically included from the Portfolio tab.")), /*#__PURE__*/React.createElement("div", {
+  }, "Je aandelenportefeuille (", eur(portfolioValue || 0), ") wordt automatisch meegenomen vanuit de Aandelenportefeuille-tab."), /*#__PURE__*/React.createElement("div", {
     className: "budget-cats"
   }, /*#__PURE__*/React.createElement("div", {
     className: "budget-cat-h"
@@ -6627,7 +6611,7 @@ function NetWorthTab({
     }
   }, /*#__PURE__*/React.createElement("input", {
     value: a.label,
-    placeholder: t('bv. Spaarrekening', 'e.g. Savings account'),
+    placeholder: "bv. Spaarrekening",
     onChange: e => setAsset(a.id, 'label', e.target.value),
     style: {
       background: 'var(--bg2)',
@@ -6694,7 +6678,7 @@ function NetWorthTab({
       alignSelf: 'flex-start'
     },
     onClick: addAsset
-  }, t('+ Bezitting toevoegen', '+ Add asset')))), /*#__PURE__*/React.createElement("div", {
+  }, "+ Bezitting toevoegen"))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("h3", null, "Schulden"), n(loan?.balance) > 0 && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -6703,7 +6687,7 @@ function NetWorthTab({
       marginBottom: 14,
       lineHeight: 1.5
     }
-  }, "Je studieschuld (", eur(n(loan?.balance)), ") ", t("wordt automatisch meegenomen vanuit de Rekenmachine-tab.", "is automatically included from the Calculator tab.")), /*#__PURE__*/React.createElement("div", {
+  }, "Je studieschuld (", eur(n(loan?.balance)), ") wordt automatisch meegenomen vanuit de Rekenmachine-tab."), /*#__PURE__*/React.createElement("div", {
     className: "budget-cats"
   }, /*#__PURE__*/React.createElement("div", {
     className: "budget-cat-h"
@@ -6715,7 +6699,7 @@ function NetWorthTab({
     }
   }, /*#__PURE__*/React.createElement("input", {
     value: l.label,
-    placeholder: t('bv. Hypotheek', 'e.g. Mortgage'),
+    placeholder: "bv. Hypotheek",
     onChange: e => setLiab(l.id, 'label', e.target.value),
     style: {
       background: 'var(--bg2)',
@@ -6782,7 +6766,7 @@ function NetWorthTab({
       alignSelf: 'flex-start'
     },
     onClick: addLiab
-  }, t('+ Schuld toevoegen', '+ Add liability')))));
+  }, "+ Schuld toevoegen"))));
 }
 function NWDonut({
   data,
@@ -6839,7 +6823,7 @@ function NWDonut({
     style: {
       font: '9px Inter,sans-serif'
     }
-  }, t('TOTAAL', 'TOTAL')));
+  }, "TOTAAL"));
 }
 
 /* ---- instellingen tab ---- */
@@ -6855,11 +6839,7 @@ function SettingsTab({
   portRate,
   budget,
   transactions,
-  handleImport,
-  lightMode,
-  toggleTheme,
-  lang,
-  toggleLang
+  handleImport
 }) {
   const [key, setKey] = useState(apiKey || '');
   const [keyMsg, setKeyMsg] = useState('');
@@ -6868,7 +6848,7 @@ function SettingsTab({
   async function testAndSave() {
     const k = key.trim();
     if (!k) {
-      setKeyErr(t('Vul je API-key in.', 'Please enter your API key.'));
+      setKeyErr('Vul je API-key in.');
       return;
     }
     setTesting(true);
@@ -6893,12 +6873,12 @@ function SettingsTab({
         })
       });
       if (r.status === 401 || r.status === 403) {
-        setKeyErr(t('Ongeldige key.', 'Invalid key.'));
+        setKeyErr('Ongeldige key — controleer hem op console.anthropic.com.');
         setTesting(false);
         return;
       }
       if (!r.ok) {
-        setKeyErr('Error ' + r.status);
+        setKeyErr('Fout ' + r.status);
         setTesting(false);
         return;
       }
@@ -6906,85 +6886,20 @@ function SettingsTab({
         localStorage.setItem('fb:anthropic_key', k);
       } catch (e) {}
       setApiKey(k);
-      setKeyMsg(t('Key opgeslagen!', 'Key saved!'));
+      setKeyMsg('Key opgeslagen en getest!');
       setTimeout(() => setKeyMsg(''), 3000);
     } catch (e) {
-      setKeyErr(t('Verbindingsfout.', 'Connection error.'));
+      setKeyErr('Verbindingsfout.');
     }
     setTesting(false);
   }
   return /*#__PURE__*/React.createElement("div", {
     className: "calc-wrap"
   }, /*#__PURE__*/React.createElement("div", {
-    className: "calc-title"
-  }, t('Instellingen', 'Settings')), /*#__PURE__*/React.createElement(AccountTab, {
-    embedded: true
-  }), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, t('Weergave', 'Appearance')), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: 12,
-      marginTop: 14
-    }
   }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '12px 16px',
-      background: 'var(--bg2)',
-      borderRadius: 10
-    }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 14,
-      fontWeight: 500,
-      color: 'var(--ink)'
-    }
-  }, t('Thema', 'Theme')), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: 'var(--muted)',
-      marginTop: 2
-    }
-  }, lightMode ? t('Lichte modus actief', 'Light mode active') : t('Donkere modus actief', 'Dark mode active'))), /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    onClick: toggleTheme,
-    style: {
-      minWidth: 140
-    }
-  }, lightMode ? t('🌙 Donkere modus', '🌙 Dark mode') : t('☀️ Lichte modus', '☀️ Light mode'))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '12px 16px',
-      background: 'var(--bg2)',
-      borderRadius: 10
-    }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 14,
-      fontWeight: 500,
-      color: 'var(--ink)'
-    }
-  }, t('Taal', 'Language')), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 12,
-      color: 'var(--muted)',
-      marginTop: 2
-    }
-  }, lang === 'nl' ? 'Nederlands' : 'English')), /*#__PURE__*/React.createElement("button", {
-    className: "btn",
-    onClick: toggleLang,
-    style: {
-      minWidth: 140
-    }
-  }, lang === 'nl' ? '🇬🇧 Switch to English' : '🇳🇱 Schakel naar Nederlands')))), /*#__PURE__*/React.createElement("div", {
-    className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, t('Anthropic API-key', 'Anthropic API Key')), /*#__PURE__*/React.createElement("div", {
+    className: "calc-title"
+  }, "Instellingen"), /*#__PURE__*/React.createElement("h3", null, "Anthropic API-key"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexDirection: 'column',
@@ -6997,7 +6912,7 @@ function SettingsTab({
     style: {
       marginBottom: 0
     }
-  }, t('Nodig voor live koersen en DeGiro-import. Haal gratis een key op via', 'Required for live prices and DeGiro import. Get a free key at'), ' ', /*#__PURE__*/React.createElement("a", {
+  }, "Nodig voor live koersen, zoeken op bedrijfsnaam en de DeGiro-import. Haal gratis een key op via", ' ', /*#__PURE__*/React.createElement("a", {
     href: "https://console.anthropic.com",
     target: "_blank",
     rel: "noopener",
@@ -7006,7 +6921,7 @@ function SettingsTab({
     }
   }, "console.anthropic.com"), "."), /*#__PURE__*/React.createElement("div", {
     className: "fld"
-  }, /*#__PURE__*/React.createElement("label", null, "API Key"), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, "API-key"), /*#__PURE__*/React.createElement("input", {
     type: "password",
     value: key,
     placeholder: "sk-ant-...",
@@ -7031,9 +6946,9 @@ function SettingsTab({
     },
     onClick: testAndSave,
     disabled: testing
-  }, testing ? t('Testen...', 'Testing...') : t('Opslaan & testen', 'Save & test')))), /*#__PURE__*/React.createElement("div", {
+  }, testing ? 'Testen...' : 'Opslaan & testen'))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, t('Automatisch verversen', 'Auto-refresh')), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Automatisch verversen"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexDirection: 'column',
@@ -7050,17 +6965,17 @@ function SettingsTab({
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn" + (auto ? " primary" : ""),
     onClick: toggleAuto
-  }, auto ? t('⏸ Pauzeren', '⏸ Pause') : t('▶ Inschakelen', '▶ Enable')), /*#__PURE__*/React.createElement("span", {
+  }, auto ? '⏸ Pauzeren' : '▶ Inschakelen'), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 13,
       color: 'var(--muted)'
     }
-  }, auto ? t('Actief', 'Active') + ` — ${t('elke', 'every')} ${intervalMin} min` : t('Uitgeschakeld', 'Disabled'))), auto && /*#__PURE__*/React.createElement("div", {
+  }, auto ? `Actief — elke ${intervalMin} min` : 'Uitgeschakeld')), auto && /*#__PURE__*/React.createElement("div", {
     className: "fld",
     style: {
       maxWidth: 200
     }
-  }, /*#__PURE__*/React.createElement("label", null, t('Interval (minuten)', 'Interval (minutes)')), /*#__PURE__*/React.createElement("select", {
+  }, /*#__PURE__*/React.createElement("label", null, "Interval (minuten)"), /*#__PURE__*/React.createElement("select", {
     className: "auto-int",
     value: intervalMin,
     onChange: e => setIntervalMin(Number(e.target.value))
@@ -7069,7 +6984,7 @@ function SettingsTab({
     value: m
   }, m, " min")))))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, t('Data importeren / exporteren', 'Import / Export data')), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Data importeren / exporteren"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       gap: 12,
@@ -7094,11 +7009,11 @@ function SettingsTab({
       marginTop: 10,
       lineHeight: 1.6
     }
-  }, t('Exporteer je data als JSON voor een backup. Importeer een eerder geëxporteerd bestand om te herstellen.', 'Export your data as JSON for a backup. Import a previously exported file to restore.'))));
+  }, "Exporteer je data als JSON om een backup te maken of over te zetten naar een ander apparaat. Importeer een eerder geëxporteerd bestand om je data te herstellen.")));
 }
-function AccountTab({
-  embedded = false
-}) {
+
+/* ---- account tab ---- */
+function AccountTab() {
   const sb = typeof getSb === 'function' ? getSb() : null;
   const [user, setUser] = useState(null);
   const [displayName, setDisplayName] = useState('');
@@ -7178,7 +7093,7 @@ function AccountTab({
   }, []);
   async function saveProfile() {
     if (!sb) {
-      setProfileErr(t('Geen verbinding met Supabase.', 'No connection to Supabase.'));
+      setProfileErr('Geen verbinding met Supabase.');
       return;
     }
     setSaving(true);
@@ -7195,7 +7110,7 @@ function AccountTab({
         }
       } = await sb.auth.getSession();
       if (!session) {
-        setProfileErr(t('Sessie verlopen — log opnieuw in.', 'Session expired — please log in again.'));
+        setProfileErr('Sessie verlopen — log opnieuw in.');
         setSaving(false);
         return;
       }
@@ -7216,7 +7131,7 @@ function AccountTab({
           }
         });
         if (r.error) {
-          setProfileErr(t('Opgeslagen lokaal, maar cloud sync mislukt: ', 'Saved locally, but cloud sync failed: ') + r.error.message);
+          setProfileErr('Opgeslagen lokaal, maar cloud sync mislukt: ' + r.error.message);
           setSaving(false);
           return;
         }
@@ -7255,11 +7170,11 @@ function AccountTab({
     const file = e.target.files && e.target.files[0];
     if (!file) return;
     if (file.size > 3 * 1024 * 1024) {
-      setProfileErr(t('Afbeelding mag maximaal 3MB zijn.', 'Image must be under 3MB.'));
+      setProfileErr('Afbeelding mag maximaal 3MB zijn.');
       return;
     }
     if (!sb || !user) {
-      setProfileErr(t('Niet ingelogd.', 'Not logged in.'));
+      setProfileErr('Niet ingelogd.');
       return;
     }
     setAvatarUploading(true);
@@ -7287,10 +7202,10 @@ function AccountTab({
         onConflict: 'user_id'
       });
       setAvatarUrl(publicUrl);
-      setProfileMsg(t('Profielfoto opgeslagen!', 'Profile photo saved!'));
+      setProfileMsg('Profielfoto opgeslagen!');
       setTimeout(() => setProfileMsg(''), 3000);
     } catch (err) {
-      setProfileErr(t('Upload mislukt: ', 'Upload failed: ') + err.message);
+      setProfileErr('Upload mislukt: ' + err.message);
     }
     setAvatarUploading(false);
     e.target.value = '';
@@ -7363,16 +7278,16 @@ function AccountTab({
     }
   })();
   return /*#__PURE__*/React.createElement("div", {
-    className: embedded ? '' : 'calc-wrap'
+    className: "calc-wrap"
   }, /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("div", {
     className: "calc-title"
-  }, t('Mijn account', 'My account')), /*#__PURE__*/React.createElement("div", {
+  }, "Mijn account"), /*#__PURE__*/React.createElement("div", {
     className: "acc-grid"
   }, /*#__PURE__*/React.createElement("div", {
     className: "acc-avatar",
-    title: t('Klik om foto te wijzigen', 'Click to change photo')
+    title: "Klik om foto te wijzigen"
   }, avatarUrl ? /*#__PURE__*/React.createElement("img", {
     src: avatarUrl,
     alt: "Profielfoto"
@@ -7386,19 +7301,19 @@ function AccountTab({
     title: "Profielfoto wijzigen"
   })), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     className: "acc-name"
-  }, displayName || '(' + t('geen naam ingesteld', 'no name set') + ')'), /*#__PURE__*/React.createElement("div", {
+  }, displayName || '(geen naam ingesteld)'), /*#__PURE__*/React.createElement("div", {
     className: "acc-email"
   }, email), /*#__PURE__*/React.createElement("div", {
     className: "acc-joined"
-  }, /*#__PURE__*/React.createElement("div", null, t('Lid sinds', 'Member since'), " ", joined), lastSeen !== '—' && /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("div", null, "Lid sinds ", joined), lastSeen !== '—' && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 3
     }
-  }, t('Laatste login:', 'Last login:'), " ", lastSeen), lastSync !== '—' && /*#__PURE__*/React.createElement("div", {
+  }, "Laatste login: ", lastSeen), lastSync !== '—' && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 3
     }
-  }, t('Laatste sync:', 'Last sync:'), " ", lastSync)), avatarUrl && /*#__PURE__*/React.createElement("button", {
+  }, "Laatste sync: ", lastSync)), avatarUrl && /*#__PURE__*/React.createElement("button", {
     className: "btn",
     style: {
       marginTop: 8,
@@ -7408,15 +7323,15 @@ function AccountTab({
       borderColor: 'var(--loss)'
     },
     onClick: removeAvatar
-  }, "Remove photo"), avatarUploading && /*#__PURE__*/React.createElement("div", {
+  }, "Foto verwijderen"), avatarUploading && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: 'var(--muted)',
       marginTop: 6
     }
-  }, t('Uploaden...', 'Uploading...'))))), /*#__PURE__*/React.createElement("div", {
+  }, "Uploaden...")))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, "Edit profile"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Profiel bewerken"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexDirection: 'column',
@@ -7425,7 +7340,7 @@ function AccountTab({
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "fld"
-  }, /*#__PURE__*/React.createElement("label", null, t('Weergavenaam', 'Display name')), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, "Weergavenaam"), /*#__PURE__*/React.createElement("input", {
     value: displayName,
     placeholder: "Jan de Vries",
     onChange: e => setDisplayName(e.target.value),
@@ -7459,7 +7374,7 @@ function AccountTab({
     disabled: saving
   }, saving ? 'Opslaan...' : 'Profiel opslaan'))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, "Change password"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Wachtwoord wijzigen"), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       flexDirection: 'column',
@@ -7547,9 +7462,9 @@ function AccountTab({
       alignSelf: 'flex-start'
     },
     onClick: saveApiKey
-  }, "Save key"))), /*#__PURE__*/React.createElement("div", {
+  }, "Key opslaan"))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, "End session"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, "Sessie beëindigen"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
       color: 'var(--muted)',
@@ -7622,7 +7537,7 @@ function Donut({
       font: "10px Inter,sans-serif",
       letterSpacing: ".1em"
     }
-  }, t('POSITIES', 'POSITIONS')));
+  }, "POSITIES"));
 }
 function getAnthropicKey(){try{return localStorage.getItem('fb:anthropic_key')||'';}catch(e){return '';}}
 function saveAnthropicKey(k){try{localStorage.setItem('fb:anthropic_key',k);}catch(e){}}
@@ -7637,34 +7552,11 @@ var SbUserContext=React.createContext(null);
 function useSbUser(){return React.useContext(SbUserContext);}
 var _OrigPD=PortfolioDashboard;
 PortfolioDashboard=function(props){return React.createElement(SbUserContext.Provider,{value:props.sbUser},React.createElement(_OrigPD,null));};
-function AppRoot(){var [user,setUser]=React.useState(null);var [checking,setChecking]=React.useState(true);var [dataKey,setDataKey]=React.useState(0);React.useEffect(function(){var fn=function(){setDataKey(function(k){return k+1;});};window.addEventListener('fb-data-loaded',fn);return function(){window.removeEventListener('fb-data-loaded',fn);};},[]);React.useEffect(function(){var sb=getSb();if(!sb){setTimeout(function(){setChecking(false);},1000);return;}var t=setTimeout(function(){setChecking(false);},10000);sb.auth.getSession().then(function(r){clearTimeout(t);if(r.data&&r.data.session)setUser(r.data.session.user);setChecking(false);}).catch(function(){clearTimeout(t);setChecking(false);});var sub=sb.auth.onAuthStateChange(function(_e,session){setUser(session?session.user:null);});return function(){sub.data.subscription.unsubscribe();};},[]);if(checking)return React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'#5C6472',fontFamily:'monospace',fontSize:14,flexDirection:'column',gap:12}},React.createElement('div',null,'Loading Finance Bro...'),React.createElement('div',{style:{fontSize:11,color:'#2A3140'}},'Connecting...'));if(!user)return React.createElement(AuthScreen,{onLogin:setUser});return React.createElement(PortfolioDashboard,{sbUser:user,key:dataKey});}
+function AppRoot(){var [user,setUser]=React.useState(null);var [checking,setChecking]=React.useState(true);var [dataKey,setDataKey]=React.useState(0);React.useEffect(function(){var fn=function(){setDataKey(function(k){return k+1;});};window.addEventListener('fb-data-loaded',fn);return function(){window.removeEventListener('fb-data-loaded',fn);};},[]);React.useEffect(function(){var sb=getSb();if(!sb){setChecking(false);return;}var t=setTimeout(function(){setChecking(false);},6000);sb.auth.getSession().then(function(r){clearTimeout(t);if(r.data&&r.data.session)setUser(r.data.session.user);setChecking(false);}).catch(function(){clearTimeout(t);setChecking(false);});var sub=sb.auth.onAuthStateChange(function(_e,session){setUser(session?session.user:null);});return function(){sub.data.subscription.unsubscribe();};},[]);if(checking)return React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'#5C6472',fontFamily:'monospace',fontSize:14,flexDirection:'column',gap:12}},React.createElement('div',null,'Finance Bro laden...'),React.createElement('div',{style:{fontSize:11,color:'#2A3140'}},'Verbinding maken...'));if(!user)return React.createElement(AuthScreen,{onLogin:setUser});return React.createElement(PortfolioDashboard,{sbUser:user,key:dataKey});}
 (function(){var _orig=localStorage.setItem.bind(localStorage);var KEYS=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions','fb:networth'];var SETTINGS_KEYS=['fb:theme','fb:anthropic_key','fb:display_name','fb:finnhub_key'];var _t=null;var _ts=null;localStorage.setItem=function(k,v){_orig(k,v);if(KEYS.indexOf(k)!==-1){clearTimeout(_t);_t=setTimeout(async function(){var sb=getSb();if(!sb)return;try{var r=await sb.auth.getSession();if(!r.data||!r.data.session)return;var p={};KEYS.forEach(function(k2){try{p[k2]=JSON.parse(localStorage.getItem(k2));}catch(e){}});await sbSave(r.data.session.user.id,p);}catch(e){}},1500);}if(SETTINGS_KEYS.indexOf(k)!==-1){clearTimeout(_ts);_ts=setTimeout(async function(){var sb=getSb();if(!sb)return;try{var r=await sb.auth.getSession();if(!r.data||!r.data.session)return;var settings={theme:localStorage.getItem('fb:theme')||'light',anthropic_key:localStorage.getItem('fb:anthropic_key')||'',display_name:localStorage.getItem('fb:display_name')||''};await sb.from('user_data').upsert({user_id:r.data.session.user.id,settings:settings},{onConflict:'user_id'});}catch(e){}},1500);}};})();
 (function(){var sb=getSb();if(!sb)return;var _loaded=false;sb.auth.onAuthStateChange(async function(event,session){if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session&&!_loaded){_loaded=true;sbUpdateLastSeen(session.user.id);var saved=await sbLoad(session.user.id);if(saved){var KEYS=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions','fb:networth'];var changed=false;KEYS.forEach(function(k){if(saved[k]!==undefined){try{var cur=localStorage.getItem(k),nv=JSON.stringify(saved[k]);if(cur!==nv){localStorage.setItem(k,nv);changed=true;}}catch(e){}}});if(changed)window.dispatchEvent(new CustomEvent('fb-data-loaded'));}}if(event==='SIGNED_OUT'){_loaded=false;var KEYS2=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions','fb:networth','fb:last_seen','fb:last_sync','fb:display_name','fb:theme','fb:anthropic_key','fb:avatar'];KEYS2.forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});}});})();
 
 (function mount(n){n=n||0;if(!window.React||!window.ReactDOM){if(n<200){setTimeout(function(){mount(n+1);},25);}return;}var L=window.supabase||null;if(!L&&n<120){setTimeout(function(){mount(n+1);},25);return;}if(L&&!_sb){try{_sb=L.createClient('https://ceklzeyrlttfbcbceruk.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNla2x6ZXlybHR0ZmJjYmNlcnVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxOTA3ODUsImV4cCI6MjA5ODc2Njc4NX0.j6UxTcmLAhe9KDCxZa_05Ape6PJrU0II368G9HrDZQc');}catch(e){}}ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(AppRoot));})();
-
-(function() {
-  var WARN_MS = 15*60*1000, LOGOUT_MS = 5*60*1000, _warnTimer = null, _logoutTimer = null, _overlay = null;
-  function removeOverlay() { if(_overlay&&_overlay.parentNode)_overlay.parentNode.removeChild(_overlay); _overlay=null; }
-  function showWarning() {
-    removeOverlay(); var remaining=LOGOUT_MS/1000;
-    _overlay=document.createElement('div'); _overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;';
-    var box=document.createElement('div'); box.style.cssText='background:#fff;border-radius:14px;padding:32px 28px;max-width:380px;width:90%;text-align:center;';
-    var title=document.createElement('div'); title.style.cssText='font-size:18px;font-weight:600;color:#1A1A18;margin-bottom:10px;'; title.textContent="Still there?";
-    var sub=document.createElement('div'); sub.style.cssText='font-size:14px;color:#6B6B60;margin-bottom:6px;'; sub.textContent="You've been inactive 15 min. Logging out in:";
-    var counter=document.createElement('div'); counter.style.cssText='font-size:36px;font-weight:700;color:#9A7810;margin:14px 0;'; counter.textContent='5:00';
-    var btn=document.createElement('button'); btn.style.cssText='background:#9A7810;color:#fff;border:none;border-radius:9px;padding:12px 28px;font-size:15px;font-weight:600;cursor:pointer;width:100%;'; btn.textContent="Yes, I'm here"; btn.onclick=function(){resetTimers();removeOverlay();};
-    box.appendChild(title); box.appendChild(sub); box.appendChild(counter); box.appendChild(btn); _overlay.appendChild(box); document.body.appendChild(_overlay);
-    var iv=setInterval(function(){remaining--;var m=Math.floor(remaining/60),s=remaining%60;counter.textContent=m+':'+(s<10?'0':'')+s;if(remaining<=0){clearInterval(iv);removeOverlay();doLogout();}},1000);
-    _logoutTimer=setTimeout(function(){clearInterval(iv);removeOverlay();doLogout();},LOGOUT_MS);
-  }
-  async function doLogout(){var sb=typeof getSb==='function'?getSb():null;var KEYS=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions','fb:networth','fb:last_seen','fb:last_sync','fb:display_name','fb:theme','fb:anthropic_key','fb:avatar'];KEYS.forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});if(sb)try{await sb.auth.signOut();}catch(e){}window.location.reload();}
-  function resetTimers(){clearTimeout(_warnTimer);clearTimeout(_logoutTimer);_warnTimer=setTimeout(showWarning,WARN_MS);}
-  function onActivity(){if(_overlay)return;resetTimers();}
-  var _started=false;
-  function startIfLoggedIn(){var sb=typeof getSb==='function'?getSb():null;if(!sb)return;sb.auth.onAuthStateChange(function(event,session){if(session&&!_started){_started=true;['mousemove','keydown','click','scroll','touchstart'].forEach(function(evt){document.addEventListener(evt,onActivity,{passive:true});});resetTimers();}if(!session){_started=false;clearTimeout(_warnTimer);clearTimeout(_logoutTimer);removeOverlay();['mousemove','keydown','click','scroll','touchstart'].forEach(function(evt){document.removeEventListener(evt,onActivity);});}});}
-  setTimeout(startIfLoggedIn,2000);
-})();
   </script>
 </body>
 </html>
