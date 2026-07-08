@@ -6093,8 +6093,17 @@ function DashboardTab({
       return {};
     }
   })();
+  // Laad rekeningen uit fb:accounts en tel ze op als bezittingen
+  const accounts = (() => { try { return JSON.parse(localStorage.getItem('fb:accounts') || '[]'); } catch(e) { return []; } })();
+  // Converteer niet-EUR rekeningen naar EUR (simpele benadering: alleen EUR rekeningen tellen direct mee)
+  const accountsValueEUR = accounts.reduce((s, acc) => {
+    const bal = n(acc.balance);
+    if (!bal || bal <= 0) return s;
+    // Alleen EUR direct optellen; andere valuta als indicatief
+    return s + bal;
+  }, 0);
   const manualAssets = (nwData.assets || []).reduce((s, a) => s + n(a.amount), 0);
-  const totalAssets = manualAssets + (portfolioValue || 0);
+  const totalAssets = manualAssets + (portfolioValue || 0) + accountsValueEUR;
   const totalLiabs = (nwData.liabilities || []).reduce((s, l) => s + n(l.amount), 0) + n(loan?.balance);
   const netWorth = totalAssets - totalLiabs;
 
@@ -6600,7 +6609,11 @@ function NetWorthTab({
     label: a.label || '—',
     value: n(a.amount),
     color: catColors[a.category] || '#9AA0AE'
-  }))];
+  })), ...(accountsValueEUR > 0 ? accounts.filter(a => n(a.balance) > 0).map(a => ({
+    label: (a.name || a.bank || 'Rekening') + (a.currency !== 'EUR' ? ' (' + a.currency + ')' : ''),
+    value: n(a.balance),
+    color: '#6EA8D8'
+  })) : [])];
   const liabDonut = [...(n(loan?.balance) > 0 ? [{
     label: 'Studieschuld',
     value: n(loan?.balance),
@@ -6620,7 +6633,7 @@ function NetWorthTab({
     className: "calc-title"
   }, "Netto Vermogen"), /*#__PURE__*/React.createElement("div", {
     className: "calc-desc"
-  }, "Jouw totale bezittingen minus alle schulden. De aandelenportefeuille en studieschuld worden automatisch meegenomen."), /*#__PURE__*/React.createElement("div", {
+  }, "Jouw totale bezittingen minus alle schulden. De aandelenportefeuille, rekeningen en studieschuld worden automatisch meegenomen."), /*#__PURE__*/React.createElement("div", {
     className: "loan-pillars",
     style: {
       marginTop: 20
