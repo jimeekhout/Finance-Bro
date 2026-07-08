@@ -1416,83 +1416,261 @@ function PortfolioDashboard() {
     reader.readAsText(f);
     e.target.value = "";
   }
+      function parseDeGiroCSV(text) {
+    function parseDN(s) {
+      if (!s) return 0;
+      return parseFloat(String(s).replace(/"/g,'').trim().replace(/\./g,'').replace(',','.')) || 0;
+    }
+    function parseLine(line) {
+      const cols=[]; let cur='', inQ=false;
+      for (let i=0;i<line.length;i++) {
+        if (line[i]==='"'){inQ=!inQ;continue;}
+        if (line[i]===','&&!inQ){cols.push(cur.trim());cur='';}
+        else cur+=line[i];
+      }
+      cols.push(cur.trim()); return cols;
+    }
+    function parseDate(s) {
+      const p=s.split('-');
+      return p.length===3 ? `${p[2]}-${p[1]}-${p[0]}` : s;
+    }
+    // Convert any amount to EUR using FX rate from CSV
+    function toEUR(amount, currency, fxRate) {
+      if (!amount) return 0;
+      const amt = Math.abs(parseDN(amount));
+      const fx = parseDN(fxRate);
+      if (currency === 'EUR' || !fx || fx === 1) return amt;
+      return amt / fx; // DeGiro FX rate is foreign/EUR
+    }
+
+    const lines = text.split('\n').filter(l=>l.trim());
+    const pos = {};
+
+    // Process oldest first (CSV is newest-first)
+    for (let i = lines.length - 1; i >= 1; i--) {
+      const c = parseLine(lines[i]);
+      const rawDate=c[0], product=c[3], isin=c[4], desc=c[5],
+            fxRate=c[6], mutCur=c[7], mutAmt=c[8];
+      if (!desc || !rawDate) continue;
+      const date = parseDate(rawDate);
+      const amtEUR = toEUR(mutAmt, mutCur, fxRate);
+
+      // Init position
+      if (isin && !pos[isin]) {
+        pos[isin] = {
+          name:product, isin, shares:0, cost:0, costEUR:0,
+          currency:mutCur, firstBuy:date,
+          dividendReceived:0, dividendTax:0, txCosts:0
+        };
+      }
+
+      // === AANKOPEN ===
+      if (desc.startsWith('Koop ') && isin) {
+        const m = desc.match(/Koop\s+([\d.,]+)\s+@\s+([\d.,]+)/);
+        if (m) {
+          const sh=parseDN(m[1]), pr=parseDN(m[2]);
+          pos[isin].cost += sh * pr;
+          pos[isin].costEUR += amtEUR || (sh * pr);
+          pos[isin].shares += sh;
+          pos[isin].currency = mutCur;
+        }
+      }
+
+      // === VERKOPEN ===
+      else if (desc.startsWith('Verkoop ') && isin && pos[isin]) {
+        const m = desc.match(/Verkoop\s+([\d.,]+)\s+@\s+([\d.,]+)/);
+        if (m) {
+          const sh=parseDN(m[1]);
+          const rem=Math.max(0, pos[isin].shares - sh);
+          const avgNative=pos[isin].shares>0 ? pos[isin].cost/pos[isin].shares : 0;
+          const avgEUR=pos[isin].shares>0 ? pos[isin].costEUR/pos[isin].shares : 0;
+          pos[isin].shares = rem;
+          pos[isin].cost = rem * avgNative;
+          pos[isin].costEUR = rem * avgEUR;
+        }
+      }
+
+      // === SPLIT AANPASSING (uit CSV zelf) ===
+      else if (desc.startsWith('SPLIT AANPASSING:')) {
+        const m = desc.match(/SPLIT AANPASSING:\s+([\d.,]+)\s+.+?\s+@\s+([\d.,]+)\s+\w+\s+\((\w+)\)/);
+        if (m) {
+          const newSh=parseDN(m[1]), newPr=parseDN(m[2]), sisin=m[3];
+          const rawAmt = parseDN(mutAmt);
+          // Process the DEBIT line (negative amount = new/more shares after split)
+          // Skip the credit line (positive amount = removal/return of old shares)
+          if (newSh > 0 && rawAmt < 0 && pos[sisin]) {
+            // Preserve total cost in EUR, just update shares and native price
+            const totalCostEUR = pos[sisin].costEUR;
+            pos[sisin].shares = newSh;
+            pos[sisin].cost = newSh * newPr;
+            pos[sisin].costEUR = totalCostEUR; // EUR cost stays same, avgCostEUR drops
+          }
+        }
+      }
+
+      // === CLAIMEMISSIE / SPIN-OFF (gratis aandelen) ===
+      else if ((desc.startsWith('CLAIMEMISSIE:') || desc.startsWith('SPIN-OFF:')) && isin && pos[isin]) {
+        const m = desc.match(/Koop\s+([\d.,]+)/);
+        if (m) {
+          const sh = parseDN(m[1]);
+          // Gratis aandelen: voeg toe zonder kostprijs te verhogen
+          // Gemiddelde kostprijs per aandeel daalt hierdoor
+          pos[isin].shares += sh;
+          // costEUR blijft gelijk -> lagere gem. prijs per aandeel
+        }
+      }
+
+      // === PRODUCTWIJZIGING (ISIN-conversie, technisch) ===
+      else if (desc.startsWith('PRODUCTWIJZIGING')) {
+        // Skip — dit is een technische conversie, geen echte transactie
+      }
+
+      // === WIJZIGING ISIN ===
+      else if (desc.startsWith('WIJZIGING ISIN:')) {
+        // Skip — technisch
+      }
+
+      // === VERREKENING VAN AANDELEN ===
+      else if (desc === 'Verrekening van Aandelen' && isin && pos[isin]) {
+        // Fusie/overname verrekening — verwijder positie
+        pos[isin].shares = 0;
+        pos[isin].cost = 0;
+        pos[isin].costEUR = 0;
+      }
+
+      // === TRANSACTIEKOSTEN ===
+      else if (desc.includes('Transactiekosten') && isin && pos[isin]) {
+        pos[isin].txCosts += amtEUR;
+        pos[isin].costEUR += amtEUR; // kosten verhogen effectieve kostprijs
+      }
+
+      // === DIVIDEND ===
+      else if (desc === 'Dividend' && isin && pos[isin]) {
+        pos[isin].dividendReceived += amtEUR;
+      }
+
+      // === DIVIDEND HERINVESTERING ===
+      else if (desc === 'Dividend Herinvestering' && isin && pos[isin]) {
+        pos[isin].dividendReceived += amtEUR;
+        // Herinvesteerd dividend telt als extra aankoop — maar DeGiro verwerkt dit
+        // apart via een Koop-transactie dus hier alleen het dividend registreren
+      }
+
+      // === DIVIDENDBELASTING ===
+      else if (desc === 'Dividendbelasting' && isin && pos[isin]) {
+        pos[isin].dividendTax += amtEUR;
+      }
+    }
+
+    return Object.values(pos)
+      .filter(p => p.shares > 0.001 && p.isin)
+      .map(p => ({
+        name:        p.name,
+        isin:        p.isin,
+        currency:    p.currency,
+        shares:      Math.round(p.shares * 1000) / 1000,
+        avgCost:     p.shares>0 ? Math.round(p.cost / p.shares * 100) / 100 : 0,
+        avgCostEUR:  p.shares>0 ? Math.round(p.costEUR / p.shares * 100) / 100 : 0,
+        firstBuy:    p.firstBuy,
+        dividendReceived: Math.round(p.dividendReceived * 100) / 100,
+        dividendTax:      Math.round(p.dividendTax * 100) / 100,
+        dividendNet:      Math.round((p.dividendReceived - p.dividendTax) * 100) / 100,
+        txCosts:          Math.round(p.txCosts * 100) / 100,
+      }));
+  }
+
   async function importDegiro(raw) {
     const text = (raw != null ? raw : importText) || "";
     if (text.trim().length < 5) {
-      setImportMsg("Plak je export of kies eerst een CSV-bestand.");
+      setImportMsg("Paste your export or choose a CSV file first.");
       return;
     }
     setImporting(true);
-    setImportMsg("Export inlezen…");
-    const prompt = `Hieronder staat een export uit DeGiro (transactieoverzicht of portefeuille, meestal Nederlandstalig CSV).\n` + `Leid hieruit de HUIDIGE posities af. Als het transacties zijn: tel per product de gekochte minus verkochte ` + `stuks op, laat posities met netto 0 weg, en bereken de gewogen gemiddelde aankoopkoers per stuk in EUR.\n` + `Geef per positie: ticker (beurssymbool zoals ASML of TSLA — zoek dit op via ISIN of productnaam), ` + `name (productnaam), isin indien bekend, currency (ISO-valutacode van het product, bv EUR of USD), ` + `shares (number, netto aantal), avgCost (number, gewogen gemiddelde aankoopkoers per stuk in DE EIGEN ` + `valuta van het product, niet omgerekend).\n` + `Antwoord UITSLUITEND met een geldige JSON-array zonder uitleg of markdown. Voorbeeld:\n` + `[{"ticker":"TSLA","name":"Tesla Inc","isin":"US88160R1014","currency":"USD","shares":5,"avgCost":210.4}]\n\n` + `EXPORT:\n` + text.slice(0, 40000);
+    setImportMsg("Processing CSV…");
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": getAnthropicKey(),
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true"
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1000,
-          messages: [{
-            role: "user",
-            content: prompt
-          }]
-        })
-      });
-      const data = await res.json();
-      const out = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("\n");
-      const s = out.indexOf("["),
-        e = out.lastIndexOf("]");
-      if (s === -1 || e === -1) throw new Error("kon geen posities herkennen");
-      const parsed = JSON.parse(out.slice(s, e + 1));
-      const clean = parsed.filter(p => p && p.ticker && Number(p.shares) > 0).map(p => ({
-        ticker: String(p.ticker).toUpperCase().trim(),
-        name: p.name || "",
-        isin: p.isin || null,
-        currency: p.currency || "EUR",
-        shares: Number(p.shares),
-        avgCost: Number(p.avgCost) || 0
-      }));
-      if (!clean.length) throw new Error("geen posities gevonden in de export");
-      const map = {};
-      holdings.forEach(h => {
-        map[h.ticker.toUpperCase()] = h;
-      });
-      clean.forEach(c => {
-        const ex = map[c.ticker];
-        map[c.ticker] = ex ? {
-          ...ex,
-          shares: c.shares,
-          avgCost: c.avgCost,
-          name: ex.name || c.name,
-          isin: c.isin || ex.isin,
-          currency: c.currency || ex.currency || "EUR"
-        } : {
-          id: uid(),
-          priceNative: null,
-          fxToEur: 1,
-          currency: "EUR",
-          dividendYield: null,
-          payMonths: null,
-          ...c
+      const csvResult = parseDeGiroCSV(text);
+      if (csvResult.length === 0) {
+        throw new Error("No buy/sell transactions found. Upload Account.csv from DeGiro → Inbox → Rekeningoverzicht.");
+      }
+
+      setImportMsg("Looking up tickers… (" + csvResult.length + " positions found)");
+
+      // Ask Claude to resolve tickers from name+ISIN+currency
+      const prompt =
+        'These are stock positions from a DeGiro account. Add the correct stock ticker symbol to each.\n' +
+        'Return ONLY a valid JSON array with a "ticker" field added per object.\n' +
+        'Use standard tickers: TSLA, META, MSFT, AMZN, AAPL, ASML, HEIA.AS, INGA.AS, SHEL.AS, POSTB.AS, NOK, T, CRM, BYDDF, ASR.AS etc.\n' +
+        'Input: ' + JSON.stringify(csvResult.map(p => ({ name: p.name, isin: p.isin, currency: p.currency }))) + '\n' +
+        'Return only the JSON array, no markdown, no explanation.';
+
+      let tickerMap = {};
+      try {
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": getAnthropicKey(),
+            "anthropic-version": "2023-06-01",
+            "anthropic-dangerous-direct-browser-access": "true"
+          },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-6",
+            max_tokens: 1500,
+            messages: [{ role: "user", content: prompt }]
+          })
+        });
+        const data = await res.json();
+        const out = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
+        const s = out.indexOf("["), e = out.lastIndexOf("]");
+        if (s !== -1 && e !== -1) {
+          JSON.parse(out.slice(s, e + 1)).forEach(p => {
+            if (p && p.isin && p.ticker) tickerMap[p.isin] = String(p.ticker).toUpperCase().trim();
+          });
+        }
+      } catch (apiErr) {
+        console.warn('Ticker lookup failed:', apiErr);
+      }
+
+      // Build holdings map: merge with existing
+      const existingMap = {};
+      holdings.forEach(h => { existingMap[h.isin || h.ticker] = h; });
+
+      const newHoldings = csvResult.map(c => {
+        const ticker = tickerMap[c.isin] || c.isin;
+        const existing = existingMap[c.isin] || existingMap[ticker];
+        return {
+          id:              existing ? existing.id : uid(),
+          ticker:          ticker,
+          name:            existing ? (existing.name || c.name) : c.name,
+          isin:            c.isin,
+          currency:        c.currency || "EUR",
+          shares:          c.shares,
+          avgCost:         c.avgCost,
+          avgCostEUR:      c.avgCostEUR,
+          buyDate:         c.firstBuy || "",
+          divReceived:     c.dividendNet,   // netto dividend (na belasting)
+          divReceivedGross:c.dividendReceived,
+          divTaxPaid:      c.dividendTax,
+          txCosts:         c.txCosts,
+          priceNative:     existing ? existing.priceNative : null,
+          fxToEur:         existing ? existing.fxToEur : 1,
+          dividendYield:   existing ? existing.dividendYield : null,
+          payMonths:       existing ? existing.payMonths : null,
         };
       });
-      const merged = Object.values(map);
-      setHoldings(merged);
+
+      setHoldings(newHoldings);
       setImportText("");
       setShowImport(false);
       setImportMsg("");
-      await refresh(merged);
+      await refresh(newHoldings);
     } catch (err) {
-      setImportMsg("Importeren lukte niet (" + (err.message || err) + "). Probeer het transactieoverzicht (Account.csv) of plak je posities.");
-    } finally {
-      setImporting(false);
+      setImportMsg("Import failed: " + err.message);
     }
+    setImporting(false);
   }
+
+
 
   /* ---- zoeken op bedrijfsnaam ---- */
   async function runQuery(q) {
