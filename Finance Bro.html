@@ -5,12 +5,33 @@
   <meta name="description" content="Persoonlijk financieel dashboard — portefeuille, netto vermogen, budget en belastingberekening.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Finance Bro</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
-  <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin="anonymous">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-  <link href="https://fonts.cdnfonts.com/css/geist-sans" rel="stylesheet">
   <style>
+
+  /* Geist Sans — via jsDelivr (npm:geist) */
+  @font-face {
+    font-family: 'Geist Sans';
+    src: url('https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/Geist-Regular.woff2') format('woff2');
+    font-weight: 400; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'Geist Sans';
+    src: url('https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/Geist-Medium.woff2') format('woff2');
+    font-weight: 500; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'Geist Sans';
+    src: url('https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/Geist-SemiBold.woff2') format('woff2');
+    font-weight: 600; font-style: normal; font-display: swap;
+  }
+  @font-face {
+    font-family: 'Geist Sans';
+    src: url('https://cdn.jsdelivr.net/npm/geist@1.3.1/dist/fonts/geist-sans/Geist-Bold.woff2') format('woff2');
+    font-weight: 700; font-style: normal; font-display: swap;
+  }
 
 
 
@@ -44,7 +65,6 @@ body { background: #F5F5F0; color: #1A1A18; }
   .sidebar-bottom .user-badge b, .sidebar-bottom .logout-btn span{ display:none; }
 }
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
-@import url('https://fonts.cdnfonts.com/css/geist-sans');
 
 .pf-root{
   --bg:#F5F5F0; --bg2:#ECEAE3; --surface:#FFFFFF; --surface2:#F0EEE8;
@@ -1333,7 +1353,7 @@ function PortfolioDashboard() {
     if (data.portfolios && Array.isArray(data.portfolios) && data.portfolios.length) {
       const ps = data.portfolios.map(p => ({
         id: p.id || uid(),
-        name: p.name || t("Portefeuille", "Portfolio"),
+        name: p.name || tr("Portefeuille","Portfolio"),
         holdings: normHoldings(p.holdings || [])
       }));
       setPortfolios(ps);
@@ -2053,7 +2073,7 @@ function PortfolioDashboard() {
   }, "nee")) : /*#__PURE__*/React.createElement("button", {
     className: "ttool del",
     onClick: () => setConfirmDel(true),
-    title: t("Verwijderen", "Delete")
+    title: tr("Verwijderen","Delete")
   }, "delete"))), /*#__PURE__*/React.createElement(ImportPanel, {
     onImport: handleImport
   }), /*#__PURE__*/React.createElement(ExportButton, {
@@ -2121,7 +2141,7 @@ function PortfolioDashboard() {
     }
   }, /*#__PURE__*/React.createElement("div", {
     className: "empty"
-  }, /*#__PURE__*/React.createElement("p", null, t("Nog geen posities — zoek hieronder een aandeel of ETF om te beginnen.", "No positions yet — search below for a stock or ETF to get started.")), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("p", null, tr("Nog geen posities — zoek hieronder een aandeel of ETF om te beginnen.","No positions yet — search below for a stock or ETF to get started.")), /*#__PURE__*/React.createElement("div", {
     className: "quick"
   }, /*#__PURE__*/React.createElement("button", {
     className: "chip imp",
@@ -2276,12 +2296,12 @@ function PortfolioDashboard() {
     }, /*#__PURE__*/React.createElement("b", null, h.ticker), /*#__PURE__*/React.createElement("span", null, h.buyDate ? "sinds " + new Date(h.buyDate).toLocaleDateString("nl-NL", {
       month: "short",
       year: "numeric"
-    }) : h.name || "—")), editCell(h, "shares", t("Aantal", "Shares"), h.shares), editCell(h, "avgCost", "GAK", fmtCur(h.avgCost, h.currency)), editCell(h, "priceNative", t("Koers", "Price"), fmtCur(h.priceNative, h.currency)), /*#__PURE__*/React.createElement("div", {
+    }) : h.name || "—")), editCell(h, "shares", tr("Aantal","Shares"), h.shares), editCell(h, "avgCost", "GAK", fmtCur(h.avgCost, h.currency)), editCell(h, "priceNative", tr("Koers","Price"), fmtCur(h.priceNative, h.currency)), /*#__PURE__*/React.createElement("div", {
       className: "num",
-      "data-l": t("Inleg", "Cost basis")
+      "data-l": tr("Inleg","Cost basis")
     }, eur(h.cost)), /*#__PURE__*/React.createElement("div", {
       className: "num",
-      "data-l": t("Waarde", "Value")
+      "data-l": tr("Waarde","Value")
     }, eur(h.value), h.recDiv > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("br", null), /*#__PURE__*/React.createElement("span", {
       style: {
         fontSize: 11,
@@ -2305,11 +2325,11 @@ function PortfolioDashboard() {
     }, /*#__PURE__*/React.createElement("button", {
       className: "xbtn ebtn",
       onClick: () => beginEditHolding(h),
-      title: t("Bewerken", "Edit")
+      title: tr("Bewerken","Edit")
     }, "✎"), /*#__PURE__*/React.createElement("button", {
       className: "xbtn",
       onClick: () => remove(h.id),
-      title: t("Verwijderen", "Delete")
+      title: tr("Verwijderen","Delete")
     }, "×")));
   })), /*#__PURE__*/React.createElement("div", {
     className: "actions"
@@ -2369,7 +2389,7 @@ function PortfolioDashboard() {
     className: "fld search-wrap"
   }, /*#__PURE__*/React.createElement("label", null, tr('Zoek aandeel of ETF', 'Search stock or ETF')), /*#__PURE__*/React.createElement("input", {
     value: searchQuery,
-    placeholder: t("bv. Vanguard All-World, ASML, Shell…", "e.g. Vanguard All-World, ASML, Shell…"),
+    placeholder: tr("bv. Vanguard All-World, ASML, Shell…","e.g. Vanguard All-World, ASML, Shell…"),
     autoFocus: true,
     onChange: e => {
       setSelected(null);
@@ -2388,7 +2408,7 @@ function PortfolioDashboard() {
     className: "results-state"
   }, /*#__PURE__*/React.createElement("span", {
     className: "spin"
-  }), t("Zoeken…", "Searching…")), !searching && searchResults.map((r, i) => /*#__PURE__*/React.createElement("div", {
+  }), tr("Zoeken…","Searching…")), !searching && searchResults.map((r, i) => /*#__PURE__*/React.createElement("div", {
     className: "result",
     key: r.ticker + i,
     onClick: () => pickResult(r)
@@ -2402,7 +2422,7 @@ function PortfolioDashboard() {
     className: "r-tk"
   }, r.ticker))), !searching && noResults && /*#__PURE__*/React.createElement("div", {
     className: "results-state"
-  }, t("Geen resultaten — probeer een andere term.", "No results — try a different search term."))), selected && /*#__PURE__*/React.createElement("div", {
+  }, tr("Geen resultaten — probeer een andere term.","No results — try a different search term."))), selected && /*#__PURE__*/React.createElement("div", {
     className: "picked"
   }, "gekozen: ", /*#__PURE__*/React.createElement("b", null, selected.ticker), " · ", selected.name || "—", /*#__PURE__*/React.createElement("span", {
     className: "x",
@@ -2468,7 +2488,7 @@ function PortfolioDashboard() {
       color: "var(--faint)",
       lineHeight: 1.5
     }
-  }, t("Telt mee in \"waarde nu\". Leeg laten = schatting.", "Counts toward \"current value\". Leave empty = estimate from date × return."))))), showImport && /*#__PURE__*/React.createElement("div", {
+  }, tr("Telt mee in \"waarde nu\". Leeg laten = schatting.", "Counts toward \"current value\". Leave empty = estimate from date × return."))))), showImport && /*#__PURE__*/React.createElement("div", {
     className: "import"
   }, /*#__PURE__*/React.createElement("h4", null, "Import from DeGiro"), /*#__PURE__*/React.createElement("ol", null, /*#__PURE__*/React.createElement("li", null, "Log in to DeGiro → Inbox → ", /*#__PURE__*/React.createElement("b", null, "Account statement"), "."), /*#__PURE__*/React.createElement("li", null, "Choose a start date before your first purchase and click ", /*#__PURE__*/React.createElement("b", null, "Export → CSV"), "."), /*#__PURE__*/React.createElement("li", null, "Drop the file below, or paste the contents. Positions and average cost are calculated automatically.")), /*#__PURE__*/React.createElement("div", {
     className: "import-row"
@@ -3010,7 +3030,7 @@ function MortgageTab() {
       color: 'var(--muted)',
       marginTop: 4
     }
-  }, t("Totaal voordeel over", "Total benefit over"), " ", looptijd, " ", t("jaar (tarief 36,97%)", "years (rate 36.97%)")), /*#__PURE__*/React.createElement("div", {
+  }, tr("Totaal voordeel over","Total benefit over"), " ", looptijd, " ", tr("jaar (tarief 36,97%)","years (rate 36.97%)")), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: 'var(--gain)',
@@ -3187,14 +3207,14 @@ function CalcTab({
     className: "fld"
   }, /*#__PURE__*/React.createElement("label", null, p.label, " — Hoofdsom (€)"), /*#__PURE__*/React.createElement("input", {
     value: p.principal,
-    placeholder: t("bv. 15000", "e.g. 15000"),
+    placeholder: tr("bv. 15000","e.g. 15000"),
     inputMode: "decimal",
     onChange: e => setPhase(i, "principal", e.target.value)
   })), /*#__PURE__*/React.createElement("div", {
     className: "fld"
   }, /*#__PURE__*/React.createElement("label", null, "Rente (%)"), /*#__PURE__*/React.createElement("input", {
     value: p.rate,
-    placeholder: t("bv. 2.56", "e.g. 2.56"),
+    placeholder: tr("bv. 2.56","e.g. 2.56"),
     inputMode: "decimal",
     onChange: e => setPhase(i, "rate", e.target.value)
   })))), /*#__PURE__*/React.createElement("div", {
@@ -3228,7 +3248,7 @@ function CalcTab({
     className: "loan-pill"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
-  }, t("Schuld na", "Debt after"), " ", loanCalc.years, " ", t("jaar", "years")), /*#__PURE__*/React.createElement("div", {
+  }, tr("Schuld na","Debt after"), " ", loanCalc.years, " ", tr("jaar","years")), /*#__PURE__*/React.createElement("div", {
     className: "loan-big loss"
   }, eur(loanCalc.finalTotal))), /*#__PURE__*/React.createElement("div", {
     className: "loan-pill"
@@ -3258,7 +3278,7 @@ function CalcTab({
     }
   }, /*#__PURE__*/React.createElement("input", {
     value: portRate,
-    placeholder: t("bv. 7", "e.g. 7"),
+    placeholder: tr("bv. 7","e.g. 7"),
     inputMode: "decimal",
     onChange: e => setPortRate(e.target.value)
   })), /*#__PURE__*/React.createElement("span", {
@@ -3276,7 +3296,7 @@ function CalcTab({
     years: loanCalc.years
   }))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, t("Schuldontwikkeling over", "Debt development over"), " ", loanCalc.years, " ", t("jaar", "years")), /*#__PURE__*/React.createElement(LoanChart, {
+  }, /*#__PURE__*/React.createElement("h3", null, tr("Schuldontwikkeling over","Debt development over"), " ", loanCalc.years, " ", tr("jaar","years")), /*#__PURE__*/React.createElement(LoanChart, {
     calc: loanCalc,
     colors: phaseColors,
     phases: loan.phases
@@ -3421,7 +3441,7 @@ function LoanChart({
     style: {
       font: "11px Inter,sans-serif"
     }
-  }, t("Totaal", "Total")), phases.map((p, i) => parseFloat(p.principal) > 0 && /*#__PURE__*/React.createElement("g", {
+  }, tr("Totaal","Total")), phases.map((p, i) => parseFloat(p.principal) > 0 && /*#__PURE__*/React.createElement("g", {
     key: i,
     transform: `translate(${80 + i * 90}, 0)`
   }, /*#__PURE__*/React.createElement("line", {
@@ -3936,7 +3956,7 @@ function BudgetTab({
     className: "fld"
   }, /*#__PURE__*/React.createElement("label", null, "Bruto jaarsalaris (€)"), /*#__PURE__*/React.createElement("input", {
     value: monthData.salaryGross || '',
-    placeholder: t("bv. 45000", "e.g. 45000"),
+    placeholder: tr("bv. 45000","e.g. 45000"),
     inputMode: "decimal",
     onChange: e => {
       setField('salaryGross', e.target.value);
@@ -3946,7 +3966,7 @@ function BudgetTab({
     className: "fld"
   }, /*#__PURE__*/React.createElement("label", null, "of: bruto maandsalaris (€)"), /*#__PURE__*/React.createElement("input", {
     value: monthData.salaryMonthly || '',
-    placeholder: t("bv. 3750", "e.g. 3750"),
+    placeholder: tr("bv. 3750","e.g. 3750"),
     inputMode: "decimal",
     onChange: e => {
       const val = e.target.value;
@@ -4025,7 +4045,7 @@ function BudgetTab({
     className: "tax-amt"
   }, eur(tax.net)))))), /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, t("Maandelijkse kosten", "Monthly expenses")), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, tr("Maandelijkse kosten","Monthly expenses")), /*#__PURE__*/React.createElement("div", {
     className: "budget-cats"
   }, /*#__PURE__*/React.createElement("div", {
     className: "budget-cat-h"
@@ -4038,7 +4058,7 @@ function BudgetTab({
     key: c.id
   }, /*#__PURE__*/React.createElement("input", {
     value: c.label,
-    placeholder: t("bv. Huur", "e.g. Rent"),
+    placeholder: tr("bv. Huur","e.g. Rent"),
     onChange: e => setCat(c.id, 'label', e.target.value),
     style: {
       background: 'var(--bg2)',
@@ -4141,9 +4161,9 @@ function BudgetTab({
     style: {
       maxWidth: 200
     }
-  }, /*#__PURE__*/React.createElement("label", null, t("Maandelijks spaardoel (€)", "Monthly savings goal (€)")), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, tr("Maandelijks spaardoel (€)","Monthly savings goal (€)")), /*#__PURE__*/React.createElement("input", {
     value: monthData.savingsTarget || '',
-    placeholder: t("bv. 500", "e.g. 500"),
+    placeholder: tr("bv. 500","e.g. 500"),
     inputMode: "decimal",
     onChange: e => setField('savingsTarget', e.target.value)
   })), savingsTarget > 0 && /*#__PURE__*/React.createElement("div", {
@@ -4577,7 +4597,7 @@ function TransactionsTab({
       });
       setShowForm(s => !s);
     }
-  }, showForm && !editId ? t("Annuleren", "Cancel") : t("+ Transactie", "+ Transaction")))), showIngImport && /*#__PURE__*/React.createElement("div", {
+  }, showForm && !editId ? tr("Annuleren","Cancel") : tr("+ Transactie","+ Transaction")))), showIngImport && /*#__PURE__*/React.createElement("div", {
     className: "import",
     style: {
       marginTop: 12
@@ -5188,7 +5208,7 @@ function AccountsTab() {
         if (existing >= 0) newAccounts[existing] = accData;else newAccounts.push(accData);
       });
       setAccounts(newAccounts);
-      setWiseMsg(`✓ ${balances.length} ${t("Wise rekening(en) gesynchroniseerd!", "Wise account(s) synced!")}`);
+      setWiseMsg(`✓ ${balances.length} ${tr("Wise rekening(en) gesynchroniseerd!","Wise account(s) synced!")}`);
       setTimeout(() => setWiseMsg(''), 4000);
     } catch (e) {
       setWiseMsg(tr('Verbindingsfout: ','Connection error: ') + e.message);
@@ -6194,7 +6214,7 @@ function DashboardTab({
   }), /*#__PURE__*/React.createElement(Card, {
     label: "Aandelenportefeuille",
     value: eur(portfolioValue || 0),
-    sub: `${portfolios.reduce((s, p) => s + p.holdings.length, 0)} ${t("posities", "positions")}`,
+    sub: `${portfolios.reduce((s, p) => s + p.holdings.length, 0)} ${tr("posities","positions")}`,
     color: "var(--brass)"
   }), /*#__PURE__*/React.createElement(Card, {
     label: tr('Budget restant','Budget remaining'),
@@ -6204,7 +6224,7 @@ function DashboardTab({
   }), /*#__PURE__*/React.createElement(Card, {
     label: "Uitgaven deze maand",
     value: eur(totalSpent),
-    sub: `${thisMonthTrans.filter(t => t.type === 'uitgave').length} ${t("transacties", "transactions")}`
+    sub: `${thisMonthTrans.filter(t => t.type === 'uitgave').length} ${tr("transacties","transactions")}`
   })), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'grid',
@@ -6628,7 +6648,7 @@ function NetWorthTab({
     className: "calc-title"
   }, "Netto Vermogen"), /*#__PURE__*/React.createElement("div", {
     className: "calc-desc"
-  }, tr('Jouw totale bezittingen minus alle schulden.','Your total assets minus all liabilities.'), " ", t("De aandelenportefeuille en studieschuld worden automatisch meegenomen.", "Your stock portfolio and student debt are included automatically.")), /*#__PURE__*/React.createElement("div", {
+  }, tr('Jouw totale bezittingen minus alle schulden.','Your total assets minus all liabilities.'), " ", tr("De aandelenportefeuille en studieschuld worden automatisch meegenomen.","Your stock portfolio and student debt are included automatically.")), /*#__PURE__*/React.createElement("div", {
     className: "loan-pillars",
     style: {
       marginTop: 20
@@ -6785,7 +6805,7 @@ function NetWorthTab({
       marginBottom: 14,
       lineHeight: 1.5
     }
-  }, "Je aandelenportefeuille (", eur(portfolioValue || 0), ") ", t("wordt automatisch meegenomen vanuit de Aandelenportefeuille-tab.", "is automatically included from the Portfolio tab.")), /*#__PURE__*/React.createElement("div", {
+  }, "Je aandelenportefeuille (", eur(portfolioValue || 0), ") ", tr("wordt automatisch meegenomen vanuit de Aandelenportefeuille-tab.","is automatically included from the Portfolio tab.")), /*#__PURE__*/React.createElement("div", {
     className: "budget-cats"
   }, /*#__PURE__*/React.createElement("div", {
     className: "budget-cat-h"
@@ -6873,7 +6893,7 @@ function NetWorthTab({
       marginBottom: 14,
       lineHeight: 1.5
     }
-  }, "Je studieschuld (", eur(n(loan?.balance)), ") ", t("wordt automatisch meegenomen vanuit de Rekenmachine-tab.", "is automatically included from the Calculator tab.")), /*#__PURE__*/React.createElement("div", {
+  }, "Je studieschuld (", eur(n(loan?.balance)), ") ", tr("wordt automatisch meegenomen vanuit de Rekenmachine-tab.","is automatically included from the Calculator tab.")), /*#__PURE__*/React.createElement("div", {
     className: "budget-cats"
   }, /*#__PURE__*/React.createElement("div", {
     className: "budget-cat-h"
