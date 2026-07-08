@@ -6,28 +6,89 @@
   <title>Finance Bro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.cdnfonts.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.cdnfonts.com/css/geist-sans" rel="stylesheet">
   <style>
-
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #11141B; color: #ECEAE3; }
+body { background: #F5F5F0; color: #1A1A18; }
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+/* ── layout met sidebar ── */
+.app-shell{ display:flex; min-height:100vh; }
+.sidebar{ width:220px; min-height:100vh; background:var(--surface); border-right:1px solid var(--line); display:flex; flex-direction:column; padding:0; flex:none; position:fixed; left:0; top:0; bottom:0; z-index:100; }
+.sidebar-brand{ padding:24px 20px 20px; border-bottom:1px solid var(--line); }
+.sidebar-brand .pf-brand{ font-size:22px; color:var(--ink); }
+.sidebar-brand .pf-sub{ color:var(--muted); font-size:11.5px; letter-spacing:0; text-transform:none; line-height:1.4; }
+.sidebar-nav{ flex:1; padding:12px 10px; display:flex; flex-direction:column; gap:4px; overflow-y:auto; }
+.nav-item{ display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:9px; color:var(--muted); font-size:13.5px; font-family:'Inter',sans-serif; cursor:pointer; transition:.14s; border:none; background:none; width:100%; text-align:left; }
+.nav-item:hover{ color:var(--ink); background:var(--surface); }
+.nav-item.on{ color:var(--ink); background:var(--surface2); border-left:2px solid var(--brass); padding-left:10px; }
+.nav-item .nav-icon{ font-size:16px; width:22px; text-align:center; flex:none; }
+.nav-section{ font-size:10px; letter-spacing:.18em; text-transform:uppercase; color:var(--faint); padding:14px 12px 6px; }
+.nav-logout{ color:var(--muted); }
+.nav-logout:hover{ color:var(--loss) !important; background:rgba(226,145,126,.08) !important; }
+.sidebar-bottom{ padding:12px 10px; border-top:1px solid var(--line); }
+.main-content{ margin-left:220px; flex:1; min-width:0; }
+.pf-wrap{ max-width:1080px; margin:0 auto; padding:28px 28px 64px; }
+@media(max-width:768px){
+  .sidebar{ width:60px; }
+  .sidebar-brand{ padding:16px 10px; }
+  .sidebar-brand .pf-sub, .sidebar-brand .pf-asof-wrap{ display:none; }
+  .nav-item span:not(.nav-icon){ display:none; }
+  .nav-section{ display:none; }
+  .main-content{ margin-left:60px; }
+  .sidebar-bottom .user-badge b, .sidebar-bottom .logout-btn span{ display:none; }
+}
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.cdnfonts.com/css/geist-sans');
 
 .pf-root{
-  --bg:#11141B; --bg2:#0C0F15; --surface:#1A1F2A; --surface2:#232938;
-  --line:#2A3140; --line2:#3A4357;
-  --ink:#ECEAE3; --muted:#8B92A2; --faint:#5C6472;
-  --gain:#79C7A0; --loss:#E2917E; --brass:#CBA135; --brass-dim:#8C7126;
-  font-family:'Inter',system-ui,sans-serif;
-  background:
-    radial-gradient(1200px 600px at 80% -10%, rgba(203,161,53,.06), transparent 60%),
-    var(--bg);
+  --bg:#F5F5F0; --bg2:#ECEAE3; --surface:#FFFFFF; --surface2:#F0EEE8;
+  --line:#E0DDD5; --line2:#CCCAB8;
+  --ink:#1A1A18; --muted:#6B6B60; --faint:#9A9A8E;
+  --gain:#2A8A5A; --loss:#C0503A; --brass:#9A7810; --brass-dim:#C8A020;
+  font-family:'Geist Sans','Inter',system-ui,sans-serif;
+  background: radial-gradient(1200px 600px at 80% -10%, rgba(203,161,53,.04), transparent 60%), var(--bg);
   color:var(--ink);
   min-height:100vh; width:100%;
   -webkit-font-smoothing:antialiased;
 }
-.pf-wrap{ max-width:1080px; margin:0 auto; padding:28px 22px 64px; }
+.pf-root.dark-mode{
+  --bg:#11141B; --bg2:#0C0F15; --surface:#1A1F2A; --surface2:#232938;
+  --line:#2A3140; --line2:#3A4357;
+  --ink:#ECEAE3; --muted:#8B92A2; --faint:#5C6472;
+  --gain:#79C7A0; --loss:#E2917E; --brass:#CBA135; --brass-dim:#8C7126;
+  background: radial-gradient(1200px 600px at 80% -10%, rgba(203,161,53,.06), transparent 60%), var(--bg);
+}
+.pf-root.dark-mode .sidebar{ background:#0E1118; border-right:1px solid var(--line); }
+.pf-root.dark-mode .tape{ background:var(--surface2); }
+
+/* theme toggle */
+.theme-toggle{ background:none; border:1px solid var(--line2); border-radius:8px; color:var(--muted); padding:7px 10px; cursor:pointer; font-size:15px; line-height:1; transition:.14s; }
+.theme-toggle:hover{ color:var(--ink); border-color:var(--line); }
+
+/* auth / login scherm */
+.setup-overlay{position:fixed;inset:0;background:#0C0F15;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:'Geist Sans','Inter',system-ui,sans-serif;overflow-y:auto;}
+.setup-box{background:#1A1F2A;border:1px solid #2A3140;border-radius:16px;padding:36px 32px;max-width:440px;width:90%;text-align:center;margin:auto;}
+.setup-logo{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:600;color:#ECEAE3;margin-bottom:5px;letter-spacing:.04em;}
+.setup-logo span{color:#CBA135;}
+.setup-label{display:block;text-align:left;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#5C6472;margin-bottom:7px;}
+.setup-input{width:100%;background:#0C0F15;border:1px solid #3A4357;border-radius:9px;color:#ECEAE3;padding:12px 13px;font-family:'IBM Plex Mono',monospace;font-size:13.5px;outline:none;margin-bottom:14px;}
+.setup-input:focus{border-color:#8C7126;}
+.setup-btn{width:100%;background:#CBA135;color:#1A1206;border:none;border-radius:9px;padding:13px;font-size:14.5px;font-weight:600;cursor:pointer;font-family:'Geist Sans','Inter',sans-serif;margin-bottom:8px;}
+.setup-btn:hover{filter:brightness(1.08);}
+.setup-btn:disabled{opacity:.6;cursor:default;}
+.setup-err{color:#E2917E;font-size:12px;font-family:'IBM Plex Mono',monospace;margin:4px 0 10px;min-height:16px;text-align:left;}
+.auth-tabs{display:flex;gap:0;margin-bottom:22px;border:1px solid #2A3140;border-radius:9px;overflow:hidden;}
+.auth-tab{flex:1;padding:10px;font-size:13.5px;cursor:pointer;background:#0C0F15;color:#8B92A2;border:none;font-family:'Geist Sans','Inter',sans-serif;transition:.14s;}
+.auth-tab.on{background:#1A1F2A;color:#ECEAE3;font-weight:600;}
+.forgot-link{font-size:12px;color:#CBA135;cursor:pointer;text-decoration:underline;margin-top:6px;text-align:right;display:block;}
+.user-badge{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-family:'IBM Plex Mono',monospace;}
+.user-badge b{color:var(--ink);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.logout-btn{background:none;border:1px solid var(--line2);color:var(--faint);border-radius:7px;padding:5px 10px;font-size:11.5px;cursor:pointer;font-family:'IBM Plex Mono',monospace;}
+.logout-btn:hover{color:var(--loss);border-color:var(--loss);}
+.theme-toggle:hover{ color:var(--ink); border-color:var(--line); }
+.pf-wrap{ max-width:1080px; margin:0 auto; padding:28px 28px 64px; }
 
 /* header + ticker tape */
 .pf-top{ display:flex; align-items:baseline; justify-content:space-between; gap:18px; flex-wrap:wrap; border-bottom:1px solid var(--line); padding-bottom:16px; }
@@ -90,7 +151,11 @@ body { background: #11141B; color: #ECEAE3; }
 
 /* account tab */
 .acc-grid{ display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
-.acc-avatar{ width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,var(--brass),var(--brass-dim)); display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-size:28px; font-weight:600; color:#1A1206; flex:none; }
+.acc-avatar{ width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,var(--brass),var(--brass-dim)); display:flex; align-items:center; justify-content:center; font-family:'Fraunces',serif; font-size:28px; font-weight:600; color:#1A1206; flex:none; position:relative; cursor:pointer; overflow:hidden; }
+.acc-avatar img{ width:100%; height:100%; object-fit:cover; border-radius:50%; }
+.acc-avatar-overlay{ position:absolute; inset:0; background:rgba(0,0,0,.45); border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:0; transition:.15s; font-size:18px; }
+.acc-avatar:hover .acc-avatar-overlay{ opacity:1; }
+.acc-avatar input[type=file]{ position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
 .acc-name{ font-size:18px; font-weight:600; color:var(--ink); margin-bottom:4px; }
 .acc-email{ font-family:'IBM Plex Mono',monospace; font-size:13px; color:var(--muted); margin-bottom:4px; }
 .acc-joined{ font-size:12px; color:var(--faint); }
@@ -316,28 +381,6 @@ body { background: #11141B; color: #ECEAE3; }
 .err{ margin-top:12px; font-size:12.5px; color:var(--loss); font-family:'IBM Plex Mono',monospace; }
 .foot{ margin-top:22px; font-size:11px; color:var(--faint); line-height:1.6; }
 
-
-.setup-overlay{position:fixed;inset:0;background:#0C0F15;display:flex;align-items:center;justify-content:center;z-index:9999;font-family:'Inter',system-ui,sans-serif;overflow-y:auto;}
-.setup-box{background:#1A1F2A;border:1px solid #2A3140;border-radius:16px;padding:36px 32px;max-width:440px;width:90%;text-align:center;margin:auto;}
-.setup-logo{font-family:'Fraunces',Georgia,serif;font-size:26px;font-weight:600;color:#ECEAE3;margin-bottom:5px;letter-spacing:.04em;}
-.setup-logo span{color:#CBA135;}
-.setup-label{display:block;text-align:left;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#5C6472;margin-bottom:7px;}
-.setup-input{width:100%;background:#0C0F15;border:1px solid #3A4357;border-radius:9px;color:#ECEAE3;padding:12px 13px;font-family:'IBM Plex Mono',monospace;font-size:13.5px;outline:none;margin-bottom:14px;}
-.setup-input:focus{border-color:#8C7126;}
-.setup-btn{width:100%;background:#CBA135;color:#1A1206;border:none;border-radius:9px;padding:13px;font-size:14.5px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;margin-bottom:8px;}
-.setup-btn:hover{filter:brightness(1.08);}
-.setup-btn:disabled{opacity:.6;cursor:default;}
-.setup-err{color:#E2917E;font-size:12px;font-family:'IBM Plex Mono',monospace;margin:4px 0 10px;min-height:16px;text-align:left;}
-.auth-tabs{display:flex;gap:0;margin-bottom:22px;border:1px solid #2A3140;border-radius:9px;overflow:hidden;}
-.auth-tab{flex:1;padding:10px;font-size:13.5px;cursor:pointer;background:#0C0F15;color:#8B92A2;border:none;font-family:'Inter',sans-serif;transition:.14s;}
-.auth-tab.on{background:#1A1F2A;color:#ECEAE3;font-weight:600;}
-.forgot-link{font-size:12px;color:#CBA135;cursor:pointer;text-decoration:underline;margin-top:6px;text-align:right;display:block;}
-.user-badge{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted,#8B92A2);font-family:'IBM Plex Mono',monospace;}
-.user-badge b{color:var(--ink,#ECEAE3);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.logout-btn{background:none;border:1px solid var(--line2,#3A4357);color:var(--faint,#5C6472);border-radius:7px;padding:5px 10px;font-size:11.5px;cursor:pointer;font-family:'IBM Plex Mono',monospace;}
-.logout-btn:hover{color:var(--loss,#E2917E);border-color:var(--loss,#E2917E);}
-
-  
   </style>
 </head>
 <body>
@@ -622,8 +665,25 @@ function PortfolioDashboard() {
   const [auto, setAuto] = useState(false);
   const [intervalMin, setIntervalMin] = useState(15);
   const [apiKey, setApiKey] = useState("");
+  const [lightMode, setLightMode] = useState(() => {
+    try {
+      const saved = localStorage.getItem('fb:theme');
+      return saved ? saved !== 'dark' : true;
+    } catch (e) {
+      return true;
+    }
+  });
+  function toggleTheme() {
+    setLightMode(m => {
+      const next = !m;
+      try {
+        localStorage.setItem('fb:theme', next ? 'light' : 'dark');
+      } catch (e) {}
+      return next;
+    });
+  }
   const [showRt, setShowRt] = useState(false);
-  const [activeTab, setActiveTab] = useState("portfolio"); // "portfolio" | "calc"
+  const [activeTab, setActiveTab] = useState("dashboard");
   const [loan, setLoan] = useState({
     phases: [{
       label: "Fase 1",
@@ -1356,83 +1416,261 @@ function PortfolioDashboard() {
     reader.readAsText(f);
     e.target.value = "";
   }
+      function parseDeGiroCSV(text) {
+    function parseDN(s) {
+      if (!s) return 0;
+      return parseFloat(String(s).replace(/"/g,'').trim().replace(/\./g,'').replace(',','.')) || 0;
+    }
+    function parseLine(line) {
+      const cols=[]; let cur='', inQ=false;
+      for (let i=0;i<line.length;i++) {
+        if (line[i]==='"'){inQ=!inQ;continue;}
+        if (line[i]===','&&!inQ){cols.push(cur.trim());cur='';}
+        else cur+=line[i];
+      }
+      cols.push(cur.trim()); return cols;
+    }
+    function parseDate(s) {
+      const p=s.split('-');
+      return p.length===3 ? `${p[2]}-${p[1]}-${p[0]}` : s;
+    }
+    // Convert any amount to EUR using FX rate from CSV
+    function toEUR(amount, currency, fxRate) {
+      if (!amount) return 0;
+      const amt = Math.abs(parseDN(amount));
+      const fx = parseDN(fxRate);
+      if (currency === 'EUR' || !fx || fx === 1) return amt;
+      return amt / fx; // DeGiro FX rate is foreign/EUR
+    }
+
+    const lines = text.split('\n').filter(l=>l.trim());
+    const pos = {};
+
+    // Process oldest first (CSV is newest-first)
+    for (let i = lines.length - 1; i >= 1; i--) {
+      const c = parseLine(lines[i]);
+      const rawDate=c[0], product=c[3], isin=c[4], desc=c[5],
+            fxRate=c[6], mutCur=c[7], mutAmt=c[8];
+      if (!desc || !rawDate) continue;
+      const date = parseDate(rawDate);
+      const amtEUR = toEUR(mutAmt, mutCur, fxRate);
+
+      // Init position
+      if (isin && !pos[isin]) {
+        pos[isin] = {
+          name:product, isin, shares:0, cost:0, costEUR:0,
+          currency:mutCur, firstBuy:date,
+          dividendReceived:0, dividendTax:0, txCosts:0
+        };
+      }
+
+      // === AANKOPEN ===
+      if (desc.startsWith('Koop ') && isin) {
+        const m = desc.match(/Koop\s+([\d.,]+)\s+@\s+([\d.,]+)/);
+        if (m) {
+          const sh=parseDN(m[1]), pr=parseDN(m[2]);
+          pos[isin].cost += sh * pr;
+          pos[isin].costEUR += amtEUR || (sh * pr);
+          pos[isin].shares += sh;
+          pos[isin].currency = mutCur;
+        }
+      }
+
+      // === VERKOPEN ===
+      else if (desc.startsWith('Verkoop ') && isin && pos[isin]) {
+        const m = desc.match(/Verkoop\s+([\d.,]+)\s+@\s+([\d.,]+)/);
+        if (m) {
+          const sh=parseDN(m[1]);
+          const rem=Math.max(0, pos[isin].shares - sh);
+          const avgNative=pos[isin].shares>0 ? pos[isin].cost/pos[isin].shares : 0;
+          const avgEUR=pos[isin].shares>0 ? pos[isin].costEUR/pos[isin].shares : 0;
+          pos[isin].shares = rem;
+          pos[isin].cost = rem * avgNative;
+          pos[isin].costEUR = rem * avgEUR;
+        }
+      }
+
+      // === SPLIT AANPASSING (uit CSV zelf) ===
+      else if (desc.startsWith('SPLIT AANPASSING:')) {
+        const m = desc.match(/SPLIT AANPASSING:\s+([\d.,]+)\s+.+?\s+@\s+([\d.,]+)\s+\w+\s+\((\w+)\)/);
+        if (m) {
+          const newSh=parseDN(m[1]), newPr=parseDN(m[2]), sisin=m[3];
+          const rawAmt = parseDN(mutAmt);
+          // Process the DEBIT line (negative amount = new/more shares after split)
+          // Skip the credit line (positive amount = removal/return of old shares)
+          if (newSh > 0 && rawAmt < 0 && pos[sisin]) {
+            // Preserve total cost in EUR, just update shares and native price
+            const totalCostEUR = pos[sisin].costEUR;
+            pos[sisin].shares = newSh;
+            pos[sisin].cost = newSh * newPr;
+            pos[sisin].costEUR = totalCostEUR; // EUR cost stays same, avgCostEUR drops
+          }
+        }
+      }
+
+      // === CLAIMEMISSIE / SPIN-OFF (gratis aandelen) ===
+      else if ((desc.startsWith('CLAIMEMISSIE:') || desc.startsWith('SPIN-OFF:')) && isin && pos[isin]) {
+        const m = desc.match(/Koop\s+([\d.,]+)/);
+        if (m) {
+          const sh = parseDN(m[1]);
+          // Gratis aandelen: voeg toe zonder kostprijs te verhogen
+          // Gemiddelde kostprijs per aandeel daalt hierdoor
+          pos[isin].shares += sh;
+          // costEUR blijft gelijk -> lagere gem. prijs per aandeel
+        }
+      }
+
+      // === PRODUCTWIJZIGING (ISIN-conversie, technisch) ===
+      else if (desc.startsWith('PRODUCTWIJZIGING')) {
+        // Skip — dit is een technische conversie, geen echte transactie
+      }
+
+      // === WIJZIGING ISIN ===
+      else if (desc.startsWith('WIJZIGING ISIN:')) {
+        // Skip — technisch
+      }
+
+      // === VERREKENING VAN AANDELEN ===
+      else if (desc === 'Verrekening van Aandelen' && isin && pos[isin]) {
+        // Fusie/overname verrekening — verwijder positie
+        pos[isin].shares = 0;
+        pos[isin].cost = 0;
+        pos[isin].costEUR = 0;
+      }
+
+      // === TRANSACTIEKOSTEN ===
+      else if (desc.includes('Transactiekosten') && isin && pos[isin]) {
+        pos[isin].txCosts += amtEUR;
+        pos[isin].costEUR += amtEUR; // kosten verhogen effectieve kostprijs
+      }
+
+      // === DIVIDEND ===
+      else if (desc === 'Dividend' && isin && pos[isin]) {
+        pos[isin].dividendReceived += amtEUR;
+      }
+
+      // === DIVIDEND HERINVESTERING ===
+      else if (desc === 'Dividend Herinvestering' && isin && pos[isin]) {
+        pos[isin].dividendReceived += amtEUR;
+        // Herinvesteerd dividend telt als extra aankoop — maar DeGiro verwerkt dit
+        // apart via een Koop-transactie dus hier alleen het dividend registreren
+      }
+
+      // === DIVIDENDBELASTING ===
+      else if (desc === 'Dividendbelasting' && isin && pos[isin]) {
+        pos[isin].dividendTax += amtEUR;
+      }
+    }
+
+    return Object.values(pos)
+      .filter(p => p.shares > 0.001 && p.isin)
+      .map(p => ({
+        name:        p.name,
+        isin:        p.isin,
+        currency:    p.currency,
+        shares:      Math.round(p.shares * 1000) / 1000,
+        avgCost:     p.shares>0 ? Math.round(p.cost / p.shares * 100) / 100 : 0,
+        avgCostEUR:  p.shares>0 ? Math.round(p.costEUR / p.shares * 100) / 100 : 0,
+        firstBuy:    p.firstBuy,
+        dividendReceived: Math.round(p.dividendReceived * 100) / 100,
+        dividendTax:      Math.round(p.dividendTax * 100) / 100,
+        dividendNet:      Math.round((p.dividendReceived - p.dividendTax) * 100) / 100,
+        txCosts:          Math.round(p.txCosts * 100) / 100,
+      }));
+  }
+
   async function importDegiro(raw) {
     const text = (raw != null ? raw : importText) || "";
     if (text.trim().length < 5) {
-      setImportMsg("Plak je export of kies eerst een CSV-bestand.");
+      setImportMsg("Paste your export or choose a CSV file first.");
       return;
     }
     setImporting(true);
-    setImportMsg("Export inlezen…");
-    const prompt = `Hieronder staat een export uit DeGiro (transactieoverzicht of portefeuille, meestal Nederlandstalig CSV).\n` + `Leid hieruit de HUIDIGE posities af. Als het transacties zijn: tel per product de gekochte minus verkochte ` + `stuks op, laat posities met netto 0 weg, en bereken de gewogen gemiddelde aankoopkoers per stuk in EUR.\n` + `Geef per positie: ticker (beurssymbool zoals ASML of TSLA — zoek dit op via ISIN of productnaam), ` + `name (productnaam), isin indien bekend, currency (ISO-valutacode van het product, bv EUR of USD), ` + `shares (number, netto aantal), avgCost (number, gewogen gemiddelde aankoopkoers per stuk in DE EIGEN ` + `valuta van het product, niet omgerekend).\n` + `Antwoord UITSLUITEND met een geldige JSON-array zonder uitleg of markdown. Voorbeeld:\n` + `[{"ticker":"TSLA","name":"Tesla Inc","isin":"US88160R1014","currency":"USD","shares":5,"avgCost":210.4}]\n\n` + `EXPORT:\n` + text.slice(0, 40000);
+    setImportMsg("Processing CSV…");
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": getAnthropicKey(),
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true"
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-6",
-          max_tokens: 1000,
-          messages: [{
-            role: "user",
-            content: prompt
-          }]
-        })
-      });
-      const data = await res.json();
-      const out = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("\n");
-      const s = out.indexOf("["),
-        e = out.lastIndexOf("]");
-      if (s === -1 || e === -1) throw new Error("kon geen posities herkennen");
-      const parsed = JSON.parse(out.slice(s, e + 1));
-      const clean = parsed.filter(p => p && p.ticker && Number(p.shares) > 0).map(p => ({
-        ticker: String(p.ticker).toUpperCase().trim(),
-        name: p.name || "",
-        isin: p.isin || null,
-        currency: p.currency || "EUR",
-        shares: Number(p.shares),
-        avgCost: Number(p.avgCost) || 0
-      }));
-      if (!clean.length) throw new Error("geen posities gevonden in de export");
-      const map = {};
-      holdings.forEach(h => {
-        map[h.ticker.toUpperCase()] = h;
-      });
-      clean.forEach(c => {
-        const ex = map[c.ticker];
-        map[c.ticker] = ex ? {
-          ...ex,
-          shares: c.shares,
-          avgCost: c.avgCost,
-          name: ex.name || c.name,
-          isin: c.isin || ex.isin,
-          currency: c.currency || ex.currency || "EUR"
-        } : {
-          id: uid(),
-          priceNative: null,
-          fxToEur: 1,
-          currency: "EUR",
-          dividendYield: null,
-          payMonths: null,
-          ...c
+      const csvResult = parseDeGiroCSV(text);
+      if (csvResult.length === 0) {
+        throw new Error("No buy/sell transactions found. Upload Account.csv from DeGiro → Inbox → Rekeningoverzicht.");
+      }
+
+      setImportMsg("Looking up tickers… (" + csvResult.length + " positions found)");
+
+      // Ask Claude to resolve tickers from name+ISIN+currency
+      const prompt =
+        'These are stock positions from a DeGiro account. Add the correct stock ticker symbol to each.\n' +
+        'Return ONLY a valid JSON array with a "ticker" field added per object.\n' +
+        'Use standard tickers: TSLA, META, MSFT, AMZN, AAPL, ASML, HEIA.AS, INGA.AS, SHEL.AS, POSTB.AS, NOK, T, CRM, BYDDF, ASR.AS etc.\n' +
+        'Input: ' + JSON.stringify(csvResult.map(p => ({ name: p.name, isin: p.isin, currency: p.currency }))) + '\n' +
+        'Return only the JSON array, no markdown, no explanation.';
+
+      let tickerMap = {};
+      try {
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "x-api-key": getAnthropicKey(),
+            "anthropic-version": "2023-06-01",
+            "anthropic-dangerous-direct-browser-access": "true"
+          },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-6",
+            max_tokens: 1500,
+            messages: [{ role: "user", content: prompt }]
+          })
+        });
+        const data = await res.json();
+        const out = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
+        const s = out.indexOf("["), e = out.lastIndexOf("]");
+        if (s !== -1 && e !== -1) {
+          JSON.parse(out.slice(s, e + 1)).forEach(p => {
+            if (p && p.isin && p.ticker) tickerMap[p.isin] = String(p.ticker).toUpperCase().trim();
+          });
+        }
+      } catch (apiErr) {
+        console.warn('Ticker lookup failed:', apiErr);
+      }
+
+      // Build holdings map: merge with existing
+      const existingMap = {};
+      holdings.forEach(h => { existingMap[h.isin || h.ticker] = h; });
+
+      const newHoldings = csvResult.map(c => {
+        const ticker = tickerMap[c.isin] || c.isin;
+        const existing = existingMap[c.isin] || existingMap[ticker];
+        return {
+          id:              existing ? existing.id : uid(),
+          ticker:          ticker,
+          name:            existing ? (existing.name || c.name) : c.name,
+          isin:            c.isin,
+          currency:        c.currency || "EUR",
+          shares:          c.shares,
+          avgCost:         c.avgCost,
+          avgCostEUR:      c.avgCostEUR,
+          buyDate:         c.firstBuy || "",
+          divReceived:     c.dividendNet,   // netto dividend (na belasting)
+          divReceivedGross:c.dividendReceived,
+          divTaxPaid:      c.dividendTax,
+          txCosts:         c.txCosts,
+          priceNative:     existing ? existing.priceNative : null,
+          fxToEur:         existing ? existing.fxToEur : 1,
+          dividendYield:   existing ? existing.dividendYield : null,
+          payMonths:       existing ? existing.payMonths : null,
         };
       });
-      const merged = Object.values(map);
-      setHoldings(merged);
+
+      setHoldings(newHoldings);
       setImportText("");
       setShowImport(false);
       setImportMsg("");
-      await refresh(merged);
+      await refresh(newHoldings);
     } catch (err) {
-      setImportMsg("Importeren lukte niet (" + (err.message || err) + "). Probeer het transactieoverzicht (Account.csv) of plak je posities.");
-    } finally {
-      setImporting(false);
+      setImportMsg("Import failed: " + err.message);
     }
+    setImporting(false);
   }
+
+
 
   /* ---- zoeken op bedrijfsnaam ---- */
   async function runQuery(q) {
@@ -1598,84 +1836,208 @@ function PortfolioDashboard() {
     className: "ed-val"
   }, display));
   return /*#__PURE__*/React.createElement("div", {
-    className: "pf-root"
+    className: "pf-root" + (lightMode ? "" : " dark-mode")
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "app-shell"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sidebar"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "sidebar-brand"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "pf-brand"
+  }, "Finance Bro", /*#__PURE__*/React.createElement("span", {
+    className: "dot"
+  }, ".")), /*#__PURE__*/React.createElement("div", {
+    className: "pf-sub",
+    style: {
+      marginTop: 4
+    }
+  }, "Jouw persoonlijke financiële dashboard.")), /*#__PURE__*/React.createElement("nav", {
+    className: "sidebar-nav"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "nav-section"
+  }, "Overzicht"), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "dashboard" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("dashboard");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "🏠"), /*#__PURE__*/React.createElement("span", null, "Dashboard")), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "portfolio" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("portfolio");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "📈"), /*#__PURE__*/React.createElement("span", null, "Aandelenportefeuille")), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "networth" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("networth");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "💎"), /*#__PURE__*/React.createElement("span", null, "Netto Vermogen")), /*#__PURE__*/React.createElement("div", {
+    className: "nav-section"
+  }, "Financiën"), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "accounts" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("accounts");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "🏦"), /*#__PURE__*/React.createElement("span", null, "Rekeningen")), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "alltrans" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("alltrans");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "💸"), /*#__PURE__*/React.createElement("span", null, "Transacties")), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "budget" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("budget");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "💶"), /*#__PURE__*/React.createElement("span", null, "Budget")), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "trans" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("trans");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "📋"), /*#__PURE__*/React.createElement("span", null, "Uitgaven")), /*#__PURE__*/React.createElement("div", {
+    className: "nav-section"
+  }, "Tools"), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "calc" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("calc");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "📊"), /*#__PURE__*/React.createElement("span", null, "Rekenmachine")), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "mortgage" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("mortgage");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "🏠"), /*#__PURE__*/React.createElement("span", null, "Hypotheek"))), /*#__PURE__*/React.createElement("div", {
+    className: "sidebar-bottom"
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "account" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("account");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "👤"), /*#__PURE__*/React.createElement("span", null, "Account")), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "settings" ? " on" : ""),
+    onClick: () => {
+      setActiveTab("settings");
+      resetTransient();
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "⚙️"), /*#__PURE__*/React.createElement("span", null, "Instellingen")), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item nav-logout",
+    onClick: () => {
+      const KEYS = ['portfolio:meta', 'portfolio:settings', 'portfolio:calc', 'portfolio:budget', 'portfolio:transactions', 'fb:networth', 'fb:last_seen', 'fb:last_sync', 'fb:display_name', 'fb:theme', 'fb:anthropic_key', 'fb:avatar'];
+      KEYS.forEach(k => {
+        try {
+          localStorage.removeItem(k);
+        } catch (e) {}
+      });
+      try {
+        const sb = typeof getSb === 'function' ? getSb() : null;
+        if (sb) sb.auth.signOut();
+      } catch (e) {}
+      setTimeout(() => {
+        window.location.href = window.location.href.split('?')[0];
+      }, 100);
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "🚪"), /*#__PURE__*/React.createElement("span", null, "Uitloggen")), /*#__PURE__*/React.createElement("button", {
+    className: "theme-toggle",
+    onClick: toggleTheme,
+    title: lightMode ? 'Donkere modus' : 'Lichte modus',
+    style: {
+      margin: '8px 10px 4px',
+      width: 'calc(100% - 20px)'
+    }
+  }, lightMode ? '🌙 Donkere modus' : '☀️ Lichte modus'))), /*#__PURE__*/React.createElement("div", {
+    className: "main-content"
   }, /*#__PURE__*/React.createElement("div", {
     className: "pf-wrap"
   }, /*#__PURE__*/React.createElement("div", {
     className: "pf-top"
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    className: "pf-brand"
-  }, "Finance Bro", /*#__PURE__*/React.createElement("span", {
-    className: "dot"
-  }, ".")), /*#__PURE__*/React.createElement("div", {
-    className: "pf-sub"
-  }, "Aandelen · ETF's · Dividend")), /*#__PURE__*/React.createElement("div", {
     style: {
-      display: "flex",
-      alignItems: "center",
-      gap: 12,
-      flexWrap: "wrap"
+      fontSize: 20,
+      fontWeight: 600,
+      color: 'var(--ink)',
+      fontFamily: "'Fraunces',serif"
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, activeTab === "dashboard" ? "Dashboard" : activeTab === "accounts" ? "Rekeningen" : activeTab === "alltrans" ? "Transacties" : activeTab === "portfolio" ? "Aandelenportefeuille" : activeTab === "networth" ? "Netto Vermogen" : activeTab === "budget" ? "Budget" : activeTab === "trans" ? "Uitgaven" : activeTab === "calc" ? "Rekenmachine" : activeTab === "mortgage" ? "Hypotheekcalculator" : activeTab === "account" ? "Account" : "Finance Bro")), /*#__PURE__*/React.createElement("div", {
     className: "pf-asof"
   }, asOf ? "Bijgewerkt " + asOf.toLocaleTimeString("nl-NL", {
     hour: "2-digit",
     minute: "2-digit"
-  }) : "Nog niet bijgewerkt", apiKey && holdings.some(h => h.live) && /*#__PURE__*/React.createElement("span", {
+  }) : "", apiKey && holdings.some(h => h.live) && /*#__PURE__*/React.createElement("span", {
     className: "live-dot"
-  }, "● realtime (US)")), /*#__PURE__*/React.createElement("button", {
-    className: "btn" + (activeTab === "account" ? " primary" : ""),
-    style: {
-      fontSize: 12,
-      padding: "7px 13px"
-    },
-    onClick: () => {
-      setActiveTab("account");
-      resetTransient();
-    }
-  }, "👤 Account"))), /*#__PURE__*/React.createElement("div", {
-    className: "tabs"
-  }, /*#__PURE__*/React.createElement("div", {
-    className: "tabs-list"
-  }, /*#__PURE__*/React.createElement("button", {
-    className: "tab calc-tab" + (activeTab === "portfolio" ? " on" : ""),
-    onClick: () => {
-      setActiveTab("portfolio");
-      resetTransient();
-    }
-  }, "📈 Aandelenportefeuille"), /*#__PURE__*/React.createElement("button", {
-    className: "tab calc-tab" + (activeTab === "calc" ? " on" : ""),
-    onClick: () => {
-      setActiveTab("calc");
-      resetTransient();
-    }
-  }, "📊 Rekenmachine"), /*#__PURE__*/React.createElement("button", {
-    className: "tab calc-tab" + (activeTab === "budget" ? " on" : ""),
-    onClick: () => {
-      setActiveTab("budget");
-      resetTransient();
-    }
-  }, "💶 Budget"), /*#__PURE__*/React.createElement("button", {
-    className: "tab calc-tab" + (activeTab === "trans" ? " on" : ""),
-    onClick: () => {
-      setActiveTab("trans");
-      resetTransient();
-    }
-  }, "📋 Uitgaven"))), activeTab === "calc" && /*#__PURE__*/React.createElement(CalcTab, {
+  }, "● realtime (US)"))), activeTab === "dashboard" && /*#__PURE__*/React.createElement(DashboardTab, {
+    portfolioValue: t.mvTotal,
+    portfolios: portfolios,
+    transactions: transactions,
+    budget: budget,
+    loan: loan,
+    holdings: holdings
+  }), activeTab === "accounts" && /*#__PURE__*/React.createElement(AccountsTab, null), activeTab === "alltrans" && /*#__PURE__*/React.createElement(AllTransactionsTab, {
+    transactions: transactions,
+    setTransactions: setTransactions
+  }), activeTab === "calc" && /*#__PURE__*/React.createElement(CalcTab, {
     loan: loan,
     setLoan: setLoan,
     loanCalc: loanCalc,
     portfolioValue: t.mvTotal,
     portRate: portRate,
     setPortRate: setPortRate
-  }), activeTab === "budget" && /*#__PURE__*/React.createElement(BudgetTab, {
+  }), activeTab === "mortgage" && /*#__PURE__*/React.createElement(MortgageTab, null), activeTab === "budget" && /*#__PURE__*/React.createElement(BudgetTab, {
     budget: budget,
     setBudget: setBudget
   }), activeTab === "trans" && /*#__PURE__*/React.createElement(TransactionsTab, {
     transactions: transactions,
     setTransactions: setTransactions,
     budget: budget
-  }), activeTab === "account" && /*#__PURE__*/React.createElement(AccountTab, null), activeTab === "portfolio" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+  }), activeTab === "networth" && /*#__PURE__*/React.createElement(NetWorthTab, {
+    portfolioValue: t.mvTotal,
+    loan: loan
+  }), activeTab === "account" && /*#__PURE__*/React.createElement(AccountTab, null), activeTab === "settings" && /*#__PURE__*/React.createElement(SettingsTab, {
+    apiKey: apiKey,
+    setApiKey: setApiKey,
+    auto: auto,
+    toggleAuto: toggleAuto,
+    intervalMin: intervalMin,
+    setIntervalMin: setIntervalMin,
+    portfolios: portfolios,
+    loan: loan,
+    portRate: portRate,
+    budget: budget,
+    transactions: transactions,
+    handleImport: handleImport
+  }), activeTab === "portfolio" && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
     className: "tabs",
     style: {
       marginTop: 12
@@ -2202,7 +2564,587 @@ function PortfolioDashboard() {
     className: "err"
   }, error), /*#__PURE__*/React.createElement("div", {
     className: "foot"
-  }, "Koersen en dividendrendement worden live opgehaald via webzoekresultaten; koers en GAK staan in de eigen valuta van het product (bv. USD voor Amerikaanse aandelen) en worden voor de portefeuilletotalen omgerekend naar euro tegen de actuele wisselkoers. Omdat ook je inleg tegen de huidige koers wordt omgerekend, is het euro-resultaat een benadering die de wisselkoersbeweging sinds aankoop niet meeneemt. Waarden kunnen enkele minuten vertraagd zijn. Met een eigen (gratis) Finnhub-key worden Amerikaanse aandelen realtime opgehaald; Europese noteringen blijven op de zoekkoers. Ontvangen dividend (handmatig ingevuld, of geschat uit aankoopdatum × rendement) wordt bij \"waarde nu\" opgeteld, dus winst/verlies toont het totaalrendement inclusief dividend. De dividendkalender verdeelt het jaarbedrag gelijk over de uitkeringsmaanden — een schatting. Geen beleggingsadvies."))));
+  }, "Koersen en dividendrendement worden live opgehaald via webzoekresultaten; koers en GAK staan in de eigen valuta van het product (bv. USD voor Amerikaanse aandelen) en worden voor de portefeuilletotalen omgerekend naar euro tegen de actuele wisselkoers. Omdat ook je inleg tegen de huidige koers wordt omgerekend, is het euro-resultaat een benadering die de wisselkoersbeweging sinds aankoop niet meeneemt. Waarden kunnen enkele minuten vertraagd zijn. Met een eigen (gratis) Finnhub-key worden Amerikaanse aandelen realtime opgehaald; Europese noteringen blijven op de zoekkoers. Ontvangen dividend (handmatig ingevuld, of geschat uit aankoopdatum × rendement) wordt bij \"waarde nu\" opgeteld, dus winst/verlies toont het totaalrendement inclusief dividend. De dividendkalender verdeelt het jaarbedrag gelijk over de uitkeringsmaanden — een schatting. Geen beleggingsadvies."))))));
+}
+
+/* ---- hypotheekcalculator tab ---- */
+function MortgageTab() {
+  const n = v => parseFloat(String(v || '').replace(',', '.')) || 0;
+  const [tab, setTab] = useState('leen');
+  const [f, setF] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('fb:mortgage') || 'null') || {};
+    } catch (e) {
+      return {};
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem('fb:mortgage', JSON.stringify(f));
+    } catch (e) {}
+  }, [f]);
+  const sf = (k, v) => setF(p => ({
+    ...p,
+    [k]: v
+  }));
+
+  // gedeelde waarden
+  const rente = n(f.rente || '4.0') / 100;
+  const looptijd = Math.max(1, n(f.looptijd || '30'));
+  const maanden = looptijd * 12;
+  const mr = rente / 12;
+
+  // leencapaciteit
+  const bruto = n(f.bruto);
+  const partner = n(f.partner);
+  const stud = n(f.stud);
+  const totInk = bruto + (partner > 0 ? partner * 0.9 : 0);
+  const lti = totInk <= 30000 ? 4.0 : totInk <= 40000 ? 4.25 : totInk <= 50000 ? 4.5 : totInk <= 60000 ? 4.6 : totInk <= 70000 ? 4.65 : totInk <= 80000 ? 4.7 : 4.75;
+  const maxLeen = Math.max(0, lti * totInk - stud * 0.35);
+  const maxMaandlast = maxLeen > 0 && mr > 0 ? maxLeen * (mr * Math.pow(1 + mr, maanden)) / (Math.pow(1 + mr, maanden) - 1) : 0;
+  const woonquote = totInk > 0 ? maxMaandlast / (totInk / 12) * 100 : 0;
+
+  // maandlasten
+  const woning = n(f.woning);
+  const inleg = n(f.inleg);
+  const hyp = Math.max(0, woning - inleg);
+  const vorm = f.vorm || 'annuiteit';
+  let ml = 0;
+  if (hyp > 0 && mr > 0) {
+    if (vorm === 'annuiteit') ml = hyp * (mr * Math.pow(1 + mr, maanden)) / (Math.pow(1 + mr, maanden) - 1);else if (vorm === 'lineair') ml = hyp / maanden + hyp * mr;else ml = hyp * mr;
+  }
+  let totRente = 0;
+  if (vorm === 'annuiteit' && hyp > 0 && mr > 0) totRente = ml * maanden - hyp;else if (vorm === 'lineair' && hyp > 0) {
+    const a = hyp / maanden;
+    for (let m = 0; m < maanden; m++) totRente += (hyp - m * a) * mr;
+  } else if (vorm === 'aflossingsvrij') totRente = hyp * mr * maanden;
+  const ltv = woning > 0 ? hyp / woning * 100 : 0;
+  const nhgGrns = 435000;
+  const overdracht = woning <= 510000 ? 0 : woning * 0.02;
+  const raftrek = f.box1 !== false && vorm !== 'aflossingsvrij' ? totRente * 0.3695 : 0;
+
+  // grafiek
+  const graf = [];
+  if (hyp > 0 && mr > 0 && vorm === 'annuiteit') {
+    let rs = hyp;
+    for (let jr = 1; jr <= Math.min(looptijd, 30); jr++) {
+      let jr2 = 0;
+      for (let m = 0; m < 12; m++) {
+        const ri = rs * mr;
+        jr2 += ri;
+        rs = Math.max(0, rs - (ml - ri));
+      }
+      graf.push({
+        jr,
+        rs: Math.round(rs)
+      });
+    }
+  }
+  const TabBtn = ({
+    id,
+    label
+  }) => /*#__PURE__*/React.createElement("button", {
+    onClick: () => setTab(id),
+    style: {
+      padding: '9px 20px',
+      borderRadius: 8,
+      border: 'none',
+      cursor: 'pointer',
+      fontFamily: 'inherit',
+      fontSize: 13,
+      fontWeight: tab === id ? 600 : 400,
+      background: tab === id ? 'var(--brass)' : 'var(--surface2)',
+      color: tab === id ? '#fff' : 'var(--muted)',
+      transition: '.14s'
+    }
+  }, label);
+  const Row = ({
+    label,
+    val,
+    color
+  }) => /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      padding: '9px 0',
+      borderBottom: '1px solid var(--line)',
+      fontSize: 13
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: 'var(--muted)'
+    }
+  }, label), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: color || 'var(--ink)'
+    }
+  }, val));
+  const Pill = ({
+    label,
+    val,
+    sub,
+    color
+  }) => /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, label), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big",
+    style: color ? {
+      color
+    } : {}
+  }, val), sub && /*#__PURE__*/React.createElement("div", {
+    className: "lbl",
+    style: {
+      marginTop: 2
+    }
+  }, sub));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "calc-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 8,
+      marginBottom: 20
+    }
+  }, /*#__PURE__*/React.createElement(TabBtn, {
+    id: "leen",
+    label: "💰 Leencapaciteit"
+  }), /*#__PURE__*/React.createElement(TabBtn, {
+    id: "calc",
+    label: "📊 Maandlasten"
+  })), tab === 'leen' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-title"
+  }, "Hoeveel kan ik lenen?"), /*#__PURE__*/React.createElement("div", {
+    className: "calc-desc"
+  }, "Gebaseerd op de Nederlandse LTI-normen 2025. Dit is een indicatie — je hypotheekadviseur bepaalt het definitieve bedrag."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: 16,
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Bruto jaarsalaris (€)"), /*#__PURE__*/React.createElement("input", {
+    value: f.bruto || '',
+    placeholder: "bv. 55000",
+    inputMode: "decimal",
+    onChange: e => sf('bruto', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Partner bruto jaarsalaris (€)"), /*#__PURE__*/React.createElement("input", {
+    value: f.partner || '',
+    placeholder: "0 als geen partner",
+    inputMode: "decimal",
+    onChange: e => sf('partner', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Studieschuld (€)"), /*#__PURE__*/React.createElement("input", {
+    value: f.stud || '',
+    placeholder: "0",
+    inputMode: "decimal",
+    onChange: e => sf('stud', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Rente (%)"), /*#__PURE__*/React.createElement("input", {
+    value: f.rente || '4.0',
+    placeholder: "4.0",
+    inputMode: "decimal",
+    onChange: e => sf('rente', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Looptijd (jaren)"), /*#__PURE__*/React.createElement("input", {
+    value: f.looptijd || '30',
+    placeholder: "30",
+    inputMode: "decimal",
+    onChange: e => sf('looptijd', e.target.value)
+  })))), totInk > 0 && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "loan-pillars"
+  }, /*#__PURE__*/React.createElement(Pill, {
+    label: "Totaal inkomen",
+    val: eur(totInk),
+    sub: partner > 0 ? 'partner telt voor 90%' : null
+  }), /*#__PURE__*/React.createElement(Pill, {
+    label: "Max. hypotheek",
+    val: eur(maxLeen),
+    color: "var(--brass)"
+  }), /*#__PURE__*/React.createElement(Pill, {
+    label: "Max. maandlast",
+    val: eur(maxMaandlast)
+  }), /*#__PURE__*/React.createElement(Pill, {
+    label: "Woonquote",
+    val: woonquote.toFixed(1) + '%',
+    color: woonquote > 35 ? 'var(--loss)' : 'var(--gain)'
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Toelichting"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement(Row, {
+    label: "LTI-factor (inkomensmultiplier)",
+    val: lti + 'x'
+  }), /*#__PURE__*/React.createElement(Row, {
+    label: "Max. op basis van inkomen",
+    val: eur(lti * totInk)
+  }), stud > 0 && /*#__PURE__*/React.createElement(Row, {
+    label: "Aftrek studieschuld",
+    val: '-' + eur(lti * totInk - maxLeen),
+    color: "var(--loss)"
+  }), /*#__PURE__*/React.createElement(Row, {
+    label: "NHG mogelijk tot",
+    val: '€' + nhgGrns.toLocaleString('nl-NL')
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 14,
+      padding: '12px 16px',
+      borderRadius: 10,
+      background: maxLeen <= nhgGrns ? 'rgba(42,138,90,.08)' : 'var(--bg2)',
+      border: '1px solid ' + (maxLeen <= nhgGrns ? 'var(--gain)' : 'var(--line)'),
+      fontSize: 13,
+      color: 'var(--muted)',
+      lineHeight: 1.6
+    }
+  }, maxLeen <= nhgGrns ? '✓ Je maximale hypotheek valt binnen de NHG-grens. Je komt waarschijnlijk in aanmerking voor NHG (~0,5% rentevoordeel).' : '⚠ Je maximale hypotheek ligt boven de NHG-grens van €' + nhgGrns.toLocaleString('nl-NL') + '.'))), totInk === 0 && /*#__PURE__*/React.createElement("div", {
+    className: "calc-section",
+    style: {
+      textAlign: 'center',
+      color: 'var(--muted)',
+      padding: '32px 20px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 32,
+      marginBottom: 12
+    }
+  }, "💰"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14
+    }
+  }, "Vul je bruto jaarsalaris in om je maximale hypotheek te berekenen."))), tab === 'calc' && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-title"
+  }, "Maandlasten berekenen"), /*#__PURE__*/React.createElement("div", {
+    className: "calc-desc"
+  }, "Bereken je maandlasten, totale rentekosten en het verloop van je hypotheek op basis van Nederlandse normen 2025."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: 16,
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Woningwaarde (€)"), /*#__PURE__*/React.createElement("input", {
+    value: f.woning || '',
+    placeholder: "bv. 350000",
+    inputMode: "decimal",
+    onChange: e => sf('woning', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Eigen inleg (€)"), /*#__PURE__*/React.createElement("input", {
+    value: f.inleg || '',
+    placeholder: "bv. 50000",
+    inputMode: "decimal",
+    onChange: e => sf('inleg', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Rente (%)"), /*#__PURE__*/React.createElement("input", {
+    value: f.rente || '4.0',
+    placeholder: "4.0",
+    inputMode: "decimal",
+    onChange: e => sf('rente', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Looptijd (jaren)"), /*#__PURE__*/React.createElement("input", {
+    value: f.looptijd || '30',
+    placeholder: "30",
+    inputMode: "decimal",
+    onChange: e => sf('looptijd', e.target.value)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Hypotheekvorm"), /*#__PURE__*/React.createElement("select", {
+    className: "auto-int",
+    value: vorm,
+    onChange: e => sf('vorm', e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "annuiteit"
+  }, "Annuïteit (meest gekozen)"), /*#__PURE__*/React.createElement("option", {
+    value: "lineair"
+  }, "Lineair"), /*#__PURE__*/React.createElement("option", {
+    value: "aflossingsvrij"
+  }, "Aflossingsvrij"))), /*#__PURE__*/React.createElement("div", {
+    className: "fld",
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 10,
+      justifyContent: 'flex-end'
+    }
+  }, /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      cursor: 'pointer',
+      fontSize: 13
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: f.box1 !== false,
+    onChange: e => sf('box1', e.target.checked)
+  }), "Hypotheekrenteaftrek (box 1)"), /*#__PURE__*/React.createElement("label", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      cursor: 'pointer',
+      fontSize: 13
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "checkbox",
+    checked: !!f.nhg,
+    onChange: e => sf('nhg', e.target.checked),
+    disabled: woning > nhgGrns
+  }), "NHG ", woning > nhgGrns && /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: 'var(--faint)',
+      fontSize: 11
+    }
+  }, "(woningwaarde te hoog)"))))), hyp > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "loan-pillars"
+  }, /*#__PURE__*/React.createElement(Pill, {
+    label: "Hypotheekbedrag",
+    val: eur(hyp)
+  }), /*#__PURE__*/React.createElement(Pill, {
+    label: "Maandlast",
+    val: eur(ml),
+    color: "var(--brass)",
+    sub: vorm === 'lineair' ? 'eerste maand' : null
+  }), /*#__PURE__*/React.createElement(Pill, {
+    label: "Totale rente",
+    val: eur(totRente),
+    color: "var(--loss)"
+  }), /*#__PURE__*/React.createElement(Pill, {
+    label: "Totaal betaald",
+    val: eur(hyp + totRente)
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Financieel overzicht"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: 12,
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--bg2)',
+      borderRadius: 10,
+      padding: '14px 16px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      letterSpacing: '.12em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 8
+    }
+  }, "LTV (loan-to-value)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      fontWeight: 600,
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: ltv > 90 ? 'var(--loss)' : ltv > 80 ? 'var(--brass)' : 'var(--gain)'
+    }
+  }, ltv.toFixed(1), "%"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 6,
+      background: 'var(--line)',
+      borderRadius: 3,
+      marginTop: 8,
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: '100%',
+      width: Math.min(100, ltv) + '%',
+      background: ltv > 90 ? 'var(--loss)' : ltv > 80 ? 'var(--brass)' : 'var(--gain)',
+      borderRadius: 3
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--faint)',
+      marginTop: 6
+    }
+  }, ltv <= 80 ? '✓ Gunstig — kans op lage rente' : ltv <= 90 ? '~ Gemiddeld' : '✗ Hoog — overweeg meer eigen inleg')), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--bg2)',
+      borderRadius: 10,
+      padding: '14px 16px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      letterSpacing: '.12em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 8
+    }
+  }, "Eenmalige kosten"), /*#__PURE__*/React.createElement(Row, {
+    label: "Overdrachtsbelasting",
+    val: overdracht === 0 ? '€0 (starter)' : eur(overdracht),
+    color: overdracht === 0 ? 'var(--gain)' : null
+  }), /*#__PURE__*/React.createElement(Row, {
+    label: "Notariskosten",
+    val: eur(1500)
+  }), /*#__PURE__*/React.createElement(Row, {
+    label: "Taxatiekosten",
+    val: eur(700)
+  }), f.nhg && woning <= nhgGrns && /*#__PURE__*/React.createElement(Row, {
+    label: "NHG premie (0,6%)",
+    val: eur(hyp * 0.006)
+  })), raftrek > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'rgba(42,138,90,.08)',
+      border: '1px solid var(--gain)',
+      borderRadius: 10,
+      padding: '14px 16px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      letterSpacing: '.12em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 8
+    }
+  }, "Hypotheekrenteaftrek"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      fontWeight: 600,
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: 'var(--gain)'
+    }
+  }, "+", eur(raftrek)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--muted)',
+      marginTop: 4
+    }
+  }, "Totaal voordeel over ", looptijd, " jaar (tarief 36,97%)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--gain)',
+      marginTop: 4
+    }
+  }, "≈ ", eur(raftrek / maanden), "/maand")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--bg2)',
+      borderRadius: 10,
+      padding: '14px 16px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      letterSpacing: '.12em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 8
+    }
+  }, "NHG"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: woning <= nhgGrns ? 'var(--gain)' : 'var(--muted)'
+    }
+  }, woning <= nhgGrns ? `✓ Mogelijk (grens €${nhgGrns.toLocaleString('nl-NL')})` : '✗ Niet mogelijk'), woning <= nhgGrns && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--faint)',
+      marginTop: 4
+    }
+  }, "NHG geeft ~0,5% rentevoordeel")))), graf.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Restschuld over tijd"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 16,
+      overflowX: 'auto'
+    }
+  }, /*#__PURE__*/React.createElement("svg", {
+    viewBox: `0 0 ${graf.length * 28 + 60} 160`,
+    style: {
+      width: '100%',
+      minWidth: 400
+    }
+  }, graf.map((d, i) => {
+    const x = i * 28 + 60;
+    const bh = Math.round(d.rs / hyp * 120);
+    return /*#__PURE__*/React.createElement("g", {
+      key: i
+    }, /*#__PURE__*/React.createElement("rect", {
+      x: x,
+      y: 140 - bh,
+      width: 18,
+      height: bh,
+      fill: "var(--brass)",
+      opacity: ".7",
+      rx: "2"
+    }), d.jr % 5 === 0 && /*#__PURE__*/React.createElement("text", {
+      x: x + 9,
+      y: 155,
+      textAnchor: "middle",
+      fill: "var(--faint)",
+      style: {
+        fontSize: 9
+      }
+    }, d.jr, "jr"));
+  }), [0, 0.25, 0.5, 0.75, 1].map((pct, i) => /*#__PURE__*/React.createElement("g", {
+    key: i
+  }, /*#__PURE__*/React.createElement("line", {
+    x1: 55,
+    y1: 140 - pct * 120,
+    x2: graf.length * 28 + 60,
+    y2: 140 - pct * 120,
+    stroke: "var(--line)",
+    strokeWidth: ".5"
+  }), /*#__PURE__*/React.createElement("text", {
+    x: 52,
+    y: 140 - pct * 120 + 3,
+    textAnchor: "end",
+    fill: "var(--faint)",
+    style: {
+      fontSize: 8
+    }
+  }, eur(hyp * pct)))))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--faint)',
+      marginTop: 4
+    }
+  }, "Na 10 jaar: ", eur(graf[9]?.rs || 0), " restschuld · Na 20 jaar: ", eur(graf[19]?.rs || 0)))) : /*#__PURE__*/React.createElement("div", {
+    className: "calc-section",
+    style: {
+      textAlign: 'center',
+      color: 'var(--muted)',
+      padding: '32px 20px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 32,
+      marginBottom: 12
+    }
+  }, "🏠"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14
+    }
+  }, "Vul woningwaarde en eigen inleg in om je maandlasten te berekenen."))));
 }
 
 /* ---- Rekenmachine tab ---- */
@@ -2829,8 +3771,16 @@ function BudgetTab({
     categories: monthData.categories.filter(c => c.id !== id)
   });
 
-  // Maand navigatie
-  const monthNames = Object.keys(months).sort().reverse();
+  // Maand navigatie — genereer laatste 12 maanden als er geen data is
+  const monthNames = Object.keys(months).length > 0 ? Object.keys(months).sort().reverse() : (() => {
+    const result = [];
+    for (let i = 0; i < 12; i++) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      result.push(d.toISOString().slice(0, 7));
+    }
+    return result;
+  })();
   if (!monthNames.includes(activeMonth)) monthNames.unshift(activeMonth);
   function fmtMonth(ym) {
     try {
@@ -4112,6 +5062,2147 @@ function ExportButton({
   }, "Sluiten"))));
 }
 
+/* ---- rekeningen tab ---- */
+function AccountsTab() {
+  const accUid = () => Math.random().toString(36).slice(2, 9);
+  const n = v => parseFloat(String(v || '').replace(',', '.')) || 0;
+  const DEFAULT_ACCOUNTS = [];
+  const [accounts, setAccounts] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('fb:accounts') || '[]');
+    } catch (e) {
+      return DEFAULT_ACCOUNTS;
+    }
+  });
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({
+    name: '',
+    bank: '',
+    type: 'betaalrekening',
+    balance: '',
+    currency: 'EUR',
+    iban: ''
+  });
+  const [editId, setEditId] = useState(null);
+  const [wiseKey, setWiseKey] = useState(() => {
+    try {
+      return localStorage.getItem('fb:wise_key') || '';
+    } catch (e) {
+      return '';
+    }
+  });
+  const [showWiseSetup, setShowWiseSetup] = useState(false);
+  const [wiseLoading, setWiseLoading] = useState(false);
+  const [wiseMsg, setWiseMsg] = useState('');
+  useEffect(() => {
+    try {
+      localStorage.setItem('fb:accounts', JSON.stringify(accounts));
+    } catch (e) {}
+  }, [accounts]);
+  function saveAccount() {
+    if (!form.name) return;
+    if (editId) {
+      setAccounts(a => a.map(acc => acc.id === editId ? {
+        ...acc,
+        ...form
+      } : acc));
+      setEditId(null);
+    } else {
+      setAccounts(a => [...a, {
+        id: accUid(),
+        ...form,
+        lastSync: null
+      }]);
+    }
+    setForm({
+      name: '',
+      bank: '',
+      type: 'betaalrekening',
+      balance: '',
+      currency: 'EUR',
+      iban: ''
+    });
+    setShowForm(false);
+  }
+  function startEdit(acc) {
+    setForm({
+      name: acc.name,
+      bank: acc.bank,
+      type: acc.type,
+      balance: acc.balance,
+      currency: acc.currency || 'EUR',
+      iban: acc.iban || ''
+    });
+    setEditId(acc.id);
+    setShowForm(true);
+  }
+  async function fetchWiseBalances() {
+    if (!wiseKey) {
+      setShowWiseSetup(true);
+      return;
+    }
+    setWiseLoading(true);
+    setWiseMsg('');
+    try {
+      // Haal Wise profielen op
+      const profileRes = await fetch('https://api.wise.com/v1/profiles', {
+        headers: {
+          'Authorization': 'Bearer ' + wiseKey
+        }
+      });
+      if (!profileRes.ok) {
+        setWiseMsg('Ongeldige Wise API-key. Controleer hem in je Wise instellingen.');
+        setWiseLoading(false);
+        return;
+      }
+      const profiles = await profileRes.json();
+      const profile = profiles.find(p => p.type === 'personal') || profiles[0];
+      if (!profile) {
+        setWiseMsg('Geen Wise profiel gevonden.');
+        setWiseLoading(false);
+        return;
+      }
+
+      // Haal balansen op
+      const balRes = await fetch(`https://api.wise.com/v4/profiles/${profile.id}/balances?types=STANDARD`, {
+        headers: {
+          'Authorization': 'Bearer ' + wiseKey
+        }
+      });
+      if (!balRes.ok) {
+        setWiseMsg('Fout bij ophalen balansen.');
+        setWiseLoading(false);
+        return;
+      }
+      const balances = await balRes.json();
+
+      // Update of voeg toe
+      const newAccounts = [...accounts];
+      balances.forEach(bal => {
+        const existing = newAccounts.findIndex(a => a.wiseId === bal.id);
+        const accData = {
+          id: existing >= 0 ? newAccounts[existing].id : accUid(),
+          wiseId: bal.id,
+          name: `Wise ${bal.currency}`,
+          bank: 'Wise',
+          type: 'betaalrekening',
+          balance: bal.amount.value.toFixed(2),
+          currency: bal.currency,
+          iban: '',
+          lastSync: new Date().toISOString(),
+          fromWise: true
+        };
+        if (existing >= 0) newAccounts[existing] = accData;else newAccounts.push(accData);
+      });
+      setAccounts(newAccounts);
+      setWiseMsg(`✓ ${balances.length} Wise rekening(en) gesynchroniseerd!`);
+      setTimeout(() => setWiseMsg(''), 4000);
+    } catch (e) {
+      setWiseMsg('Verbindingsfout: ' + e.message);
+    }
+    setWiseLoading(false);
+  }
+  function saveWiseKey(k) {
+    try {
+      localStorage.setItem('fb:wise_key', k);
+    } catch (e) {}
+    setWiseKey(k);
+  }
+  const totalByCurrency = {};
+  accounts.forEach(a => {
+    const cur = a.currency || 'EUR';
+    totalByCurrency[cur] = (totalByCurrency[cur] || 0) + n(a.balance);
+  });
+  const TYPES = ['betaalrekening', 'spaarrekening', 'beleggingsrekening', 'crypto', 'overig'];
+  const CURRENCIES = ['EUR', 'USD', 'GBP', 'CHF', 'SEK', 'DKK', 'NOK', 'PLN', 'CZK', 'HUF'];
+  const BANKS = ['ING', 'Rabobank', 'ABN AMRO', 'SNS', 'Triodos', 'Bunq', 'Revolut', 'Wise', 'N26', 'Overig'];
+  return /*#__PURE__*/React.createElement("div", {
+    className: "calc-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 10,
+      marginBottom: 20,
+      flexWrap: 'wrap',
+      alignItems: 'center'
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    onClick: () => {
+      setShowForm(true);
+      setEditId(null);
+      setForm({
+        name: '',
+        bank: '',
+        type: 'betaalrekening',
+        balance: '',
+        currency: 'EUR',
+        iban: ''
+      });
+    }
+  }, "+ Rekening toevoegen"), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: fetchWiseBalances,
+    disabled: wiseLoading,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6
+    }
+  }, wiseLoading ? '⏳ Laden...' : '🔄 Synchroniseer Wise'), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => setShowWiseSetup(s => !s),
+    style: {
+      fontSize: 12
+    }
+  }, "⚙️ Wise API-key"), wiseMsg && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: wiseMsg.startsWith('✓') ? 'var(--gain)' : 'var(--loss)',
+      fontFamily: "'IBM Plex Mono',monospace"
+    }
+  }, wiseMsg)), showWiseSetup && /*#__PURE__*/React.createElement("div", {
+    className: "calc-section",
+    style: {
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("h3", null, "Wise API-key instellen"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: 'var(--muted)',
+      marginBottom: 12,
+      lineHeight: 1.6
+    }
+  }, "Maak een gratis read-only API-key aan op", ' ', /*#__PURE__*/React.createElement("a", {
+    href: "https://wise.com/settings/api-tokens",
+    target: "_blank",
+    rel: "noopener",
+    style: {
+      color: 'var(--brass)'
+    }
+  }, "wise.com/settings/api-tokens"), ". Kies ", /*#__PURE__*/React.createElement("b", null, "Read only"), " — Finance Bro kan dan alleen je saldo en transacties lezen, nooit betalingen doen."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 10,
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    type: "password",
+    value: wiseKey,
+    placeholder: "Wise API-key...",
+    onChange: e => saveWiseKey(e.target.value),
+    style: {
+      flex: 1,
+      minWidth: 200,
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
+      borderRadius: 8,
+      color: 'var(--ink)',
+      padding: '10px 13px',
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 13,
+      outline: 'none'
+    }
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    onClick: () => {
+      setShowWiseSetup(false);
+      fetchWiseBalances();
+    }
+  }, "Opslaan & synchroniseren"))), showForm && /*#__PURE__*/React.createElement("div", {
+    className: "calc-section",
+    style: {
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("h3", null, editId ? 'Rekening bewerken' : 'Rekening toevoegen'), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: 12,
+      maxWidth: 560
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Naam"), /*#__PURE__*/React.createElement("input", {
+    value: form.name,
+    placeholder: "bv. ING Betaalrekening",
+    onChange: e => setForm(f => ({
+      ...f,
+      name: e.target.value
+    }))
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Bank"), /*#__PURE__*/React.createElement("select", {
+    className: "auto-int",
+    value: form.bank,
+    onChange: e => setForm(f => ({
+      ...f,
+      bank: e.target.value
+    }))
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "Kies bank..."), BANKS.map(b => /*#__PURE__*/React.createElement("option", {
+    key: b,
+    value: b
+  }, b)))), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Type"), /*#__PURE__*/React.createElement("select", {
+    className: "auto-int",
+    value: form.type,
+    onChange: e => setForm(f => ({
+      ...f,
+      type: e.target.value
+    }))
+  }, TYPES.map(t => /*#__PURE__*/React.createElement("option", {
+    key: t,
+    value: t
+  }, t)))), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Valuta"), /*#__PURE__*/React.createElement("select", {
+    className: "auto-int",
+    value: form.currency,
+    onChange: e => setForm(f => ({
+      ...f,
+      currency: e.target.value
+    }))
+  }, CURRENCIES.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c,
+    value: c
+  }, c)))), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "Saldo"), /*#__PURE__*/React.createElement("input", {
+    value: form.balance,
+    placeholder: "0.00",
+    inputMode: "decimal",
+    onChange: e => setForm(f => ({
+      ...f,
+      balance: e.target.value
+    }))
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "IBAN (optioneel)"), /*#__PURE__*/React.createElement("input", {
+    value: form.iban,
+    placeholder: "NL00 INGB 0000 0000 00",
+    onChange: e => setForm(f => ({
+      ...f,
+      iban: e.target.value
+    }))
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 10,
+      marginTop: 14
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    onClick: saveAccount,
+    disabled: !form.name
+  }, editId ? 'Opslaan' : 'Toevoegen'), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => {
+      setShowForm(false);
+      setEditId(null);
+    }
+  }, "Annuleren"))), accounts.length > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 12,
+      marginBottom: 20,
+      flexWrap: 'wrap'
+    }
+  }, Object.entries(totalByCurrency).map(([cur, total]) => /*#__PURE__*/React.createElement("div", {
+    key: cur,
+    style: {
+      background: 'var(--surface)',
+      border: '1px solid var(--line)',
+      borderRadius: 10,
+      padding: '14px 18px',
+      minWidth: 140
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      letterSpacing: '.15em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 4
+    }
+  }, "Totaal ", cur), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      fontWeight: 600,
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: 'var(--ink)'
+    }
+  }, cur === 'EUR' ? '€' : cur + ' ', Number(total).toLocaleString('nl-NL', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  }))))), accounts.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "calc-section",
+    style: {
+      textAlign: 'center',
+      color: 'var(--muted)',
+      padding: '40px 20px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 32,
+      marginBottom: 12
+    }
+  }, "🏦"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 15,
+      marginBottom: 8
+    }
+  }, "Nog geen rekeningen toegevoegd"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13
+    }
+  }, "Voeg een rekening handmatig toe of synchroniseer je Wise account.")) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 10
+    }
+  }, accounts.map(acc => /*#__PURE__*/React.createElement("div", {
+    key: acc.id,
+    style: {
+      background: 'var(--surface)',
+      border: '1px solid var(--line)',
+      borderRadius: 12,
+      padding: '16px 20px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 16,
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 42,
+      height: 42,
+      borderRadius: 10,
+      background: acc.bank === 'Wise' ? 'rgba(0,184,148,.12)' : 'var(--surface2)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: 20,
+      flexShrink: 0
+    }
+  }, acc.bank === 'Wise' ? '🌍' : acc.type === 'spaarrekening' ? '💰' : acc.type === 'crypto' ? '₿' : acc.type === 'beleggingsrekening' ? '📈' : '🏦'), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 15,
+      fontWeight: 600,
+      color: 'var(--ink)'
+    }
+  }, acc.name), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)'
+    }
+  }, acc.bank, " · ", acc.type, acc.iban ? ' · ' + acc.iban : ''), acc.lastSync && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--faint)',
+      marginTop: 2
+    }
+  }, "Gesync: ", new Date(acc.lastSync).toLocaleString('nl-NL', {
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit'
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'right',
+      flexShrink: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 20,
+      fontWeight: 600,
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: n(acc.balance) >= 0 ? 'var(--ink)' : 'var(--loss)'
+    }
+  }, acc.currency === 'EUR' ? '€' : (acc.currency || 'EUR') + ' ', Number(n(acc.balance)).toLocaleString('nl-NL', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--faint)'
+    }
+  }, acc.currency || 'EUR')), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 6,
+      flexShrink: 0
+    }
+  }, acc.fromWise && /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      fontSize: 11,
+      padding: '5px 10px'
+    },
+    onClick: fetchWiseBalances,
+    disabled: wiseLoading
+  }, "🔄"), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      fontSize: 11,
+      padding: '5px 10px'
+    },
+    onClick: () => startEdit(acc)
+  }, "✎"), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      fontSize: 11,
+      padding: '5px 10px',
+      color: 'var(--loss)',
+      borderColor: 'var(--loss)'
+    },
+    onClick: () => setAccounts(a => a.filter(x => x.id !== acc.id))
+  }, "×"))))));
+}
+
+/* ---- alle transacties tab ---- */
+function AllTransactionsTab({
+  transactions,
+  setTransactions
+}) {
+  const tUid = () => Math.random().toString(36).slice(2, 9);
+  const n = v => parseFloat(String(v || '').replace(',', '.')) || 0;
+  const today = new Date().toISOString().slice(0, 10);
+  const [search, setSearch] = useState('');
+  const [filterType, setFilterType] = useState('alle');
+  const [filterMonth, setFilterMonth] = useState('alle');
+  const [sortField, setSortField] = useState('date');
+  const [sortDir, setSortDir] = useState('desc');
+  const [showIngImport, setShowIngImport] = useState(false);
+  const [ingMsg, setIngMsg] = useState('');
+  const [wiseLoading, setWiseLoading] = useState(false);
+  const [wiseMsg, setWiseMsg] = useState('');
+  async function fetchWiseTransactions() {
+    const wiseKey = localStorage.getItem('fb:wise_key') || '';
+    if (!wiseKey) {
+      setWiseMsg('⚠ Stel eerst je Wise API-key in via de Rekeningen-tab.');
+      return;
+    }
+    setWiseLoading(true);
+    setWiseMsg('');
+    try {
+      // Haal profiel op
+      const profileRes = await fetch('https://api.wise.com/v1/profiles', {
+        headers: {
+          'Authorization': 'Bearer ' + wiseKey
+        }
+      });
+      if (!profileRes.ok) {
+        setWiseMsg('✗ Ongeldige Wise API-key.');
+        setWiseLoading(false);
+        return;
+      }
+      const profiles = await profileRes.json();
+      const profile = profiles.find(p => p.type === 'personal') || profiles[0];
+      if (!profile) {
+        setWiseMsg('✗ Geen Wise profiel gevonden.');
+        setWiseLoading(false);
+        return;
+      }
+
+      // Haal alle accounts op
+      const accRes = await fetch(`https://api.wise.com/v1/borderless-accounts?profileId=${profile.id}`, {
+        headers: {
+          'Authorization': 'Bearer ' + wiseKey
+        }
+      });
+      if (!accRes.ok) {
+        setWiseMsg('✗ Kon Wise rekeningen niet ophalen.');
+        setWiseLoading(false);
+        return;
+      }
+      const accounts = await accRes.json();
+
+      // Haal transacties op voor elke currency
+      const existingIds = new Set((transactions || []).filter(t => t.wiseId).map(t => t.wiseId));
+      const newTrans = [];
+      const since = new Date();
+      since.setFullYear(since.getFullYear() - 1);
+      const sinceStr = since.toISOString();
+      for (const acc of accounts) {
+        for (const bal of acc.balances || []) {
+          try {
+            const stmtRes = await fetch(`https://api.wise.com/v3/profiles/${profile.id}/borderless-accounts/${acc.id}/statement.json?currency=${bal.currency}&intervalStart=${sinceStr}&intervalEnd=${new Date().toISOString()}`, {
+              headers: {
+                'Authorization': 'Bearer ' + wiseKey
+              }
+            });
+            if (!stmtRes.ok) continue;
+            const stmt = await stmtRes.json();
+            for (const tx of stmt.transactions || []) {
+              if (existingIds.has(String(tx.referenceNumber))) continue;
+              const amount = Math.abs(tx.amount?.value || 0);
+              if (amount === 0) continue;
+              const isCredit = tx.type === 'CREDIT';
+              const date = tx.date ? tx.date.slice(0, 10) : today;
+              newTrans.push({
+                id: tUid(),
+                wiseId: String(tx.referenceNumber),
+                date,
+                amount,
+                type: isCredit ? 'inkomst' : 'uitgave',
+                note: tx.details?.description || tx.details?.type || 'Wise transactie',
+                category: 'Wise',
+                currency: bal.currency,
+                source: 'wise'
+              });
+              existingIds.add(String(tx.referenceNumber));
+            }
+          } catch (e) {
+            continue;
+          }
+        }
+      }
+      if (newTrans.length === 0) {
+        setWiseMsg('✓ Geen nieuwe Wise transacties gevonden.');
+      } else {
+        setTransactions(prev => [...newTrans, ...(prev || [])]);
+        setWiseMsg(`✓ ${newTrans.length} Wise transactie(s) geïmporteerd!`);
+      }
+      setTimeout(() => setWiseMsg(''), 5000);
+    } catch (e) {
+      setWiseMsg('✗ Verbindingsfout: ' + e.message);
+    }
+    setWiseLoading(false);
+  }
+
+  // Maanden voor filter
+  const months = [...new Set((transactions || []).map(t => t.date?.slice(0, 7)).filter(Boolean))].sort().reverse();
+
+  // Filteren en sorteren
+  const filtered = (transactions || []).filter(t => {
+    if (filterType !== 'alle' && t.type !== filterType) return false;
+    if (filterMonth !== 'alle' && !t.date?.startsWith(filterMonth)) return false;
+    if (search) {
+      const hay = ((t.note || '') + (t.category || '')).toLowerCase();
+      if (!hay.includes(search.toLowerCase())) return false;
+    }
+    return true;
+  }).sort((a, b) => {
+    const mul = sortDir === 'asc' ? 1 : -1;
+    if (sortField === 'date') return mul * (a.date || '').localeCompare(b.date || '');
+    if (sortField === 'amount') return mul * (n(a.amount) - n(b.amount));
+    return 0;
+  });
+  const totalIn = filtered.filter(t => t.type === 'inkomst').reduce((s, t) => s + n(t.amount), 0);
+  const totalOut = filtered.filter(t => t.type === 'uitgave').reduce((s, t) => s + n(t.amount), 0);
+
+  // ING CSV parser
+  function handleIngFile(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setIngMsg('');
+    const reader = new FileReader();
+    reader.onload = () => {
+      const text = String(reader.result || '');
+      const lines = text.split('\n').filter(l => l.trim());
+      if (lines.length < 2) {
+        setIngMsg('Leeg of ongeldig bestand.');
+        return;
+      }
+      const header = lines[0].replace(/"/g, '').split(';').map(h => h.trim().toLowerCase());
+      const datumIdx = header.findIndex(h => h === 'datum');
+      const naamIdx = header.findIndex(h => h.includes('naam') || h.includes('omschrijving'));
+      const afbijIdx = header.findIndex(h => h === 'af bij');
+      const bedragIdx = header.findIndex(h => h.includes('bedrag'));
+      const mededIdx = header.findIndex(h => h.includes('mededeling'));
+      if (datumIdx === -1 || bedragIdx === -1) {
+        setIngMsg('Geen geldig ING CSV-bestand.');
+        return;
+      }
+      const existingKeys = new Set((transactions || []).map(t => `${t.date}_${t.amount}_${(t.note || '').slice(0, 20)}`));
+      const entries = [];
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(';').map(c => c.replace(/^"|"$/g, '').trim());
+        if (cols.length < 4) continue;
+        const raw = cols[datumIdx] || '';
+        const date = raw.length === 8 ? `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}` : raw;
+        const naam = cols[naamIdx] || '';
+        const afbij = (cols[afbijIdx] || '').toLowerCase();
+        const bedragRaw = (cols[bedragIdx] || '').replace('.', '').replace(',', '.');
+        const bedrag = Math.abs(parseFloat(bedragRaw) || 0);
+        const meded = cols[mededIdx] || '';
+        if (!date || bedrag === 0) continue;
+        const type = afbij === 'bij' ? 'inkomst' : 'uitgave';
+        const note = naam || meded.slice(0, 60);
+        const key = `${date}_${bedrag}_${note.slice(0, 20)}`;
+        if (existingKeys.has(key)) continue;
+        existingKeys.add(key);
+        entries.push({
+          id: tUid(),
+          date,
+          amount: bedrag,
+          type,
+          note,
+          category: ''
+        });
+      }
+      if (entries.length === 0) {
+        setIngMsg('Geen nieuwe transacties gevonden.');
+        return;
+      }
+      setTransactions(prev => [...entries, ...(prev || [])]);
+      setIngMsg(`✓ ${entries.length} transacties geïmporteerd!`);
+      setShowIngImport(false);
+    };
+    reader.readAsText(file, 'UTF-8');
+    e.target.value = '';
+  }
+  function toggleSort(field) {
+    if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc');else {
+      setSortField(field);
+      setSortDir('desc');
+    }
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "calc-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 10,
+      flexWrap: 'wrap',
+      alignItems: 'center',
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: search,
+    onChange: e => setSearch(e.target.value),
+    placeholder: "🔍 Zoeken...",
+    style: {
+      flex: 1,
+      minWidth: 160,
+      background: 'var(--surface)',
+      border: '1px solid var(--line)',
+      borderRadius: 8,
+      color: 'var(--ink)',
+      padding: '9px 13px',
+      fontSize: 13,
+      outline: 'none'
+    }
+  }), /*#__PURE__*/React.createElement("select", {
+    className: "auto-int",
+    value: filterType,
+    onChange: e => setFilterType(e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "alle"
+  }, "Alle types"), /*#__PURE__*/React.createElement("option", {
+    value: "uitgave"
+  }, "Uitgaven"), /*#__PURE__*/React.createElement("option", {
+    value: "inkomst"
+  }, "Inkomsten")), /*#__PURE__*/React.createElement("select", {
+    className: "auto-int",
+    value: filterMonth,
+    onChange: e => setFilterMonth(e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: "alle"
+  }, "Alle maanden"), months.map(m => /*#__PURE__*/React.createElement("option", {
+    key: m,
+    value: m
+  }, m))), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: () => setShowIngImport(s => !s)
+  }, "⬆ ING import"), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    onClick: fetchWiseTransactions,
+    disabled: wiseLoading,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6
+    }
+  }, wiseLoading ? '⏳ Laden...' : '🌍 Wise sync'), wiseMsg && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: wiseMsg.startsWith('✓') ? 'var(--gain)' : 'var(--loss)'
+    }
+  }, wiseMsg)), showIngImport && /*#__PURE__*/React.createElement("div", {
+    className: "calc-section",
+    style: {
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("h4", null, "Importeer ING bankafschrift (CSV)"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: 'var(--muted)',
+      marginBottom: 12,
+      lineHeight: 1.6
+    }
+  }, "Log in op ", /*#__PURE__*/React.createElement("b", null, "mijn.ing.nl"), " → Betaalrekening → ", /*#__PURE__*/React.createElement("b", null, "Exporteren"), " → formaat CSV."), /*#__PURE__*/React.createElement("label", {
+    className: "btn primary",
+    style: {
+      cursor: 'pointer',
+      display: 'inline-block'
+    }
+  }, "📂 Kies ING CSV-bestand", /*#__PURE__*/React.createElement("input", {
+    type: "file",
+    accept: ".csv",
+    onChange: handleIngFile,
+    style: {
+      display: 'none'
+    }
+  })), ingMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      fontSize: 12.5,
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: ingMsg.startsWith('✓') ? 'var(--gain)' : 'var(--loss)'
+    }
+  }, ingMsg)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 12,
+      marginBottom: 16,
+      flexWrap: 'wrap'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--surface)',
+      border: '1px solid var(--line)',
+      borderRadius: 10,
+      padding: '12px 16px',
+      flex: 1,
+      minWidth: 120
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      letterSpacing: '.15em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 4
+    }
+  }, filtered.length, " transacties"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 600,
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: 'var(--ink)'
+    }
+  }, filtered.length)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--surface)',
+      border: '1px solid var(--line)',
+      borderRadius: 10,
+      padding: '12px 16px',
+      flex: 1,
+      minWidth: 120
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      letterSpacing: '.15em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 4
+    }
+  }, "Inkomsten"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 600,
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: 'var(--gain)'
+    }
+  }, "+", eur(totalIn))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--surface)',
+      border: '1px solid var(--line)',
+      borderRadius: 10,
+      padding: '12px 16px',
+      flex: 1,
+      minWidth: 120
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      letterSpacing: '.15em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 4
+    }
+  }, "Uitgaven"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 600,
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: 'var(--loss)'
+    }
+  }, "-", eur(totalOut))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--surface)',
+      border: '1px solid var(--line)',
+      borderRadius: 10,
+      padding: '12px 16px',
+      flex: 1,
+      minWidth: 120
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 10,
+      letterSpacing: '.15em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 4
+    }
+  }, "Netto"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 18,
+      fontWeight: 600,
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: totalIn - totalOut >= 0 ? 'var(--gain)' : 'var(--loss)'
+    }
+  }, eur(totalIn - totalOut)))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '100px 1fr 120px 100px',
+      gap: 10,
+      padding: '8px 12px',
+      fontSize: 11,
+      letterSpacing: '.12em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      borderBottom: '1px solid var(--line)'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      cursor: 'pointer'
+    },
+    onClick: () => toggleSort('date')
+  }, "Datum ", sortField === 'date' ? sortDir === 'desc' ? '↓' : '↑' : ''), /*#__PURE__*/React.createElement("span", null, "Omschrijving"), /*#__PURE__*/React.createElement("span", null, "Categorie"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      textAlign: 'right',
+      cursor: 'pointer'
+    },
+    onClick: () => toggleSort('amount')
+  }, "Bedrag ", sortField === 'amount' ? sortDir === 'desc' ? '↓' : '↑' : '')), filtered.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    style: {
+      textAlign: 'center',
+      color: 'var(--muted)',
+      padding: '40px 20px',
+      fontSize: 14
+    }
+  }, (transactions || []).length === 0 ? 'Nog geen transacties. Importeer een ING CSV-bestand om te beginnen.' : 'Geen transacties gevonden met deze filters.') : /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column'
+    }
+  }, filtered.map((t, i) => /*#__PURE__*/React.createElement("div", {
+    key: t.id,
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '100px 1fr 120px 100px',
+      gap: 10,
+      padding: '11px 12px',
+      borderBottom: '1px solid var(--line)',
+      alignItems: 'center',
+      background: i % 2 === 0 ? 'transparent' : 'var(--bg2)'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: 'var(--muted)'
+    }
+  }, t.date), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: 'var(--ink)',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
+    }
+  }, t.source === 'wise' && /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 10,
+      background: 'rgba(0,184,148,.12)',
+      color: '#00A878',
+      borderRadius: 4,
+      padding: '1px 5px',
+      marginRight: 6,
+      fontFamily: "'IBM Plex Mono',monospace"
+    }
+  }, "Wise"), t.note || '—'), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 11,
+      color: 'var(--faint)',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
+    }
+  }, t.category || '—'), /*#__PURE__*/React.createElement("span", {
+    style: {
+      textAlign: 'right',
+      fontSize: 13,
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontWeight: 500,
+      color: t.type === 'inkomst' ? 'var(--gain)' : 'var(--loss)'
+    }
+  }, t.type === 'inkomst' ? '+' : '−', eur(n(t.amount)))))));
+}
+
+/* ---- dashboard overzicht tab ---- */
+function DashboardTab({
+  portfolioValue,
+  portfolios,
+  transactions,
+  budget,
+  loan,
+  holdings
+}) {
+  const n = v => parseFloat(String(v || '').replace(',', '.')) || 0;
+  const today = new Date().toISOString().slice(0, 7);
+
+  // Budget berekeningen
+  const activeMon = budget && budget.activeMonth || today;
+  const activeBudget = budget && budget.months && budget.months[activeMon] || {
+    salaryGross: '',
+    categories: [],
+    savingsTarget: ''
+  };
+  const gross = n(activeBudget.salaryGross);
+  const nlTax = calcNLTax(gross);
+  const netMth = nlTax.net / 12;
+  const totalBudget = (activeBudget.categories || []).reduce((s, c) => s + n(c.amount), 0);
+  const savingsTarget = n(activeBudget.savingsTarget);
+
+  // Uitgaven deze maand
+  const thisMonthTrans = (transactions || []).filter(t => t.date && t.date.startsWith(activeMon));
+  const totalSpent = thisMonthTrans.filter(t => t.type === 'uitgave').reduce((s, t) => s + n(t.amount), 0);
+  const totalIncome = thisMonthTrans.filter(t => t.type === 'inkomst').reduce((s, t) => s + n(t.amount), 0);
+  const budgetLeft = totalBudget - totalSpent;
+  const budgetPct = totalBudget > 0 ? Math.min(100, Math.round(totalSpent / totalBudget * 100)) : 0;
+
+  // Netto vermogen
+  const nwData = (() => {
+    try {
+      return JSON.parse(localStorage.getItem('fb:networth') || '{}');
+    } catch (e) {
+      return {};
+    }
+  })();
+  // Laad rekeningen uit fb:accounts en tel ze op als bezittingen
+  const accounts = (() => { try { return JSON.parse(localStorage.getItem('fb:accounts') || '[]'); } catch(e) { return []; } })();
+  // Converteer niet-EUR rekeningen naar EUR (simpele benadering: alleen EUR rekeningen tellen direct mee)
+  const accountsValueEUR = accounts.reduce((s, acc) => {
+    const bal = n(acc.balance);
+    if (!bal || bal <= 0) return s;
+    // Alleen EUR direct optellen; andere valuta als indicatief
+    return s + bal;
+  }, 0);
+  const manualAssets = (nwData.assets || []).reduce((s, a) => s + n(a.amount), 0);
+  const totalAssets = manualAssets + (portfolioValue || 0) + accountsValueEUR;
+  const totalLiabs = (nwData.liabilities || []).reduce((s, l) => s + n(l.amount), 0) + n(loan?.balance);
+  const netWorth = totalAssets - totalLiabs;
+
+  // Laatste 5 transacties
+  const recentTrans = [...(transactions || [])].sort((a, b) => b.date?.localeCompare(a.date || '') || 0).slice(0, 5);
+
+  // Dividend komende maand
+  const nextMon = (() => {
+    const [y, m] = activeMon.split('-').map(Number);
+    const d = new Date(y, m, 1);
+    return d.toISOString().slice(0, 7);
+  })();
+  const dividendNext = holdings.filter(h => h.divMonths && h.divMonths.includes(Number(nextMon.split('-')[1]))).map(h => ({
+    ticker: h.ticker,
+    amount: h.divYield > 0 ? n(h.qty) * n(h.avgCost) * n(h.divYield) / 100 / h.divMonths.length : 0
+  })).filter(d => d.amount > 0);
+  const divTotal = dividendNext.reduce((s, d) => s + d.amount, 0);
+
+  // Spaardoel voortgang
+  const savingsProgress = savingsTarget > 0 ? Math.min(100, Math.round((netMth - totalBudget) / savingsTarget * 100)) : 0;
+  const catColors = ['#6EA8D8', '#C98AC0', '#E2917E', '#9AA0AE', '#B5915A', '#7FB8A0', '#CBA135'];
+  const spentByCat = {};
+  thisMonthTrans.filter(t => t.type === 'uitgave').forEach(t => {
+    spentByCat[t.category || 'Overig'] = (spentByCat[t.category || 'Overig'] || 0) + n(t.amount);
+  });
+  const catData = Object.entries(spentByCat).sort((a, b) => b[1] - a[1]).slice(0, 6).map(([label, value], i) => ({
+    label,
+    value,
+    color: catColors[i % catColors.length]
+  }));
+  const catTotal = catData.reduce((s, d) => s + d.value, 0) || 1;
+  const Card = ({
+    label,
+    value,
+    sub,
+    color,
+    onClick
+  }) => /*#__PURE__*/React.createElement("div", {
+    onClick: onClick,
+    style: {
+      background: 'var(--surface)',
+      border: '1px solid var(--line)',
+      borderRadius: 12,
+      padding: '18px 20px',
+      cursor: onClick ? 'pointer' : 'default',
+      transition: '.14s'
+    },
+    onMouseEnter: e => {
+      if (onClick) e.currentTarget.style.borderColor = 'var(--brass-dim)';
+    },
+    onMouseLeave: e => {
+      e.currentTarget.style.borderColor = 'var(--line)';
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      letterSpacing: '.15em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 8
+    }
+  }, label), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 26,
+      fontWeight: 600,
+      color: color || 'var(--ink)',
+      fontFamily: "'IBM Plex Mono',monospace"
+    }
+  }, value), sub && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)',
+      marginTop: 4
+    }
+  }, sub));
+  return /*#__PURE__*/React.createElement("div", {
+    className: "calc-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginBottom: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: 'var(--muted)'
+    }
+  }, new Date().toLocaleDateString('nl-NL', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+      gap: 12,
+      marginBottom: 24
+    }
+  }, /*#__PURE__*/React.createElement(Card, {
+    label: "Netto vermogen",
+    value: eur(netWorth),
+    sub: `${eur(totalAssets)} bezittingen`,
+    color: netWorth >= 0 ? 'var(--gain)' : 'var(--loss)'
+  }), /*#__PURE__*/React.createElement(Card, {
+    label: "Aandelenportefeuille",
+    value: eur(portfolioValue || 0),
+    sub: `${portfolios.reduce((s, p) => s + p.holdings.length, 0)} posities`,
+    color: "var(--brass)"
+  }), /*#__PURE__*/React.createElement(Card, {
+    label: "Budget restant",
+    value: eur(budgetLeft),
+    sub: `${budgetPct}% van budget gebruikt`,
+    color: budgetLeft >= 0 ? 'var(--gain)' : 'var(--loss)'
+  }), /*#__PURE__*/React.createElement(Card, {
+    label: "Uitgaven deze maand",
+    value: eur(totalSpent),
+    sub: `${thisMonthTrans.filter(t => t.type === 'uitgave').length} transacties`
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: 16,
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--surface)',
+      border: '1px solid var(--line)',
+      borderRadius: 12,
+      padding: '18px 20px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      letterSpacing: '.15em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 14
+    }
+  }, "Budget ", activeMon), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      fontSize: 12,
+      color: 'var(--muted)',
+      marginBottom: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Uitgegeven"), /*#__PURE__*/React.createElement("span", null, budgetPct, "%")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 8,
+      background: 'var(--bg2)',
+      borderRadius: 4,
+      marginBottom: 16,
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: '100%',
+      width: budgetPct + '%',
+      background: budgetPct > 90 ? 'var(--loss)' : budgetPct > 70 ? '#CBA135' : 'var(--gain)',
+      borderRadius: 4,
+      transition: '.3s'
+    }
+  })), catData.length > 0 ? catData.map((d, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      marginBottom: 7,
+      fontSize: 12.5
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 8,
+      height: 8,
+      borderRadius: 2,
+      background: d.color,
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      flex: 1,
+      color: 'var(--ink)',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
+    }
+  }, d.label), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: 'var(--muted)'
+    }
+  }, eur(d.value)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: 'var(--faint)',
+      fontSize: 11,
+      width: 32,
+      textAlign: 'right'
+    }
+  }, Math.round(d.value / catTotal * 100), "%"))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: 'var(--faint)'
+    }
+  }, "Nog geen uitgaven deze maand.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--surface)',
+      border: '1px solid var(--line)',
+      borderRadius: 12,
+      padding: '18px 20px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      letterSpacing: '.15em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 14
+    }
+  }, "Laatste transacties"), recentTrans.length > 0 ? recentTrans.map((t, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      paddingBottom: 10,
+      marginBottom: 10,
+      borderBottom: i < recentTrans.length - 1 ? '1px solid var(--line)' : 'none'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 32,
+      height: 32,
+      borderRadius: 8,
+      background: t.type === 'inkomst' ? 'rgba(42,138,90,.12)' : 'rgba(192,80,58,.1)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      fontSize: 14,
+      flexShrink: 0
+    }
+  }, t.type === 'inkomst' ? '↑' : '↓'), /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: 'var(--ink)',
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap'
+    }
+  }, t.note || t.category || '—'), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: 'var(--faint)'
+    }
+  }, t.category, " · ", t.date)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 13,
+      color: t.type === 'inkomst' ? 'var(--gain)' : 'var(--loss)',
+      flexShrink: 0
+    }
+  }, t.type === 'inkomst' ? '+' : '−', eur(n(t.amount))))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: 'var(--faint)'
+    }
+  }, "Nog geen transacties."))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'grid',
+      gridTemplateColumns: '1fr 1fr',
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--surface)',
+      border: '1px solid var(--line)',
+      borderRadius: 12,
+      padding: '18px 20px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      letterSpacing: '.15em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 14
+    }
+  }, "Spaardoel deze maand"), savingsTarget > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'baseline',
+      marginBottom: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 22,
+      fontWeight: 600,
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: 'var(--brass)'
+    }
+  }, eur(savingsTarget)), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)'
+    }
+  }, "doel per maand")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 8,
+      background: 'var(--bg2)',
+      borderRadius: 4,
+      marginBottom: 12,
+      overflow: 'hidden'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: '100%',
+      width: Math.max(0, savingsProgress) + '%',
+      background: savingsProgress >= 100 ? 'var(--gain)' : 'var(--brass)',
+      borderRadius: 4,
+      transition: '.3s'
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12.5,
+      color: netMth - totalBudget >= savingsTarget ? 'var(--gain)' : 'var(--loss)'
+    }
+  }, netMth - totalBudget >= savingsTarget ? `✓ Spaardoel haalbaar — ${eur(netMth - totalBudget - savingsTarget)} extra` : `✗ ${eur(savingsTarget - (netMth - totalBudget))} tekort op spaardoel`)) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: 'var(--faint)'
+    }
+  }, "Stel een spaardoel in via de Budget-tab.")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: 'var(--surface)',
+      border: '1px solid var(--line)',
+      borderRadius: 12,
+      padding: '18px 20px'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      letterSpacing: '.15em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 14
+    }
+  }, "Dividend volgende maand"), dividendNext.length > 0 ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 22,
+      fontWeight: 600,
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: 'var(--gain)',
+      marginBottom: 12
+    }
+  }, eur(divTotal)), dividendNext.slice(0, 4).map((d, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      fontSize: 12.5,
+      marginBottom: 6,
+      color: 'var(--ink)'
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: 'var(--muted)'
+    }
+  }, d.ticker), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'IBM Plex Mono',monospace"
+    }
+  }, "+", eur(d.amount))))) : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: 'var(--faint)'
+    }
+  }, holdings.length === 0 ? 'Voeg posities toe in de Aandelenportefeuille-tab.' : 'Geen dividend verwacht volgende maand.'))));
+}
+
+/* ---- netto vermogen tab ---- */
+function NetWorthTab({
+  portfolioValue,
+  loan
+}) {
+  const nw_uid = () => Math.random().toString(36).slice(2, 9);
+  const n = v => parseFloat(String(v || '').replace(',', '.')) || 0;
+  const DEFAULT_NW = {
+    assets: [{
+      id: 'a1',
+      label: 'Spaarrekening',
+      amount: '',
+      category: 'cash'
+    }, {
+      id: 'a2',
+      label: 'Eigen woning (WOZ-waarde)',
+      amount: '',
+      category: 'vastgoed'
+    }, {
+      id: 'a3',
+      label: 'Auto',
+      amount: '',
+      category: 'overig'
+    }],
+    liabilities: [{
+      id: 'l1',
+      label: 'Hypotheek',
+      amount: '',
+      category: 'hypotheek'
+    }, {
+      id: 'l2',
+      label: 'Creditcard schuld',
+      amount: '',
+      category: 'overig'
+    }]
+  };
+  const [nwData, setNwData] = useState(() => {
+    try {
+      const v = localStorage.getItem('fb:networth');
+      return v ? JSON.parse(v) : DEFAULT_NW;
+    } catch (e) {
+      return DEFAULT_NW;
+    }
+  });
+  useEffect(() => {
+    try {
+      localStorage.setItem('fb:networth', JSON.stringify(nwData));
+    } catch (e) {}
+  }, [nwData]);
+  const setAsset = (id, k, v) => setNwData(d => ({
+    ...d,
+    assets: d.assets.map(a => a.id === id ? {
+      ...a,
+      [k]: v
+    } : a)
+  }));
+  const setLiab = (id, k, v) => setNwData(d => ({
+    ...d,
+    liabilities: d.liabilities.map(l => l.id === id ? {
+      ...l,
+      [k]: v
+    } : l)
+  }));
+  const addAsset = () => setNwData(d => ({
+    ...d,
+    assets: [...d.assets, {
+      id: nw_uid(),
+      label: '',
+      amount: '',
+      category: 'overig'
+    }]
+  }));
+  const addLiab = () => setNwData(d => ({
+    ...d,
+    liabilities: [...d.liabilities, {
+      id: nw_uid(),
+      label: '',
+      amount: '',
+      category: 'overig'
+    }]
+  }));
+  const delAsset = id => setNwData(d => ({
+    ...d,
+    assets: d.assets.filter(a => a.id !== id)
+  }));
+  const delLiab = id => setNwData(d => ({
+    ...d,
+    liabilities: d.liabilities.filter(l => l.id !== id)
+  }));
+
+  // Bereken totalen
+  const manualAssets = nwData.assets.reduce((s, a) => s + n(a.amount), 0);
+  const totalAssets = manualAssets + (portfolioValue || 0);
+  const totalLiabs = nwData.liabilities.reduce((s, l) => s + n(l.amount), 0) + n(loan?.balance);
+  const netWorth = totalAssets - totalLiabs;
+  const ASSET_CATS = ['cash', 'vastgoed', 'voertuig', 'overig'];
+  const LIAB_CATS = ['hypotheek', 'studieschuld', 'persoonlijke lening', 'creditcard', 'overig'];
+  const catColors = {
+    cash: '#6EA8D8',
+    vastgoed: '#CBA135',
+    voertuig: '#7FB8A0',
+    overig: '#9AA0AE',
+    aandelen: '#C98AC0',
+    hypotheek: '#E2917E',
+    studieschuld: '#B5915A',
+    'persoonlijke lening': '#C98AC0',
+    creditcard: '#E57373'
+  };
+
+  // Donut data
+  const assetDonut = [...(portfolioValue > 0 ? [{
+    label: 'Aandelenportefeuille',
+    value: portfolioValue,
+    color: '#C98AC0'
+  }] : []), ...nwData.assets.filter(a => n(a.amount) > 0).map(a => ({
+    label: a.label || '—',
+    value: n(a.amount),
+    color: catColors[a.category] || '#9AA0AE'
+  })), ...(accountsValueEUR > 0 ? accounts.filter(a => n(a.balance) > 0).map(a => ({
+    label: (a.name || a.bank || 'Rekening') + (a.currency !== 'EUR' ? ' (' + a.currency + ')' : ''),
+    value: n(a.balance),
+    color: '#6EA8D8'
+  })) : [])];
+  const liabDonut = [...(n(loan?.balance) > 0 ? [{
+    label: 'Studieschuld',
+    value: n(loan?.balance),
+    color: catColors.studieschuld
+  }] : []), ...nwData.liabilities.filter(l => n(l.amount) > 0).map(l => ({
+    label: l.label || '—',
+    value: n(l.amount),
+    color: catColors[l.category] || '#9AA0AE'
+  }))];
+  const adTotal = assetDonut.reduce((s, d) => s + d.value, 0) || 1;
+  const ldTotal = liabDonut.reduce((s, d) => s + d.value, 0) || 1;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "calc-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-title"
+  }, "Netto Vermogen"), /*#__PURE__*/React.createElement("div", {
+    className: "calc-desc"
+  }, "Jouw totale bezittingen minus alle schulden. De aandelenportefeuille, rekeningen en studieschuld worden automatisch meegenomen."), /*#__PURE__*/React.createElement("div", {
+    className: "loan-pillars",
+    style: {
+      marginTop: 20
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Totale bezittingen"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big gain"
+  }, eur(totalAssets))), /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Totale schulden"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big loss"
+  }, eur(totalLiabs))), /*#__PURE__*/React.createElement("div", {
+    className: "loan-pill",
+    style: {
+      border: '1px solid ' + (netWorth >= 0 ? 'var(--gain)' : 'var(--loss)'),
+      background: netWorth >= 0 ? 'rgba(121,199,160,.07)' : 'rgba(226,145,126,.07)'
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "lbl"
+  }, "Netto vermogen"), /*#__PURE__*/React.createElement("div", {
+    className: "loan-big " + (netWorth >= 0 ? 'gain' : 'loss'),
+    style: {
+      fontSize: 28
+    }
+  }, eur(netWorth)))), (totalAssets > 0 || totalLiabs > 0) && /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 32,
+      marginTop: 28,
+      flexWrap: 'wrap'
+    }
+  }, totalAssets > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 200
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      letterSpacing: '.15em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 12
+    }
+  }, "Bezittingen"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement(NWDonut, {
+    data: assetDonut,
+    total: adTotal,
+    center: eur(totalAssets)
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 6
+    }
+  }, assetDonut.map((d, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      fontSize: 12
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 8,
+      height: 8,
+      borderRadius: 2,
+      background: d.color,
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: 'var(--ink)',
+      flex: 1
+    }
+  }, d.label), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: 'var(--muted)'
+    }
+  }, eur(d.value))))))), totalLiabs > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      flex: 1,
+      minWidth: 200
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      letterSpacing: '.15em',
+      textTransform: 'uppercase',
+      color: 'var(--faint)',
+      marginBottom: 12
+    }
+  }, "Schulden"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 16
+    }
+  }, /*#__PURE__*/React.createElement(NWDonut, {
+    data: liabDonut,
+    total: ldTotal,
+    center: eur(totalLiabs),
+    color: "loss"
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 6
+    }
+  }, liabDonut.map((d, i) => /*#__PURE__*/React.createElement("div", {
+    key: i,
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      fontSize: 12
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      width: 8,
+      height: 8,
+      borderRadius: 2,
+      background: d.color,
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: 'var(--ink)',
+      flex: 1
+    }
+  }, d.label), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontFamily: "'IBM Plex Mono',monospace",
+      color: 'var(--muted)'
+    }
+  }, eur(d.value))))))))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Bezittingen"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)',
+      marginBottom: 14,
+      lineHeight: 1.5
+    }
+  }, "Je aandelenportefeuille (", eur(portfolioValue || 0), ") wordt automatisch meegenomen vanuit de Aandelenportefeuille-tab."), /*#__PURE__*/React.createElement("div", {
+    className: "budget-cats"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "budget-cat-h"
+  }, /*#__PURE__*/React.createElement("span", null, "Omschrijving"), /*#__PURE__*/React.createElement("span", null, "Waarde (€)"), /*#__PURE__*/React.createElement("span", null, "Categorie"), /*#__PURE__*/React.createElement("span", null)), nwData.assets.map(a => /*#__PURE__*/React.createElement("div", {
+    className: "budget-cat-r",
+    key: a.id,
+    style: {
+      gridTemplateColumns: '1fr 130px 130px 28px'
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: a.label,
+    placeholder: "bv. Spaarrekening",
+    onChange: e => setAsset(a.id, 'label', e.target.value),
+    style: {
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
+      borderRadius: 7,
+      color: 'var(--ink)',
+      padding: '8px 11px',
+      fontFamily: 'Inter,sans-serif',
+      fontSize: 13,
+      outline: 'none',
+      width: '100%'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: 'var(--faint)',
+      fontSize: 13
+    }
+  }, "€"), /*#__PURE__*/React.createElement("input", {
+    value: a.amount,
+    placeholder: "0",
+    inputMode: "decimal",
+    onChange: e => setAsset(a.id, 'amount', e.target.value),
+    style: {
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
+      borderRadius: 7,
+      color: 'var(--ink)',
+      padding: '8px 11px',
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 13,
+      outline: 'none',
+      width: '100%',
+      textAlign: 'right'
+    }
+  })), /*#__PURE__*/React.createElement("select", {
+    value: a.category,
+    onChange: e => setAsset(a.id, 'category', e.target.value),
+    style: {
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
+      borderRadius: 7,
+      color: 'var(--ink)',
+      padding: '8px 11px',
+      fontSize: 12,
+      outline: 'none',
+      width: '100%'
+    }
+  }, ASSET_CATS.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c,
+    value: c
+  }, c))), /*#__PURE__*/React.createElement("button", {
+    className: "xbtn",
+    onClick: () => delAsset(a.id)
+  }, "×"))), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      marginTop: 10,
+      alignSelf: 'flex-start'
+    },
+    onClick: addAsset
+  }, "+ Bezitting toevoegen"))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Schulden"), n(loan?.balance) > 0 && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)',
+      marginBottom: 14,
+      lineHeight: 1.5
+    }
+  }, "Je studieschuld (", eur(n(loan?.balance)), ") wordt automatisch meegenomen vanuit de Rekenmachine-tab."), /*#__PURE__*/React.createElement("div", {
+    className: "budget-cats"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "budget-cat-h"
+  }, /*#__PURE__*/React.createElement("span", null, "Omschrijving"), /*#__PURE__*/React.createElement("span", null, "Bedrag (€)"), /*#__PURE__*/React.createElement("span", null, "Categorie"), /*#__PURE__*/React.createElement("span", null)), nwData.liabilities.map(l => /*#__PURE__*/React.createElement("div", {
+    className: "budget-cat-r",
+    key: l.id,
+    style: {
+      gridTemplateColumns: '1fr 130px 130px 28px'
+    }
+  }, /*#__PURE__*/React.createElement("input", {
+    value: l.label,
+    placeholder: "bv. Hypotheek",
+    onChange: e => setLiab(l.id, 'label', e.target.value),
+    style: {
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
+      borderRadius: 7,
+      color: 'var(--ink)',
+      padding: '8px 11px',
+      fontFamily: 'Inter,sans-serif',
+      fontSize: 13,
+      outline: 'none',
+      width: '100%'
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: 'var(--faint)',
+      fontSize: 13
+    }
+  }, "€"), /*#__PURE__*/React.createElement("input", {
+    value: l.amount,
+    placeholder: "0",
+    inputMode: "decimal",
+    onChange: e => setLiab(l.id, 'amount', e.target.value),
+    style: {
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
+      borderRadius: 7,
+      color: 'var(--ink)',
+      padding: '8px 11px',
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 13,
+      outline: 'none',
+      width: '100%',
+      textAlign: 'right'
+    }
+  })), /*#__PURE__*/React.createElement("select", {
+    value: l.category,
+    onChange: e => setLiab(l.id, 'category', e.target.value),
+    style: {
+      background: 'var(--bg2)',
+      border: '1px solid var(--line2)',
+      borderRadius: 7,
+      color: 'var(--ink)',
+      padding: '8px 11px',
+      fontSize: 12,
+      outline: 'none',
+      width: '100%'
+    }
+  }, LIAB_CATS.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c,
+    value: c
+  }, c))), /*#__PURE__*/React.createElement("button", {
+    className: "xbtn",
+    onClick: () => delLiab(l.id)
+  }, "×"))), /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: {
+      marginTop: 10,
+      alignSelf: 'flex-start'
+    },
+    onClick: addLiab
+  }, "+ Schuld toevoegen"))));
+}
+function NWDonut({
+  data,
+  total,
+  center
+}) {
+  const r = 48,
+    sw = 16,
+    circ = 2 * Math.PI * r;
+  let acc = 0;
+  return /*#__PURE__*/React.createElement("svg", {
+    width: "120",
+    height: "120",
+    viewBox: "0 0 120 120",
+    style: {
+      flex: 'none'
+    }
+  }, /*#__PURE__*/React.createElement("circle", {
+    cx: "60",
+    cy: "60",
+    r: r,
+    fill: "none",
+    stroke: "var(--line)",
+    strokeWidth: sw
+  }), data.map((d, i) => {
+    const len = d.value / total * circ;
+    const seg = /*#__PURE__*/React.createElement("circle", {
+      key: i,
+      cx: "60",
+      cy: "60",
+      r: r,
+      fill: "none",
+      stroke: d.color,
+      strokeWidth: sw,
+      strokeDasharray: `${len} ${circ - len}`,
+      strokeDashoffset: -acc,
+      transform: "rotate(-90 60 60)"
+    });
+    acc += len;
+    return seg;
+  }), /*#__PURE__*/React.createElement("text", {
+    x: "60",
+    y: "57",
+    textAnchor: "middle",
+    fill: "var(--ink)",
+    style: {
+      font: "600 10px 'IBM Plex Mono',monospace"
+    }
+  }, center), /*#__PURE__*/React.createElement("text", {
+    x: "60",
+    y: "70",
+    textAnchor: "middle",
+    fill: "var(--faint)",
+    style: {
+      font: '9px Inter,sans-serif'
+    }
+  }, "TOTAAL"));
+}
+
+/* ---- instellingen tab ---- */
+function SettingsTab({
+  apiKey,
+  setApiKey,
+  auto,
+  toggleAuto,
+  intervalMin,
+  setIntervalMin,
+  portfolios,
+  loan,
+  portRate,
+  budget,
+  transactions,
+  handleImport
+}) {
+  const [key, setKey] = useState(apiKey || '');
+  const [keyMsg, setKeyMsg] = useState('');
+  const [keyErr, setKeyErr] = useState('');
+  const [testing, setTesting] = useState(false);
+  async function testAndSave() {
+    const k = key.trim();
+    if (!k) {
+      setKeyErr('Vul je API-key in.');
+      return;
+    }
+    setTesting(true);
+    setKeyErr('');
+    setKeyMsg('');
+    try {
+      const r = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': k,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 10,
+          messages: [{
+            role: 'user',
+            content: 'Hi'
+          }]
+        })
+      });
+      if (r.status === 401 || r.status === 403) {
+        setKeyErr('Ongeldige key — controleer hem op console.anthropic.com.');
+        setTesting(false);
+        return;
+      }
+      if (!r.ok) {
+        setKeyErr('Fout ' + r.status);
+        setTesting(false);
+        return;
+      }
+      try {
+        localStorage.setItem('fb:anthropic_key', k);
+      } catch (e) {}
+      setApiKey(k);
+      setKeyMsg('Key opgeslagen en getest!');
+      setTimeout(() => setKeyMsg(''), 3000);
+    } catch (e) {
+      setKeyErr('Verbindingsfout.');
+    }
+    setTesting(false);
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "calc-wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-title"
+  }, "Instellingen"), /*#__PURE__*/React.createElement("h3", null, "Anthropic API-key"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 14,
+      maxWidth: 480,
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "calc-desc",
+    style: {
+      marginBottom: 0
+    }
+  }, "Nodig voor live koersen, zoeken op bedrijfsnaam en de DeGiro-import. Haal gratis een key op via", ' ', /*#__PURE__*/React.createElement("a", {
+    href: "https://console.anthropic.com",
+    target: "_blank",
+    rel: "noopener",
+    style: {
+      color: 'var(--brass)'
+    }
+  }, "console.anthropic.com"), "."), /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "API-key"), /*#__PURE__*/React.createElement("input", {
+    type: "password",
+    value: key,
+    placeholder: "sk-ant-...",
+    onChange: e => setKey(e.target.value),
+    onKeyDown: e => e.key === 'Enter' && testAndSave()
+  })), keyErr && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'var(--loss)',
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 12
+    }
+  }, keyErr), keyMsg && /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: 'var(--gain)',
+      fontFamily: "'IBM Plex Mono',monospace",
+      fontSize: 12
+    }
+  }, "✓ ", keyMsg), /*#__PURE__*/React.createElement("button", {
+    className: "btn primary",
+    style: {
+      alignSelf: 'flex-start'
+    },
+    onClick: testAndSave,
+    disabled: testing
+  }, testing ? 'Testen...' : 'Opslaan & testen'))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Automatisch verversen"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 14,
+      maxWidth: 480,
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "btn" + (auto ? " primary" : ""),
+    onClick: toggleAuto
+  }, auto ? '⏸ Pauzeren' : '▶ Inschakelen'), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 13,
+      color: 'var(--muted)'
+    }
+  }, auto ? `Actief — elke ${intervalMin} min` : 'Uitgeschakeld')), auto && /*#__PURE__*/React.createElement("div", {
+    className: "fld",
+    style: {
+      maxWidth: 200
+    }
+  }, /*#__PURE__*/React.createElement("label", null, "Interval (minuten)"), /*#__PURE__*/React.createElement("select", {
+    className: "auto-int",
+    value: intervalMin,
+    onChange: e => setIntervalMin(Number(e.target.value))
+  }, [1, 5, 15, 30, 60].map(m => /*#__PURE__*/React.createElement("option", {
+    key: m,
+    value: m
+  }, m, " min")))))), /*#__PURE__*/React.createElement("div", {
+    className: "calc-section"
+  }, /*#__PURE__*/React.createElement("h3", null, "Data importeren / exporteren"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      gap: 12,
+      flexWrap: 'wrap',
+      marginTop: 12
+    }
+  }, /*#__PURE__*/React.createElement(ImportPanel, {
+    onImport: handleImport
+  }), /*#__PURE__*/React.createElement(ExportButton, {
+    portfolios: portfolios,
+    loan: loan,
+    portRate: portRate,
+    budget: budget,
+    transactions: transactions,
+    apiKey: key,
+    auto: auto,
+    intervalMin: intervalMin
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: 'var(--muted)',
+      marginTop: 10,
+      lineHeight: 1.6
+    }
+  }, "Exporteer je data als JSON om een backup te maken of over te zetten naar een ander apparaat. Importeer een eerder geëxporteerd bestand om je data te herstellen.")));
+}
+
 /* ---- account tab ---- */
 function AccountTab() {
   const sb = typeof getSb === 'function' ? getSb() : null;
@@ -4329,7 +7420,7 @@ function AccountTab() {
   }
   async function logout() {
     if (!sb) return;
-    const KEYS = ['portfolio:meta', 'portfolio:settings', 'portfolio:calc', 'portfolio:budget', 'portfolio:transactions', 'fb:last_seen', 'fb:last_sync', 'fb:display_name'];
+    const KEYS = ['portfolio:meta', 'portfolio:settings', 'portfolio:calc', 'portfolio:budget', 'portfolio:transactions', 'fb:networth', 'fb:last_seen', 'fb:last_sync', 'fb:display_name'];
     KEYS.forEach(k => {
       try {
         localStorage.removeItem(k);
@@ -4646,15 +7737,15 @@ function getSb(){if(_sb)return _sb;var L=(typeof window!=='undefined'&&window.su
 const SB_TABLE='user_data';
 async function sbSave(uid,payload){var sb=getSb();if(!sb)return;try{await sb.from(SB_TABLE).upsert({user_id:uid,data:payload,updated_at:new Date().toISOString()},{onConflict:'user_id'});}catch(e){}}
 async function sbUpdateLastSeen(uid){var sb=getSb();if(!sb||!uid)return;try{await sb.from(SB_TABLE).upsert({user_id:uid,last_seen:new Date().toISOString()},{onConflict:'user_id'});}catch(e){}}
-async function sbLoad(uid){var sb=getSb();if(!sb)return null;try{var r=await sb.from(SB_TABLE).select('data,last_seen,updated_at').eq('user_id',uid).single();if(!r.data)return null;try{if(r.data.last_seen)localStorage.setItem('fb:last_seen',r.data.last_seen);if(r.data.updated_at)localStorage.setItem('fb:last_sync',r.data.updated_at);}catch(e){}return r.data.data;}catch(e){return null;}}
+async function sbLoad(uid){var sb=getSb();if(!sb)return null;try{var r=await sb.from(SB_TABLE).select('data,last_seen,updated_at,settings,display_name').eq('user_id',uid).single();if(!r.data)return null;try{if(r.data.last_seen)localStorage.setItem('fb:last_seen',r.data.last_seen);if(r.data.updated_at)localStorage.setItem('fb:last_sync',r.data.updated_at);if(r.data.display_name)localStorage.setItem('fb:display_name',r.data.display_name);if(r.data.settings){var s=r.data.settings;if(s.theme)localStorage.setItem('fb:theme',s.theme);if(s.anthropic_key)localStorage.setItem('fb:anthropic_key',s.anthropic_key);}}catch(e){}return r.data.data;}catch(e){return null;}}
 function AuthScreen({onLogin}){var [tab,setTab]=React.useState('login');var [email,setEmail]=React.useState('');var [pass,setPass]=React.useState('');var [name,setName]=React.useState('');var [err,setErr]=React.useState('');var [ok,setOk]=React.useState('');var [busy,setBusy]=React.useState(false);var [forgotSent,setForgotSent]=React.useState(false);async function doLogin(){setErr('');setOk('');setBusy(true);var r=await getSb().auth.signInWithPassword({email:email.trim(),password:pass});if(r.error){setErr(r.error.message.includes('Invalid login')?'Onjuist e-mailadres of wachtwoord.':r.error.message.includes('not confirmed')?'E-mail nog niet bevestigd.':'Fout: '+r.error.message);setBusy(false);return;}onLogin(r.data.user);setBusy(false);}async function doRegister(){setErr('');setOk('');setBusy(true);var r=await getSb().auth.signUp({email:email.trim(),password:pass,options:{data:{display_name:name.trim()}}});if(r.error){setErr(r.error.message.includes('already')?'Al geregistreerd, probeer in te loggen.':'Fout: '+r.error.message);setBusy(false);return;}if(r.data.session){onLogin(r.data.user);setBusy(false);return;}setOk('Account aangemaakt! Check je e-mail voor een bevestigingslink.');setBusy(false);}async function doForgot(){if(!email.trim()){setErr('Vul eerst je e-mailadres in.');return;}setErr('');setBusy(true);var r=await getSb().auth.resetPasswordForEmail(email.trim(),{redirectTo:window.location.href});if(r.error){setErr('Fout: '+r.error.message);}else{setOk('Reset-link verstuurd naar '+email.trim());setForgotSent(true);}setBusy(false);}var onKey=function(e){if(e.key==='Enter')tab==='login'?doLogin():doRegister();};return React.createElement('div',{className:'setup-overlay'},React.createElement('div',{className:'setup-box'},React.createElement('div',{className:'setup-logo'},'Finance Bro',React.createElement('span',null,'.')),React.createElement('div',{className:'auth-tabs'},React.createElement('button',{className:'auth-tab'+(tab==='login'?' on':''),onClick:function(){setTab('login');setErr('');setOk('');setForgotSent(false);}},'Inloggen'),React.createElement('button',{className:'auth-tab'+(tab==='register'?' on':''),onClick:function(){setTab('register');setErr('');setOk('');}},'Account aanmaken')),tab==='register'&&React.createElement(React.Fragment,null,React.createElement('label',{className:'setup-label'},'Naam'),React.createElement('input',{className:'setup-input',placeholder:'Jan de Vries',value:name,onChange:function(e){setName(e.target.value);},onKeyDown:onKey})),React.createElement('label',{className:'setup-label'},'E-mailadres'),React.createElement('input',{className:'setup-input',type:'email',placeholder:'jij@voorbeeld.nl',value:email,onChange:function(e){setEmail(e.target.value);},onKeyDown:onKey}),React.createElement('label',{className:'setup-label'},'Wachtwoord'),React.createElement('input',{className:'setup-input',type:'password',placeholder:'••••••••',value:pass,onChange:function(e){setPass(e.target.value);},onKeyDown:onKey}),err&&React.createElement('div',{className:'setup-err'},err),ok&&React.createElement('div',{style:{color:'#79C7A0',fontSize:12,fontFamily:'monospace',marginBottom:8,textAlign:'left',lineHeight:1.5}},ok),React.createElement('button',{className:'setup-btn',onClick:tab==='login'?doLogin:doRegister,disabled:busy},busy?'Even geduld...':(tab==='login'?'Inloggen':'Account aanmaken')),tab==='login'&&React.createElement('span',{className:'forgot-link',onClick:doForgot},forgotSent?'✓ Reset-link verstuurd':'Wachtwoord vergeten?')));}
 var SbUserContext=React.createContext(null);
 function useSbUser(){return React.useContext(SbUserContext);}
 var _OrigPD=PortfolioDashboard;
 PortfolioDashboard=function(props){return React.createElement(SbUserContext.Provider,{value:props.sbUser},React.createElement(_OrigPD,null));};
 function AppRoot(){var [user,setUser]=React.useState(null);var [checking,setChecking]=React.useState(true);var [dataKey,setDataKey]=React.useState(0);React.useEffect(function(){var fn=function(){setDataKey(function(k){return k+1;});};window.addEventListener('fb-data-loaded',fn);return function(){window.removeEventListener('fb-data-loaded',fn);};},[]);React.useEffect(function(){var sb=getSb();if(!sb){setChecking(false);return;}var t=setTimeout(function(){setChecking(false);},6000);sb.auth.getSession().then(function(r){clearTimeout(t);if(r.data&&r.data.session)setUser(r.data.session.user);setChecking(false);}).catch(function(){clearTimeout(t);setChecking(false);});var sub=sb.auth.onAuthStateChange(function(_e,session){setUser(session?session.user:null);});return function(){sub.data.subscription.unsubscribe();};},[]);if(checking)return React.createElement('div',{style:{display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'#5C6472',fontFamily:'monospace',fontSize:14,flexDirection:'column',gap:12}},React.createElement('div',null,'Finance Bro laden...'),React.createElement('div',{style:{fontSize:11,color:'#2A3140'}},'Verbinding maken...'));if(!user)return React.createElement(AuthScreen,{onLogin:setUser});return React.createElement(PortfolioDashboard,{sbUser:user,key:dataKey});}
-(function(){var _orig=localStorage.setItem.bind(localStorage);var KEYS=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions'];var _t=null;localStorage.setItem=function(k,v){_orig(k,v);if(KEYS.indexOf(k)!==-1){clearTimeout(_t);_t=setTimeout(async function(){var sb=getSb();if(!sb)return;try{var r=await sb.auth.getSession();if(!r.data||!r.data.session)return;var p={};KEYS.forEach(function(k2){try{p[k2]=JSON.parse(localStorage.getItem(k2));}catch(e){}});await sbSave(r.data.session.user.id,p);}catch(e){}},1500);}};})();
-(function(){var sb=getSb();if(!sb)return;var _loaded=false;sb.auth.onAuthStateChange(async function(event,session){if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session&&!_loaded){_loaded=true;sbUpdateLastSeen(session.user.id);var saved=await sbLoad(session.user.id);if(saved){var KEYS=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions'];var changed=false;KEYS.forEach(function(k){if(saved[k]!==undefined){try{var cur=localStorage.getItem(k),nv=JSON.stringify(saved[k]);if(cur!==nv){localStorage.setItem(k,nv);changed=true;}}catch(e){}}});if(changed)window.dispatchEvent(new CustomEvent('fb-data-loaded'));}}if(event==='SIGNED_OUT'){_loaded=false;var KEYS2=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions','fb:last_seen','fb:last_sync','fb:display_name'];KEYS2.forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});}});})();
+(function(){var _orig=localStorage.setItem.bind(localStorage);var KEYS=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions','fb:networth'];var SETTINGS_KEYS=['fb:theme','fb:anthropic_key','fb:display_name','fb:finnhub_key'];var _t=null;var _ts=null;localStorage.setItem=function(k,v){_orig(k,v);if(KEYS.indexOf(k)!==-1){clearTimeout(_t);_t=setTimeout(async function(){var sb=getSb();if(!sb)return;try{var r=await sb.auth.getSession();if(!r.data||!r.data.session)return;var p={};KEYS.forEach(function(k2){try{p[k2]=JSON.parse(localStorage.getItem(k2));}catch(e){}});await sbSave(r.data.session.user.id,p);}catch(e){}},1500);}if(SETTINGS_KEYS.indexOf(k)!==-1){clearTimeout(_ts);_ts=setTimeout(async function(){var sb=getSb();if(!sb)return;try{var r=await sb.auth.getSession();if(!r.data||!r.data.session)return;var settings={theme:localStorage.getItem('fb:theme')||'light',anthropic_key:localStorage.getItem('fb:anthropic_key')||'',display_name:localStorage.getItem('fb:display_name')||''};await sb.from('user_data').upsert({user_id:r.data.session.user.id,settings:settings},{onConflict:'user_id'});}catch(e){}},1500);}};})();
+(function(){var sb=getSb();if(!sb)return;var _loaded=false;sb.auth.onAuthStateChange(async function(event,session){if((event==='SIGNED_IN'||event==='INITIAL_SESSION')&&session&&!_loaded){_loaded=true;sbUpdateLastSeen(session.user.id);var saved=await sbLoad(session.user.id);if(saved){var KEYS=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions','fb:networth'];var changed=false;KEYS.forEach(function(k){if(saved[k]!==undefined){try{var cur=localStorage.getItem(k),nv=JSON.stringify(saved[k]);if(cur!==nv){localStorage.setItem(k,nv);changed=true;}}catch(e){}}});if(changed)window.dispatchEvent(new CustomEvent('fb-data-loaded'));}}if(event==='SIGNED_OUT'){_loaded=false;var KEYS2=['portfolio:meta','portfolio:settings','portfolio:calc','portfolio:budget','portfolio:transactions','fb:networth','fb:last_seen','fb:last_sync','fb:display_name','fb:theme','fb:anthropic_key','fb:avatar'];KEYS2.forEach(function(k){try{localStorage.removeItem(k);}catch(e){}});}});})();
 
 (function mount(n){n=n||0;if(!window.React||!window.ReactDOM){if(n<200){setTimeout(function(){mount(n+1);},25);}return;}var L=window.supabase||null;if(!L&&n<120){setTimeout(function(){mount(n+1);},25);return;}if(L&&!_sb){try{_sb=L.createClient('https://ceklzeyrlttfbcbceruk.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNla2x6ZXlybHR0ZmJjYmNlcnVrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMxOTA3ODUsImV4cCI6MjA5ODc2Njc4NX0.j6UxTcmLAhe9KDCxZa_05Ape6PJrU0II368G9HrDZQc');}catch(e){}}ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(AppRoot));})();
   </script>

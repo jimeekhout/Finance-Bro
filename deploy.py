@@ -57,7 +57,7 @@ print(f"  Voorbeelden: 'uitlogfunctie verbeterd', 'account tab toegevoegd'")
 versie = input("  → ").strip()
 if not versie:
     versie = f"update {datetime.now().strftime('%d-%m-%Y %H:%M')}"
-commit_msg = f"🚀 {versie}"
+commit_msg = versie
 ok(f"Commit-bericht: '{commit_msg}'")
 
 # ── Stap 3: Kopieer naar index.html ──────────────────────────────────────────
@@ -76,8 +76,8 @@ except:
 
 # ── Stap 5: Git add + commit + push ──────────────────────────────────────────
 stap(5, "Bestanden toevoegen aan Git...")
-run(f"git add {DOEL}", cwd=REPO_PAD)
-ok("index.html toegevoegd")
+run(f"git add -A", cwd=REPO_PAD)
+ok("Alle bestanden toegevoegd")
 
 stap(6, "Commit aanmaken...")
 run(f'git commit -m "{commit_msg}"', cwd=REPO_PAD)
