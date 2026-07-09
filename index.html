@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="description" content="Persoonlijk financieel dashboard — portefeuille, netto vermogen, budget en belastingberekening.">
+  <meta name="description" content="Finance Bro — persoonlijk financieel dashboard voor portefeuille, netto vermogen, budget en belastingberekening.">
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Finance Bro</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💰</text></svg>">
@@ -3677,14 +3677,23 @@ function BudgetTab({
 }) {
   const uid = () => Math.random().toString(36).slice(2, 9);
   const n = v => parseFloat(String(v || '').replace(',', '.')) || 0;
-  const today = new Date().toISOString().slice(0, 7);
+  const today = (() => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); })();
 
   // Veilige state — nooit undefined
+  // Personen
+  const persons = (budget && budget.persons) || [{ id: 'p1', name: 'Ik' }];
+  const activePerson = (budget && budget.activePerson) || persons[0].id;
+  const [editingPerson, setEditingPerson] = useState(null);
+  const [newPersonName, setNewPersonName] = useState('');
+
   const months = budget && budget.months || {};
   const activeMonth = budget && budget.activeMonth || today;
-  const monthData = months[activeMonth] || {
+  // Maanddata is per persoon gesplitst: key = personId + ':' + month
+  const monthKey = activePerson + ':' + activeMonth;
+  const monthData = months[monthKey] || {
     salaryGross: '',
     salaryMonthly: '',
+    salaryHourly: '',
     savingsTarget: '',
     categories: [{
       id: 'c1',
@@ -3736,7 +3745,7 @@ function BudgetTab({
     ...b,
     months: {
       ...(b.months || {}),
-      [activeMonth]: {
+      [monthKey]: {
         ...monthData,
         ...patch
       }
@@ -3764,15 +3773,17 @@ function BudgetTab({
   });
 
   // Maand navigatie — genereer laatste 12 maanden als er geen data is
-  const monthNames = Object.keys(months).length > 0 ? Object.keys(months).sort().reverse() : (() => {
-    const result = [];
-    for (let i = 0; i < 12; i++) {
-      const d = new Date();
-      d.setMonth(d.getMonth() - i);
-      result.push(d.toISOString().slice(0, 7));
-    }
-    return result;
-  })();
+  // Altijd alle 12 maanden van het actieve jaar tonen + maanden met data uit andere jaren
+  const activeYear = activeMonth.slice(0, 4);
+  const allYearMonths = Array.from({ length: 12 }, (_, i) => {
+    const m = String(i + 1).padStart(2, '0');
+    return activeYear + '-' + m;
+  }).reverse(); // december eerst
+  // Voeg ook bestaande maanden uit andere jaren toe
+  const otherMonths = Object.keys(months)
+    .filter(m => m.slice(0, 4) !== activeYear)
+    .sort().reverse();
+  const monthNames = [...new Set([...allYearMonths, ...otherMonths])];
   if (!monthNames.includes(activeMonth)) monthNames.unshift(activeMonth);
   function fmtMonth(ym) {
     try {
@@ -3795,6 +3806,8 @@ function BudgetTab({
           ...(b.months || {}),
           [ym]: {
             salaryGross: '',
+            salaryMonthly: '',
+            salaryHourly: '',
             savingsTarget: '',
             categories: monthData.categories.map(c => ({
               ...c,
@@ -3812,13 +3825,13 @@ function BudgetTab({
   }
   function prevMonth() {
     const [y, m] = activeMonth.split('-').map(Number);
-    const d = new Date(y, m - 2, 1);
-    return d.toISOString().slice(0, 7);
+    if (m === 1) return (y - 1) + '-12';
+    return y + '-' + String(m - 1).padStart(2, '0');
   }
   function nextMonth() {
     const [y, m] = activeMonth.split('-').map(Number);
-    const d = new Date(y, m, 1);
-    return d.toISOString().slice(0, 7);
+    if (m === 12) return (y + 1) + '-01';
+    return y + '-' + String(m + 1).padStart(2, '0');
   }
   function delMonth() {
     const newMonths = {
@@ -3882,6 +3895,69 @@ function BudgetTab({
   return /*#__PURE__*/React.createElement("div", {
     className: "calc-wrap"
   }, /*#__PURE__*/React.createElement("div", {
+    style: { display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }
+  },
+  /*#__PURE__*/React.createElement("span", {
+    style: { fontSize: 11, letterSpacing: '.15em', textTransform: 'uppercase', color: 'var(--faint)', marginRight: 4 }
+  }, "Persoon"),
+  persons.map(p => editingPerson === p.id
+    ? /*#__PURE__*/React.createElement("input", {
+        key: p.id,
+        autoFocus: true,
+        value: newPersonName,
+        style: { background: 'var(--bg2)', border: '1px solid var(--brass)', borderRadius: 8, color: 'var(--ink)', padding: '6px 10px', fontSize: 13, fontFamily: "'IBM Plex Mono',monospace", outline: 'none', width: 120 },
+        onChange: e => setNewPersonName(e.target.value),
+        onKeyDown: e => {
+          if (e.key === 'Enter') {
+            const name = newPersonName.trim() || p.name;
+            setBudget(b => ({ ...b, persons: persons.map(x => x.id === p.id ? { ...x, name } : x) }));
+            setEditingPerson(null);
+          }
+          if (e.key === 'Escape') setEditingPerson(null);
+        },
+        onBlur: () => {
+          const name = newPersonName.trim() || p.name;
+          setBudget(b => ({ ...b, persons: persons.map(x => x.id === p.id ? { ...x, name } : x) }));
+          setEditingPerson(null);
+        }
+      })
+    : /*#__PURE__*/React.createElement("button", {
+        key: p.id,
+        className: 'btn' + (activePerson === p.id ? ' primary' : ''),
+        style: { padding: '6px 14px', fontSize: 13 },
+        onClick: () => setBudget(b => ({ ...b, activePerson: p.id })),
+        onDoubleClick: () => { setEditingPerson(p.id); setNewPersonName(p.name); }
+      }, p.name,
+      persons.length > 1 && activePerson !== p.id && /*#__PURE__*/React.createElement("span", {
+        style: { marginLeft: 6, opacity: .5, cursor: 'pointer', fontSize: 12 },
+        onClick: e => {
+          e.stopPropagation();
+          if (window.confirm('Persoon "' + p.name + '" verwijderen?')) {
+            setBudget(b => ({
+              ...b,
+              persons: persons.filter(x => x.id !== p.id),
+              activePerson: persons.find(x => x.id !== p.id)?.id || 'p1'
+            }));
+          }
+        }
+      }, "×")
+    )
+  ),
+  /*#__PURE__*/React.createElement("button", {
+    className: "btn",
+    style: { padding: '6px 12px', fontSize: 13, borderStyle: 'dashed', color: 'var(--brass)' },
+    onClick: () => {
+      const id = 'p' + Date.now();
+      setBudget(b => ({
+        ...b,
+        persons: [...persons, { id, name: 'Persoon ' + (persons.length + 1) }],
+        activePerson: id
+      }));
+      setEditingPerson(id);
+      setNewPersonName('Persoon ' + (persons.length + 1));
+    }
+  }, "+ Persoon toevoegen")
+  ), /*#__PURE__*/React.createElement("div", {
     className: "budget-month-bar"
   }, /*#__PURE__*/React.createElement("button", {
     className: "btn",
@@ -3954,33 +4030,61 @@ function BudgetTab({
     className: "budget-income"
   }, /*#__PURE__*/React.createElement("div", {
     className: "fld"
-  }, /*#__PURE__*/React.createElement("label", null, "Bruto jaarsalaris (€)"), /*#__PURE__*/React.createElement("input", {
+  }, /*#__PURE__*/React.createElement("label", null, "Bruto jaarsalaris (€)"),
+  /*#__PURE__*/React.createElement("input", {
     value: monthData.salaryGross || '',
-    placeholder: tr("bv. 45000","e.g. 45000"),
-    inputMode: "decimal",
-    onChange: e => {
-      setField('salaryGross', e.target.value);
-      setField('salaryMonthly', '');
-    }
-  })), /*#__PURE__*/React.createElement("div", {
-    className: "fld"
-  }, /*#__PURE__*/React.createElement("label", null, "of: bruto maandsalaris (€)"), /*#__PURE__*/React.createElement("input", {
-    value: monthData.salaryMonthly || '',
-    placeholder: tr("bv. 3750","e.g. 3750"),
+    placeholder: "bijv. 54000",
     inputMode: "decimal",
     onChange: e => {
       const val = e.target.value;
-      setField('salaryMonthly', val);
+      const yr = parseFloat(val.replace(',', '.')) || 0;
+      upd({ salaryGross: val, salaryMonthly: yr > 0 ? String(Math.round(yr / 12)) : '' });
+    }
+  }),
+  monthData.salaryGross && gross > 0 && /*#__PURE__*/React.createElement("div", {
+    style: { fontSize: 11, color: 'var(--muted)', marginTop: 4 }
+  }, "→ Netto p/m: ", /*#__PURE__*/React.createElement("b", {style:{color:'var(--gain)'}}, eur(calcNLTax(gross).net / 12)),
+     " · Bruto p/m: ", /*#__PURE__*/React.createElement("b", null, "€ ", Math.round(gross/12).toLocaleString('nl-NL'))
+  )),
+  /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "of: bruto maandsalaris (€)"),
+  /*#__PURE__*/React.createElement("input", {
+    value: monthData.salaryMonthly || '',
+    placeholder: "bijv. 4500",
+    inputMode: "decimal",
+    onChange: e => {
+      const val = e.target.value;
       const mth = parseFloat(val.replace(',', '.')) || 0;
-      setField('salaryGross', mth > 0 ? String(Math.round(mth * 12)) : '');
+      upd({ salaryMonthly: val, salaryGross: mth > 0 ? String(Math.round(mth * 12)) : '' });
     }
-  }), monthData.salaryMonthly && /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: 'var(--muted)',
-      marginTop: 4
+  }),
+  monthData.salaryMonthly && gross > 0 && /*#__PURE__*/React.createElement("div", {
+    style: { fontSize: 11, color: 'var(--muted)', marginTop: 4 }
+  }, "→ Jaarsalaris: ", /*#__PURE__*/React.createElement("b", null, "€ ", Math.round(gross).toLocaleString('nl-NL')),
+     " · Netto p/m: ", /*#__PURE__*/React.createElement("b", {style:{color:'var(--gain)'}}, eur(calcNLTax(gross).net / 12))
+  )),
+  /*#__PURE__*/React.createElement("div", {
+    className: "fld"
+  }, /*#__PURE__*/React.createElement("label", null, "of: bruto uurloon (€)"),
+  /*#__PURE__*/React.createElement("input", {
+    value: monthData.salaryHourly || '',
+    placeholder: "bijv. 28",
+    inputMode: "decimal",
+    onChange: e => {
+      const val = e.target.value;
+      const hr = parseFloat(val.replace(',', '.')) || 0;
+      // 1 jaar = 52 weken × 40 uur = 2080 uur
+      const yr = hr > 0 ? Math.round(hr * 2080) : 0;
+      upd({ salaryHourly: val, salaryGross: yr > 0 ? String(yr) : '', salaryMonthly: yr > 0 ? String(Math.round(yr / 12)) : '' });
     }
-  }, "→ € ", Math.round((parseFloat((monthData.salaryMonthly || '').replace(',', '.')) || 0) * 12).toLocaleString('nl-NL'), " per jaar")), /*#__PURE__*/React.createElement("div", {
+  }),
+  monthData.salaryHourly && gross > 0 && /*#__PURE__*/React.createElement("div", {
+    style: { fontSize: 11, color: 'var(--muted)', marginTop: 4 }
+  }, "→ Jaarsalaris: ", /*#__PURE__*/React.createElement("b", null, "€ ", Math.round(gross).toLocaleString('nl-NL')),
+     " · Netto p/m: ", /*#__PURE__*/React.createElement("b", {style:{color:'var(--gain)'}}, eur(calcNLTax(gross).net / 12))
+  )),
+  /*#__PURE__*/React.createElement("div", {
     className: "budget-net-box"
   }, /*#__PURE__*/React.createElement("div", {
     className: "lbl"
@@ -3988,9 +4092,7 @@ function BudgetTab({
     className: "budget-net-big"
   }, eur(netMth)), /*#__PURE__*/React.createElement("div", {
     className: "lbl",
-    style: {
-      marginTop: 4
-    }
+    style: { marginTop: 4 }
   }, "Effectief tarief ", tax.effectiveRate.toFixed(1), "%"))), gross > 0 && /*#__PURE__*/React.createElement("div", {
     className: "tax-breakdown"
   }, /*#__PURE__*/React.createElement("div", {
@@ -6076,7 +6178,7 @@ function DashboardTab({
   holdings
 }) {
   const n = v => parseFloat(String(v || '').replace(',', '.')) || 0;
-  const today = new Date().toISOString().slice(0, 7);
+  const today = (() => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); })();
 
   // Budget berekeningen
   const activeMon = budget && budget.activeMonth || today;
