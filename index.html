@@ -1215,7 +1215,7 @@ function PortfolioDashboard() {
       }
       const d = await r.json();
       if (typeof d.c === "number" && d.c > 0) {
-        setRtMsg("Werkt — realtime koersen actief voor je Amerikaanse tr('posities','positions').");
+        setRtMsg("Werkt — realtime koersen actief voor je Amerikaanse positions.");
         refreshLive();
       } else {
         setRtMsg("Verbinding werkt, maar er kwam geen koers terug. Controleer het symbool of probeer later opnieuw.");
@@ -1855,7 +1855,7 @@ function PortfolioDashboard() {
     style: {
       marginTop: 4
     }
-  }, tr('Jouw persoonlijke financiële dashboard.', 'Your personal financial dashboard.'))), /*#__PURE__*/React.createElement("nav", {
+  }, Your personal financial dashboard.)), /*#__PURE__*/React.createElement("nav", {
     className: "sidebar-nav"
   }, /*#__PURE__*/React.createElement("div", {
     className: "nav-section"
@@ -1917,7 +1917,12 @@ function PortfolioDashboard() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "nav-icon"
-  }, "📋"), /*#__PURE__*/React.createElement("span", null, tr('Uitgaven', 'Expenses'))), /*#__PURE__*/React.createElement("div", {
+  }, "📋"), /*#__PURE__*/React.createElement("span", null, tr('Uitgaven', 'Expenses'))), /*#__PURE__*/React.createElement("button", {
+    className: "nav-item" + (activeTab === "savings" ? " on" : ""),
+    onClick: () => { setActiveTab("savings"); resetTransient(); }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "nav-icon"
+  }, "🐖"), /*#__PURE__*/React.createElement("span", null, "Spaarrekening")), /*#__PURE__*/React.createElement("div", {
     className: "nav-section"
   }, tr('Tools', 'Tools')), /*#__PURE__*/React.createElement("button", {
     className: "nav-item" + (activeTab === "calc" ? " on" : ""),
@@ -1935,7 +1940,7 @@ function PortfolioDashboard() {
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "nav-icon"
-  }, "🏠"), /*#__PURE__*/React.createElement("span", null, tr('Hypotheek', 'Mortgage')))), /*#__PURE__*/React.createElement("div", {
+  }, "🏠"), /*#__PURE__*/React.createElement("span", null, tr('Hypotheek', 'Mortgage'))), /*#__PURE__*/React.createElement("div", {
     className: "sidebar-bottom"
   }, /*#__PURE__*/React.createElement("button", {
     className: "nav-item" + (activeTab === "settings" ? " on" : ""),
@@ -2001,7 +2006,8 @@ function PortfolioDashboard() {
     portfolioValue: t.mvTotal,
     portRate: portRate,
     setPortRate: setPortRate
-  }), activeTab === "mortgage" && /*#__PURE__*/React.createElement(MortgageTab, null), activeTab === "budget" && /*#__PURE__*/React.createElement(BudgetTab, {
+  }), activeTab === "savings" && /*#__PURE__*/React.createElement(SavingsTab, null),
+  activeTab === "mortgage" && /*#__PURE__*/React.createElement(MortgageTab, null), activeTab === "budget" && /*#__PURE__*/React.createElement(BudgetTab, {
     budget: budget,
     setBudget: setBudget
   }), activeTab === "trans" && /*#__PURE__*/React.createElement(TransactionsTab, {
@@ -3063,7 +3069,7 @@ function MortgageTab() {
     }
   }, "NHG geeft ~0,5% rentevoordeel")))), graf.length > 0 && /*#__PURE__*/React.createElement("div", {
     className: "calc-section"
-  }, /*#__PURE__*/React.createElement("h3", null, tr('Restschuld over tijd','Remaining debt over time')), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("h3", null, Remaining debt over time), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 16,
       overflowX: 'auto'
@@ -3191,7 +3197,7 @@ function CalcTab({
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("div", {
     className: "calc-title"
-  }, tr('Studieschuld calculator','Student debt calculator')), /*#__PURE__*/React.createElement("div", {
+  }, Student debt calculator), /*#__PURE__*/React.createElement("div", {
     className: "calc-desc"
   }, "Voer per fase de hoofdsom en het rentepercentage in. De grafiek toont hoe je totale studieschuld zich ontwikkelt over de looptijd, zonder aflossing."), /*#__PURE__*/React.createElement("div", {
     className: "loan-phases"
@@ -3332,6 +3338,199 @@ function CalcTab({
     className: "calc-empty"
   }, "Vul hierboven de hoofdsom en het rentepercentage in van je leningfase(s) om de grafiek te zien."));
 }
+
+/* ---- Spaarrekeningcalculator ---- */
+function SavingsTab() {
+  const n = v => parseFloat(String(v||'').replace(',','.')) || 0;
+  const [principal, setPrincipal] = React.useState('');
+  const [rate, setRate] = React.useState('');
+  const [monthly, setMonthly] = React.useState('');
+
+  const years = 20;
+  const data = React.useMemo(() => {
+    const p = n(principal), r = n(rate) / 100, m = n(monthly);
+    if (p <= 0 && m <= 0) return null;
+    const points = [];
+    for (let yr = 0; yr <= years; yr++) {
+      // Compound interest with monthly contributions
+      let val = p * Math.pow(1 + r, yr);
+      if (m > 0 && r > 0) {
+        val += m * 12 * ((Math.pow(1 + r, yr) - 1) / r);
+      } else if (m > 0) {
+        val += m * 12 * yr;
+      }
+      points.push({ year: yr, value: Math.round(val) });
+    }
+    return points;
+  }, [principal, rate, monthly]);
+
+  // SVG chart
+  function SavingsChart({ points }) {
+    if (!points || points.length < 2) return null;
+    const W = 560, H = 260, PL = 80, PR = 20, PT = 20, PB = 40;
+    const cW = W - PL - PR, cH = H - PT - PB;
+    const maxVal = Math.max(...points.map(p => p.value));
+    const minVal = 0;
+    const range = maxVal - minVal || 1;
+    const toX = yr => PL + (yr / 20) * cW;
+    const toY = val => PT + cH - ((val - minVal) / range) * cH;
+
+    // Y axis labels
+    const yTicks = 5;
+    const yLabels = Array.from({length: yTicks + 1}, (_, i) => {
+      const val = minVal + (range / yTicks) * i;
+      return { val, y: toY(val) };
+    });
+
+    // Path
+    const pathD = points.map((p, i) =>
+      (i === 0 ? 'M' : 'L') + toX(p.year).toFixed(1) + ',' + toY(p.value).toFixed(1)
+    ).join(' ');
+
+    // Fill area
+    const fillD = pathD + ' L' + toX(20).toFixed(1) + ',' + (PT+cH) + ' L' + PL + ',' + (PT+cH) + ' Z';
+
+    return /*#__PURE__*/React.createElement('svg', {
+      viewBox: '0 0 ' + W + ' ' + H,
+      style: { width: '100%', maxWidth: W, display: 'block', margin: '0 auto' }
+    },
+      // Grid lines
+      yLabels.map((t, i) => /*#__PURE__*/React.createElement('line', {
+        key: 'g'+i, x1: PL, x2: W-PR, y1: t.y, y2: t.y,
+        stroke: 'var(--rule)', strokeWidth: 1, strokeDasharray: '4 3'
+      })),
+      // Y labels
+      yLabels.map((t, i) => /*#__PURE__*/React.createElement('text', {
+        key: 'y'+i, x: PL-8, y: t.y+4, textAnchor: 'end',
+        style: { font: '11px IBM Plex Mono,monospace', fill: 'var(--muted)' }
+      }, t.val >= 1000000 ? '€' + (t.val/1000000).toFixed(1) + 'M'
+        : t.val >= 1000 ? '€' + Math.round(t.val/1000) + 'k'
+        : '€' + Math.round(t.val)
+      )),
+      // X labels (every 5 years)
+      [0,5,10,15,20].map(yr => /*#__PURE__*/React.createElement('text', {
+        key: 'x'+yr, x: toX(yr), y: H-8, textAnchor: 'middle',
+        style: { font: '11px IBM Plex Mono,monospace', fill: 'var(--muted)' }
+      }, 'Jaar ' + yr)),
+      // Fill
+      /*#__PURE__*/React.createElement('path', {
+        d: fillD, fill: 'var(--brass)', opacity: 0.12
+      }),
+      // Line
+      /*#__PURE__*/React.createElement('path', {
+        d: pathD, fill: 'none', stroke: 'var(--brass)', strokeWidth: 2.5, strokeLinejoin: 'round'
+      }),
+      // Dots at every year
+      points.map((p, i) => /*#__PURE__*/React.createElement('circle', {
+        key: 'dot'+i, cx: toX(p.year), cy: toY(p.value), r: i % 5 === 0 ? 4 : 2.5,
+        fill: 'var(--brass)', stroke: 'var(--bg)', strokeWidth: 1.5
+      }))
+    );
+  }
+
+  const eur = v => '€ ' + Math.round(v).toLocaleString('nl-NL');
+  const totalDeposited = n(principal) + n(monthly) * 12 * years;
+  const finalValue = data ? data[data.length-1].value : 0;
+  const interest = finalValue - totalDeposited;
+
+  return /*#__PURE__*/React.createElement('div', { className: 'calc-wrap' },
+    /*#__PURE__*/React.createElement('div', { className: 'calc-title' }, 'Spaarrekeningcalculator'),
+
+    /*#__PURE__*/React.createElement('div', { className: 'calc-section' },
+      /*#__PURE__*/React.createElement('div', { style: { display: 'flex', gap: 16, flexWrap: 'wrap' } },
+        // Principal
+        /*#__PURE__*/React.createElement('div', { className: 'fld', style: { flex: '1 1 160px' } },
+          /*#__PURE__*/React.createElement('label', null, 'Huidig spaarbedrag (€)'),
+          /*#__PURE__*/React.createElement('input', {
+            value: principal, placeholder: 'bijv. 10000', inputMode: 'decimal',
+            onChange: e => setPrincipal(e.target.value)
+          })
+        ),
+        // Rate
+        /*#__PURE__*/React.createElement('div', { className: 'fld', style: { flex: '1 1 140px' } },
+          /*#__PURE__*/React.createElement('label', null, 'Rente per jaar (%)'),
+          /*#__PURE__*/React.createElement('input', {
+            value: rate, placeholder: 'bijv. 2.5', inputMode: 'decimal',
+            onChange: e => setRate(e.target.value)
+          })
+        ),
+        // Monthly deposit
+        /*#__PURE__*/React.createElement('div', { className: 'fld', style: { flex: '1 1 160px' } },
+          /*#__PURE__*/React.createElement('label', null, 'Maandelijks inleggen (€)'),
+          /*#__PURE__*/React.createElement('input', {
+            value: monthly, placeholder: 'bijv. 200', inputMode: 'decimal',
+            onChange: e => setMonthly(e.target.value)
+          })
+        )
+      )
+    ),
+
+    data && /*#__PURE__*/React.createElement(React.Fragment, null,
+      // Summary cards
+      /*#__PURE__*/React.createElement('div', { style: { display: 'flex', gap: 12, flexWrap: 'wrap', margin: '16px 0' } },
+        /*#__PURE__*/React.createElement('div', { className: 'loan-card', style: { flex: '1 1 140px' } },
+          /*#__PURE__*/React.createElement('div', { className: 'lbl' }, 'Waarde na 20 jaar'),
+          /*#__PURE__*/React.createElement('div', { className: 'loan-big gain' }, eur(finalValue))
+        ),
+        /*#__PURE__*/React.createElement('div', { className: 'loan-card', style: { flex: '1 1 140px' } },
+          /*#__PURE__*/React.createElement('div', { className: 'lbl' }, 'Totaal ingelegd'),
+          /*#__PURE__*/React.createElement('div', { className: 'loan-big' }, eur(totalDeposited))
+        ),
+        /*#__PURE__*/React.createElement('div', { className: 'loan-card', style: { flex: '1 1 140px' } },
+          /*#__PURE__*/React.createElement('div', { className: 'lbl' }, 'Rente-opbrengst'),
+          /*#__PURE__*/React.createElement('div', { className: 'loan-big gain' }, eur(interest))
+        )
+      ),
+
+      // Chart
+      /*#__PURE__*/React.createElement('div', { className: 'calc-section' },
+        /*#__PURE__*/React.createElement('div', { className: 'calc-label', style: { marginBottom: 12 } }, 'Groei over 20 jaar'),
+        /*#__PURE__*/React.createElement(SavingsChart, { points: data })
+      ),
+
+      // Table
+      /*#__PURE__*/React.createElement('div', { className: 'calc-section' },
+        /*#__PURE__*/React.createElement('div', { className: 'calc-label', style: { marginBottom: 8 } }, 'Overzicht per jaar'),
+        /*#__PURE__*/React.createElement('div', { style: { overflowX: 'auto' } },
+          /*#__PURE__*/React.createElement('table', { style: { width: '100%', borderCollapse: 'collapse', fontSize: 13 } },
+            /*#__PURE__*/React.createElement('thead', null,
+              /*#__PURE__*/React.createElement('tr', null,
+                ['Jaar', 'Waarde', 'Ingelegd', 'Rente'].map(h =>
+                  /*#__PURE__*/React.createElement('th', {
+                    key: h, style: { textAlign: h === 'Jaar' ? 'left' : 'right',
+                    padding: '6px 12px', borderBottom: '1px solid var(--rule)',
+                    color: 'var(--muted)', fontFamily: "'IBM Plex Mono',monospace",
+                    fontSize: 11, letterSpacing: '.05em', fontWeight: 500 }
+                  }, h)
+                )
+              )
+            ),
+            /*#__PURE__*/React.createElement('tbody', null,
+              data.filter(p => p.year > 0).map(p => {
+                const deposited = n(principal) + n(monthly) * 12 * p.year;
+                const earned = p.value - deposited;
+                return /*#__PURE__*/React.createElement('tr', {
+                  key: p.year,
+                  style: { background: p.year % 2 === 0 ? 'var(--bg2)' : 'transparent' }
+                },
+                  /*#__PURE__*/React.createElement('td', { style: { padding: '6px 12px', fontFamily: "'IBM Plex Mono',monospace", fontSize: 12 } }, p.year),
+                  /*#__PURE__*/React.createElement('td', { style: { padding: '6px 12px', textAlign: 'right', fontWeight: 600, color: 'var(--gain)' } }, eur(p.value)),
+                  /*#__PURE__*/React.createElement('td', { style: { padding: '6px 12px', textAlign: 'right', color: 'var(--muted)', fontFamily: "'IBM Plex Mono',monospace", fontSize: 12 } }, eur(deposited)),
+                  /*#__PURE__*/React.createElement('td', { style: { padding: '6px 12px', textAlign: 'right', color: 'var(--brass)', fontFamily: "'IBM Plex Mono',monospace", fontSize: 12 } }, eur(earned))
+                );
+              })
+            )
+          )
+        )
+      )
+    ),
+
+    !data && /*#__PURE__*/React.createElement('div', { className: 'calc-empty' },
+      'Vul hierboven je spaarbedrag en rentepercentage in om de grafiek te zien.'
+    )
+  );
+}
+
 
 /* ---- SVG lijndiagram voor studieschuld ---- */
 function LoanChart({
@@ -3622,7 +3821,7 @@ function CombinedChart({
     style: {
       font: "11px Inter,sans-serif"
     }
-  }, tr('Kruispunt','Crossover')))));
+  }, Crossover))));
 }
 
 /* ---- Budget tab ---- */
@@ -4387,7 +4586,7 @@ function BudgetDonut({
       font: '10px Inter,sans-serif',
       letterSpacing: '.06em'
     }
-  }, tr('PER MAAND','PER MONTH')));
+  }, PER MONTH));
 }
 
 /* ---- uitgaven tracker ---- */
@@ -4556,7 +4755,7 @@ function TransactionsTab({
         return;
       }
       if (entries.length === 0) {
-        setIngMsg(tr('Geen nieuwe transacties gevonden — mogelijk al geïmporteerd.','No new transactions found — possibly already imported.'));
+        setIngMsg(No new transactions found — possibly already imported.);
         setIngLoading(false);
         return;
       }
@@ -4672,7 +4871,7 @@ function TransactionsTab({
     onChange: e => setFilterCat(e.target.value)
   }, /*#__PURE__*/React.createElement("option", {
     value: "alle"
-  }, tr('Alle categorieën','All categories')), allCats.map(c => /*#__PURE__*/React.createElement("option", {
+  }, All categories), allCats.map(c => /*#__PURE__*/React.createElement("option", {
     key: c,
     value: c
   }, c)))), /*#__PURE__*/React.createElement("div", {
@@ -5285,7 +5484,7 @@ function AccountsTab() {
         }
       });
       if (!balRes.ok) {
-        setWiseMsg(tr('Fout bij ophalen balansen.','Error fetching balances.'));
+        setWiseMsg(Error fetching balances.);
         setWiseLoading(false);
         return;
       }
@@ -5313,7 +5512,7 @@ function AccountsTab() {
       setWiseMsg(`✓ ${balances.length} ${tr("Wise rekening(en) gesynchroniseerd!","Wise account(s) synced!")}`);
       setTimeout(() => setWiseMsg(''), 4000);
     } catch (e) {
-      setWiseMsg(tr('Verbindingsfout: ','Connection error: ') + e.message);
+      setWiseMsg(Connection error:  + e.message);
     }
     setWiseLoading(false);
   }
@@ -5735,7 +5934,7 @@ function AllTransactionsTab({
         }
       });
       if (!accRes.ok) {
-        setWiseMsg(tr('✗ Kon Wise rekeningen niet ophalen.','✗ Could not fetch Wise accounts.'));
+        setWiseMsg(✗ Could not fetch Wise accounts.);
         setWiseLoading(false);
         return;
       }
@@ -5789,7 +5988,7 @@ function AllTransactionsTab({
       }
       setTimeout(() => setWiseMsg(''), 5000);
     } catch (e) {
-      setWiseMsg(tr('✗ Verbindingsfout: ','✗ Connection error: ') + e.message);
+      setWiseMsg(✗ Connection error:  + e.message);
     }
     setWiseLoading(false);
   }
@@ -5866,7 +6065,7 @@ function AllTransactionsTab({
         });
       }
       if (entries.length === 0) {
-        setIngMsg(tr('Geen nieuwe transacties gevonden.','No new transactions found.'));
+        setIngMsg(No new transactions found.);
         return;
       }
       setTransactions(prev => [...entries, ...(prev || [])]);
@@ -5913,7 +6112,7 @@ function AllTransactionsTab({
     onChange: e => setFilterType(e.target.value)
   }, /*#__PURE__*/React.createElement("option", {
     value: "alle"
-  }, tr('Alle types','All types')), /*#__PURE__*/React.createElement("option", {
+  }, All types), /*#__PURE__*/React.createElement("option", {
     value: "uitgave"
   }, "Uitgaven"), /*#__PURE__*/React.createElement("option", {
     value: "inkomst"
@@ -6311,7 +6510,7 @@ function DashboardTab({
   }, /*#__PURE__*/React.createElement(Card, {
     label: "Netto vermogen",
     value: eur(netWorth),
-    sub: `${eur(totalAssets)} tr('bezittingen','in assets')`,
+    sub: `${eur(totalAssets)} 'in assets'`,
     color: netWorth >= 0 ? 'var(--gain)' : 'var(--loss)'
   }), /*#__PURE__*/React.createElement(Card, {
     label: "Aandelenportefeuille",
@@ -6319,9 +6518,9 @@ function DashboardTab({
     sub: `${portfolios.reduce((s, p) => s + p.holdings.length, 0)} ${tr("posities","positions")}`,
     color: "var(--brass)"
   }), /*#__PURE__*/React.createElement(Card, {
-    label: tr('Budget restant','Budget remaining'),
+    label: Budget remaining,
     value: eur(budgetLeft),
-    sub: `${budgetPct}% tr('van budget gebruikt','of budget used')`,
+    sub: `${budgetPct}% 'of budget used'`,
     color: budgetLeft >= 0 ? 'var(--gain)' : 'var(--loss)'
   }), /*#__PURE__*/React.createElement(Card, {
     label: "Uitgaven deze maand",
@@ -6357,7 +6556,7 @@ function DashboardTab({
       color: 'var(--muted)',
       marginBottom: 6
     }
-  }, /*#__PURE__*/React.createElement("span", null, tr('Uitgegeven','Spent')), /*#__PURE__*/React.createElement("span", null, budgetPct, "%")), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("span", null, Spent), /*#__PURE__*/React.createElement("span", null, budgetPct, "%")), /*#__PURE__*/React.createElement("div", {
     style: {
       height: 8,
       background: 'var(--bg2)',
@@ -6549,7 +6748,7 @@ function DashboardTab({
       fontSize: 13,
       color: 'var(--faint)'
     }
-  }, tr('Stel een spaardoel in via de Budget-tab.','Set a savings goal in the Budget tab.'))), /*#__PURE__*/React.createElement("div", {
+  }, Set a savings goal in the Budget tab.)), /*#__PURE__*/React.createElement("div", {
     style: {
       background: 'var(--surface)',
       border: '1px solid var(--line)',
@@ -6750,7 +6949,7 @@ function NetWorthTab({
     className: "calc-title"
   }, "Netto Vermogen"), /*#__PURE__*/React.createElement("div", {
     className: "calc-desc"
-  }, tr('Jouw totale bezittingen minus alle schulden.','Your total assets minus all liabilities.'), " ", tr("De aandelenportefeuille en studieschuld worden automatisch meegenomen.","Your stock portfolio and student debt are included automatically.")), /*#__PURE__*/React.createElement("div", {
+  }, Your total assets minus all liabilities., " ", tr("De aandelenportefeuille en studieschuld worden automatisch meegenomen.","Your stock portfolio and student debt are included automatically.")), /*#__PURE__*/React.createElement("div", {
     className: "loan-pillars",
     style: {
       marginTop: 20
@@ -7131,7 +7330,7 @@ function NWDonut({
     style: {
       font: '9px Inter,sans-serif'
     }
-  }, tr('TOTAAL','TOTAL')));
+  }, TOTAL));
 }
 
 /* ---- instellingen tab ---- */
@@ -7347,7 +7546,7 @@ function SettingsTab({
       fontSize: 13,
       color: 'var(--muted)'
     }
-  }, auto ? tr('Actief','Active') + ` — ${tr('elke','every')} ${intervalMin} min` : tr('Uitgeschakeld','Disabled'))), auto && /*#__PURE__*/React.createElement("div", {
+  }, auto ? tr('Actief','Active') + ` — ${'every'} ${intervalMin} min` : Disabled)), auto && /*#__PURE__*/React.createElement("div", {
     className: "fld",
     style: {
       maxWidth: 200
@@ -7579,7 +7778,7 @@ function AccountTab({
         onConflict: 'user_id'
       });
       setAvatarUrl(publicUrl);
-      setProfileMsg(tr('Profielfoto opgeslagen!','Profile photo saved!'));
+      setProfileMsg(Profile photo saved!);
       setTimeout(() => setProfileMsg(''), 3000);
     } catch (err) {
       setProfileErr(tr('Upload mislukt: ','Upload failed: ') + err.message);
@@ -7660,7 +7859,7 @@ function AccountTab({
     className: "calc-section"
   }, /*#__PURE__*/React.createElement("div", {
     className: "calc-title"
-  }, tr('Mijn account','My account')), /*#__PURE__*/React.createElement("div", {
+  }, My account), /*#__PURE__*/React.createElement("div", {
     className: "acc-grid"
   }, /*#__PURE__*/React.createElement("div", {
     className: "acc-avatar",
